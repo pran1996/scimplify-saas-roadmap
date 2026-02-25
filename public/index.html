@@ -112,19 +112,246 @@ body{background:#0f0d2e;font-family:'Inter',sans-serif;color:#e2e8f0}
 <section class="max-w-6xl mx-auto px-4 pb-16">
 <h2 class="text-2xl font-bold mb-6 text-center">The Six Products</h2>
 <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
-  <template x-for="p in products" :key="p.id">
-    <div class="glass rounded-xl p-5 glass-hover transition cursor-pointer" @click="mode='products';activeProduct=p.id">
-      <div class="flex justify-between items-start mb-3">
-        <span class="text-2xl" x-text="p.icon"></span>
-        <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full text-white" :class="p.tier==='Must Build'?'tier-must':p.tier==='Build Next'?'tier-next':'tier-traction'" x-text="p.tier"></span>
-      </div>
-      <h3 class="font-semibold mb-1" x-text="p.name"></h3>
-      <p class="text-xs text-gray-400 mb-3" x-text="p.tagline"></p>
-      <div class="text-xs text-gray-500 mb-1"><span class="text-gray-300 font-medium">Revenue:</span> <span x-text="p.revenue"></span></div>
-      <div class="text-xs text-gray-500 mb-1"><span class="text-gray-300 font-medium">ICP:</span> <span x-text="p.icp"></span></div>
-      <div class="text-xs text-gray-500"><span class="text-gray-300 font-medium">Like:</span> <span x-text="p.analogy"></span></div>
+
+  <!-- Product 1: RFQ Intelligence -->
+  <div x-data="{open:false}" class="glass rounded-xl p-6 cursor-pointer transition" @click="open=!open">
+    <div class="flex justify-between items-start mb-2">
+      <span class="text-2xl">🎯</span>
+      <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full text-white tier-must">Must Build</span>
     </div>
-  </template>
+    <h3 class="font-semibold mb-1">RFQ Intelligence + China+1 Assessment</h3>
+    <p class="text-xs text-gray-400 mb-2">"From RFQ to qualified manufacturer in 48 hours, not 4 weeks"</p>
+    <p x-show="!open" class="text-[10px] text-gray-500 italic">Click to expand ↓</p>
+    <div x-show="open" x-collapse class="mt-3 space-y-3 text-xs text-gray-400">
+      <div>
+        <p class="text-indigo-400 font-semibold text-sm mb-1">What It Does</p>
+        <ul class="list-disc list-inside space-y-1">
+          <li>Customer submits RFQ or "switch from China" request</li>
+          <li>Auto-matches against 3C framework (Chemistry fit, Capacity match, Compliance alignment) using ATOMS data from 465+ manufacturers</li>
+          <li>Generates feasibility report: matched manufacturers, estimated cost, timeline, risk flags</li>
+          <li>For China+1: adds comparison vs current China source (cost, lead time, CBAM impact, tariff savings)</li>
+          <li>Routes qualified leads into IONS for project execution</li>
+        </ul>
+      </div>
+      <div>
+        <p class="text-indigo-400 font-semibold text-sm mb-1">ICP</p>
+        <p>Global procurement managers sourcing from India. EU buyers facing CBAM. Companies doing China+1 diversification.</p>
+      </div>
+      <div>
+        <p class="text-indigo-400 font-semibold text-sm mb-1">Value Created</p>
+        <p>Time-to-qualified-source drops from 4-6 weeks to 48 hours. Data-driven manufacturer matching vs relationship-based guesswork. CBAM impact quantified before commitment.</p>
+      </div>
+      <div>
+        <p class="text-indigo-400 font-semibold text-sm mb-1">Value Captured</p>
+        <p>Free tier for basic RFQ matching (drives core business). China+1 Assessment Reports: $2-5K standalone. Subscription: $500-1,500/mo for procurement teams. Feeds $50-100K China+1 service projects.</p>
+      </div>
+      <div>
+        <p class="text-indigo-400 font-semibold text-sm mb-1">Industry Analogy</p>
+        <p class="italic">"Like Resilinc's supply chain intelligence meets Alibaba's supplier matching — but for specialty chemicals with chemistry-level matching, not just keyword search"</p>
+      </div>
+      <button @click.stop="mode='products';activeProduct='rfq'" class="mt-2 px-4 py-1.5 bg-indigo-500/20 hover:bg-indigo-500/40 text-indigo-300 rounded-lg text-xs font-medium transition">Try it →</button>
+    </div>
+  </div>
+
+  <!-- Product 2: IONS Project Hub -->
+  <div x-data="{open:false}" class="glass rounded-xl p-6 cursor-pointer transition" @click="open=!open">
+    <div class="flex justify-between items-start mb-2">
+      <span class="text-2xl">🔬</span>
+      <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full text-white tier-must">Must Build</span>
+    </div>
+    <h3 class="font-semibold mb-1">IONS Project Hub</h3>
+    <p class="text-xs text-gray-400 mb-2">"Every molecule has a journey. Now you can track it."</p>
+    <p x-show="!open" class="text-[10px] text-gray-500 italic">Click to expand ↓</p>
+    <div x-show="open" x-collapse class="mt-3 space-y-3 text-xs text-gray-400">
+      <div>
+        <p class="text-indigo-400 font-semibold text-sm mb-1">What It Does</p>
+        <ul class="list-disc list-inside space-y-1">
+          <li>Project management platform for R&D engagements — NOT a scientist marketplace</li>
+          <li>Three workflow templates: Route Optimization, Custom Molecule Development, China+1 Switch</li>
+          <li>Milestone-based tracking with quality gates (Discovery → Feasibility → Lab Scale → Pilot → Tech Transfer → Qualification → Production)</li>
+          <li>Sample tracking with iteration history ("V1: Purity 95% — rejected. V2: 97.5%. V3: 98.2% ✓")</li>
+          <li>Customer-facing portal for project status, feedback submission, milestone approvals</li>
+        </ul>
+      </div>
+      <div>
+        <p class="text-indigo-400 font-semibold text-sm mb-1">ICP</p>
+        <p>R&D heads and procurement managers with active Scimplify projects. Internally: Scimplify scientists managing 20+ concurrent projects.</p>
+      </div>
+      <div>
+        <p class="text-indigo-400 font-semibold text-sm mb-1">Value Created</p>
+        <p>Scientists become 3-5x more productive (structured workflows vs spreadsheet chaos). Customer transparency — no more "where's my sample?" emails. Project cycle time reduced 30-40%.</p>
+      </div>
+      <div>
+        <p class="text-indigo-400 font-semibold text-sm mb-1">Value Captured</p>
+        <p>Managed tier: $2,000-5,000/mo per active project. Primary value: more projects per scientist = more revenue. Self-serve tier (future): $500/mo.</p>
+      </div>
+      <div>
+        <p class="text-indigo-400 font-semibold text-sm mb-1">Industry Analogy</p>
+        <p class="italic">"Benchling for contract R&D — project tracking, sample management, and client collaboration in one platform"</p>
+      </div>
+      <button @click.stop="mode='products';activeProduct='ions'" class="mt-2 px-4 py-1.5 bg-indigo-500/20 hover:bg-indigo-500/40 text-indigo-300 rounded-lg text-xs font-medium transition">Try it →</button>
+    </div>
+  </div>
+
+  <!-- Product 3: ChemGraph -->
+  <div x-data="{open:false}" class="glass rounded-xl p-6 cursor-pointer transition" @click="open=!open">
+    <div class="flex justify-between items-start mb-2">
+      <span class="text-2xl">🕸️</span>
+      <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full text-white tier-next">Build Next</span>
+    </div>
+    <h3 class="font-semibold mb-1">ChemGraph</h3>
+    <p class="text-xs text-gray-400 mb-2">"The chemical industry's knowledge graph. See what others can't."</p>
+    <p x-show="!open" class="text-[10px] text-gray-500 italic">Click to expand ↓</p>
+    <div x-show="open" x-collapse class="mt-3 space-y-3 text-xs text-gray-400">
+      <div>
+        <p class="text-indigo-400 font-semibold text-sm mb-1">What It Does</p>
+        <ul class="list-disc list-inside space-y-1">
+          <li>Supply chain risk mapping ("if factory X goes offline, who else can make this?")</li>
+          <li>Cost benchmarking: surfaces savings opportunities → triggers Route Optimization projects</li>
+          <li>Capacity-demand matching: connects idle factory capacity with pending orders</li>
+          <li>China+1 opportunity detection: identifies China-dependent products with India capability</li>
+        </ul>
+      </div>
+      <div>
+        <p class="text-indigo-400 font-semibold text-sm mb-1">ICP</p>
+        <p>Enterprise procurement teams ($500M+ companies). Scimplify's own BD team (identifies and pitches opportunities).</p>
+      </div>
+      <div>
+        <p class="text-indigo-400 font-semibold text-sm mb-1">Value Created</p>
+        <p>Market intelligence that doesn't exist elsewhere. Supply risk quantified before disruptions hit. Cost optimization opportunities surfaced proactively.</p>
+      </div>
+      <div>
+        <p class="text-indigo-400 font-semibold text-sm mb-1">Value Captured</p>
+        <p>Intelligence reports: $5-20K each. Subscriptions: $500-5,000/mo enterprise. Internal value: every cost anomaly = potential project, every China-dependent product = potential China+1 project. The ENGINE that generates leads.</p>
+      </div>
+      <div>
+        <p class="text-indigo-400 font-semibold text-sm mb-1">Industry Analogy</p>
+        <p class="italic">"Bloomberg Terminal for specialty chemicals — proprietary data network no competitor can replicate because it's built on 465+ real manufacturer relationships"</p>
+      </div>
+      <button @click.stop="mode='products';activeProduct='chemgraph'" class="mt-2 px-4 py-1.5 bg-indigo-500/20 hover:bg-indigo-500/40 text-indigo-300 rounded-lg text-xs font-medium transition">Try it →</button>
+    </div>
+  </div>
+
+  <!-- Product 4: ComplianceOS -->
+  <div x-data="{open:false}" class="glass rounded-xl p-6 cursor-pointer transition" @click="open=!open">
+    <div class="flex justify-between items-start mb-2">
+      <span class="text-2xl">🛡️</span>
+      <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full text-white tier-next">Build Next</span>
+    </div>
+    <h3 class="font-semibold mb-1">ComplianceOS</h3>
+    <p class="text-xs text-gray-400 mb-2">"Every certificate tracked. Every deadline met. Zero audit surprises."</p>
+    <p x-show="!open" class="text-[10px] text-gray-500 italic">Click to expand ↓</p>
+    <div x-show="open" x-collapse class="mt-3 space-y-3 text-xs text-gray-400">
+      <div>
+        <p class="text-indigo-400 font-semibold text-sm mb-1">What It Does</p>
+        <ul class="list-disc list-inside space-y-1">
+          <li>Certificate vault + expiry tracking across all facilities</li>
+          <li>SDS (Safety Data Sheet) generation from formulation data</li>
+          <li>Regulatory change alerts (REACH, TSCA, FDA updates)</li>
+          <li>Gap analysis during factory onboarding — FREE gap analysis onboards supply, remediation management is PAID</li>
+        </ul>
+      </div>
+      <div>
+        <p class="text-indigo-400 font-semibold text-sm mb-1">ICP</p>
+        <p>Chemical manufacturers needing compliance management. Buyers requiring supplier compliance documentation. Factories being onboarded to Scimplify network.</p>
+      </div>
+      <div>
+        <p class="text-indigo-400 font-semibold text-sm mb-1">Value Created</p>
+        <p>Zero missed certificate renewals (each missed cert = potential $50K+ shipment hold). Audit prep time reduced 80%. SDS generation in minutes vs hours. High supply-side stickiness.</p>
+      </div>
+      <div>
+        <p class="text-indigo-400 font-semibold text-sm mb-1">Value Captured</p>
+        <p>$300-800/mo per facility (cert management + alerts). $1,500-2,000/mo full suite (SDS + regulatory tracking). Gap analysis reports: $2-5K one-time during onboarding.</p>
+      </div>
+      <div>
+        <p class="text-indigo-400 font-semibold text-sm mb-1">Industry Analogy</p>
+        <p class="italic">"Chemwatch meets Veeva Vault — but purpose-built for Indian specialty chemical manufacturers, not global pharma"</p>
+      </div>
+      <button @click.stop="mode='products';activeProduct='compliance'" class="mt-2 px-4 py-1.5 bg-indigo-500/20 hover:bg-indigo-500/40 text-indigo-300 rounded-lg text-xs font-medium transition">Try it →</button>
+    </div>
+  </div>
+
+  <!-- Product 5: ATOMS Commerce -->
+  <div x-data="{open:false}" class="glass rounded-xl p-6 cursor-pointer transition" @click="open=!open">
+    <div class="flex justify-between items-start mb-2">
+      <span class="text-2xl">🛒</span>
+      <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full text-white tier-traction">Build on Traction</span>
+    </div>
+    <h3 class="font-semibold mb-1">ATOMS Commerce</h3>
+    <p class="text-xs text-gray-400 mb-2">"Buy specialty chemicals like you buy everything else — online."</p>
+    <p x-show="!open" class="text-[10px] text-gray-500 italic">Click to expand ↓</p>
+    <div x-show="open" x-collapse class="mt-3 space-y-3 text-xs text-gray-400">
+      <div>
+        <p class="text-indigo-400 font-semibold text-sm mb-1">What It Does</p>
+        <ul class="list-disc list-inside space-y-1">
+          <li>E-commerce layer on ATOMS for catalog/near-commodity chemicals</li>
+          <li>Real pricing displayed (actual ₹/kg, not "request a quote")</li>
+          <li>Filters: CAS number, purity, certs, pack size, delivery location</li>
+          <li>Instant quoting for standard products (zero humans involved)</li>
+          <li>Order placement + payment (Razorpay India, Stripe international)</li>
+          <li>Reorder with one click. "Similar products" / "Also bought" from ChemGraph.</li>
+        </ul>
+      </div>
+      <div>
+        <p class="text-indigo-400 font-semibold text-sm mb-1">ICP</p>
+        <p>Small-to-mid buyers (cosmetics brands, small pharma, food companies) buying 1-20 tons of catalog chemicals.</p>
+      </div>
+      <div>
+        <p class="text-indigo-400 font-semibold text-sm mb-1">Value Created</p>
+        <p>Pricing transparency and instant procurement (vs 3-5 day email-based quoting). Manufacturer gets new sales channel with zero listing fees. Order cycle compressed from days to minutes.</p>
+      </div>
+      <div>
+        <p class="text-indigo-400 font-semibold text-sm mb-1">Value Captured</p>
+        <p>Take-rate: 2-5% on GMV. No manufacturer subscription fees — they pay only when they sell. Aligns incentives perfectly.</p>
+      </div>
+      <div>
+        <p class="text-indigo-400 font-semibold text-sm mb-1">Industry Analogy</p>
+        <p class="italic">"Knowde's catalog + Moglix's transaction model — but Knowde charges manufacturers to list (which failed), Scimplify charges on transactions (which works)"</p>
+      </div>
+      <button @click.stop="mode='products';activeProduct='atomscommerce'" class="mt-2 px-4 py-1.5 bg-indigo-500/20 hover:bg-indigo-500/40 text-indigo-300 rounded-lg text-xs font-medium transition">Try it →</button>
+    </div>
+  </div>
+
+  <!-- Product 6: GreenScore -->
+  <div x-data="{open:false}" class="glass rounded-xl p-6 cursor-pointer transition" @click="open=!open">
+    <div class="flex justify-between items-start mb-2">
+      <span class="text-2xl">🌱</span>
+      <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full text-white tier-traction">Build on Traction</span>
+    </div>
+    <h3 class="font-semibold mb-1">GreenScore</h3>
+    <p class="text-xs text-gray-400 mb-2">"Carbon footprint per molecule. The EU demands it, we deliver it."</p>
+    <p x-show="!open" class="text-[10px] text-gray-500 italic">Click to expand ↓</p>
+    <div x-show="open" x-collapse class="mt-3 space-y-3 text-xs text-gray-400">
+      <div>
+        <p class="text-indigo-400 font-semibold text-sm mb-1">What It Does</p>
+        <ul class="list-disc list-inside space-y-1">
+          <li>Carbon footprint calculation per product per route</li>
+          <li>Comparative analysis: "Route A: 45 kg CO₂e/kg. Route B: 28 kg CO₂e/kg."</li>
+          <li>Exportable carbon certificate per order</li>
+          <li>CBAM-compatible data format for EU imports</li>
+          <li>Route comparison shows not just cost savings but environmental impact</li>
+        </ul>
+      </div>
+      <div>
+        <p class="text-indigo-400 font-semibold text-sm mb-1">ICP</p>
+        <p>EU importers facing CBAM compliance (mandatory from 2026+). ESG-conscious buyers. Companies with sustainability reporting requirements.</p>
+      </div>
+      <div>
+        <p class="text-indigo-400 font-semibold text-sm mb-1">Value Created</p>
+        <p>CBAM compliance documentation automated (otherwise $10-50K in consultant fees per product). Carbon optimization as competitive differentiator. EU market access preserved.</p>
+      </div>
+      <div>
+        <p class="text-indigo-400 font-semibold text-sm mb-1">Value Captured</p>
+        <p>Bundled free with China+1 Switch projects (part of CBAM value prop). Standalone subscription: $200-500/mo after CBAM enforcement (2027+). Lightest build — highest regulatory tailwind.</p>
+      </div>
+      <div>
+        <p class="text-indigo-400 font-semibold text-sm mb-1">Industry Analogy</p>
+        <p class="italic">"Sphera's LCA tools simplified — product-level carbon scoring instead of full lifecycle assessment, tailored for chemical trade routes"</p>
+      </div>
+      <button @click.stop="mode='products';activeProduct='green'" class="mt-2 px-4 py-1.5 bg-indigo-500/20 hover:bg-indigo-500/40 text-indigo-300 rounded-lg text-xs font-medium transition">Try it →</button>
+    </div>
+  </div>
+
 </div>
 </section>
 

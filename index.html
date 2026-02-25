@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scimplify — Digital Product & SaaS Revenue Roadmap</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script>
+tailwind.config={theme:{extend:{colors:{navy:{50:'#eef2ff',100:'#e0e7ff',200:'#c7d2fe',300:'#a5b4fc',400:'#818cf8',500:'#6366f1',600:'#4f46e5',700:'#4338ca',800:'#1e1b4b',900:'#0f0d2e'},teal:{400:'#2dd4bf',500:'#14b8a6',600:'#0d9488'},amber:{400:'#fbbf24',500:'#f59e0b'}},fontFamily:{sans:['Inter','system-ui','sans-serif'],mono:['JetBrains Mono','monospace']}}}}
+</script>
+<style>
+[x-cloak]{display:none!important}
+.gradient-text{background:linear-gradient(135deg,#6366f1,#14b8a6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.card-glass{background:rgba(255,255,255,0.03);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.08)}
+.card-glass:hover{border-color:rgba(99,102,241,0.3);box-shadow:0 0 30px rgba(99,102,241,0.1)}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:#0f0d2e}::-webkit-scrollbar-thumb{background:#4338ca;border-radius:3px}
+.progress-bar{height:4px;border-radius:2px;background:#1e1b4b;overflow:hidden}
+.progress-fill{height:100%;border-radius:2px;transition:width 1s ease}
+.verdict-green{border-left:4px solid #22c55e}.verdict-yellow{border-left:4px solid #eab308}.verdict-red{border-left:4px solid #ef4444}
+</style>
+</head>
+<body class="bg-navy-900 text-gray-200 font-sans antialiased" x-data="app()">
+
+<!-- NAV -->
+<nav class="fixed top-0 w-full z-50 bg-navy-900/80 backdrop-blur-xl border-b border-white/5">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between h-16">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-lg bg-gradient-to-br from-navy-500 to-teal-500 flex items-center justify-center text-white font-bold text-sm">S</div>
+<span class="font-semibold text-white">Scimplify <span class="text-gray-500 font-normal">/ SaaS Roadmap</span></span>
+</div>
+<div class="hidden md:flex items-center gap-1 text-sm">
+<template x-for="s in sections" :key="s.id">
+<a :href="'#'+s.id" class="px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-white/5 transition" x-text="s.short"></a>
+</template>
+</div>
+<div class="text-xs text-gray-500">Pranshu Jain · Feb 2026</div>
+</div>
+</nav>
+
+<!-- HERO -->
+<section id="hero" class="min-h-screen flex items-center justify-center relative overflow-hidden pt-16">
+<div class="absolute inset-0 opacity-30">
+<div class="absolute top-1/4 left-1/4 w-96 h-96 bg-navy-500/20 rounded-full blur-3xl"></div>
+<div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-teal-500/10 rounded-full blur-3xl"></div>
+</div>
+<div class="relative z-10 text-center max-w-4xl mx-auto px-6">
+<div class="inline-block px-4 py-1.5 rounded-full bg-navy-500/10 border border-navy-500/20 text-navy-400 text-sm font-medium mb-8">Assignment Submission · Stress-Tested & Validated</div>
+<h1 class="text-5xl sm:text-7xl font-black text-white leading-tight mb-6">
+Digital Product &<br><span class="gradient-text">SaaS Revenue</span> Roadmap
+</h1>
+<p class="text-xl text-gray-400 max-w-2xl mx-auto mb-4">Transforming Scimplify from a chemicals company that uses software into a <strong class="text-white">software platform that delivers chemicals.</strong></p>
+<p class="text-gray-500 mb-6">8 Products · 3 Phases · 18 Months · ₹15-25Cr ARR</p>
+<div class="flex flex-wrap justify-center gap-3 mb-10">
+<span class="px-3 py-1 rounded-full text-xs bg-green-500/10 border border-green-500/20 text-green-400">Validated vs. Resilinc, Chemwatch, Knowde, EcoVadis, Benchling</span>
+</div>
+<div class="flex flex-wrap justify-center gap-4">
+<a href="#business" class="px-6 py-3 rounded-xl bg-navy-600 hover:bg-navy-500 text-white font-medium transition">Explore Roadmap ↓</a>
+<a href="#stress" class="px-6 py-3 rounded-xl border border-white/10 hover:border-navy-500/50 text-gray-300 font-medium transition">View Stress Tests</a>
+</div>
+</div>
+</section>
+
+<!-- BUSINESS UNDERSTANDING -->
+<section id="business" class="py-24 px-6">
+<div class="max-w-6xl mx-auto">
+<div class="text-center mb-16">
+<div class="text-navy-400 text-sm font-semibold tracking-wider uppercase mb-3">Understanding the Business</div>
+<h2 class="text-4xl font-bold text-white">How Scimplify Works</h2>
+</div>
+
+<div class="grid md:grid-cols-5 gap-4 mb-16">
+<div class="card-glass rounded-2xl p-6 text-center transition-all duration-300">
+<div class="text-3xl mb-3">🌍</div><div class="text-white font-semibold mb-1">Global Buyer</div><div class="text-xs text-gray-500">"I need compound X"</div>
+</div>
+<div class="card-glass rounded-2xl p-6 text-center transition-all duration-300">
+<div class="text-3xl mb-3">🔬</div><div class="text-white font-semibold mb-1">SCI R&D Labs</div><div class="text-xs text-gray-500">25+ scientists · 150 patents · 30 chemistries</div>
+</div>
+<div class="card-glass rounded-2xl p-6 text-center transition-all duration-300">
+<div class="text-3xl mb-3">🔄</div><div class="text-white font-semibold mb-1">Tech Transfer</div><div class="text-xs text-gray-500">3C Framework: Capacity × Chemistry × Compliance</div>
+</div>
+<div class="card-glass rounded-2xl p-6 text-center transition-all duration-300">
+<div class="text-3xl mb-3">🏭</div><div class="text-white font-semibold mb-1">500 Manufacturers</div><div class="text-xs text-gray-500">100 active · Hundreds of data points each</div>
+</div>
+<div class="card-glass rounded-2xl p-6 text-center transition-all duration-300">
+<div class="text-3xl mb-3">📦</div><div class="text-white font-semibold mb-1">Delivered</div><div class="text-xs text-gray-500">25+ countries · FDA/GMP/CGMP</div>
+</div>
+</div>
+
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-16">
+<div class="text-center p-6 rounded-2xl bg-gradient-to-b from-navy-500/10 to-transparent border border-navy-500/10">
+<div class="text-3xl font-black text-white">465</div><div class="text-sm text-gray-400 mt-1">Manufacturers on ATOMS</div>
+</div>
+<div class="text-center p-6 rounded-2xl bg-gradient-to-b from-teal-500/10 to-transparent border border-teal-500/10">
+<div class="text-3xl font-black text-white">5,000+</div><div class="text-sm text-gray-400 mt-1">Global Customers</div>
+</div>
+<div class="text-center p-6 rounded-2xl bg-gradient-to-b from-navy-500/10 to-transparent border border-navy-500/10">
+<div class="text-3xl font-black text-white">350+</div><div class="text-sm text-gray-400 mt-1">R&D Enquiries / Week</div>
+</div>
+<div class="text-center p-6 rounded-2xl bg-gradient-to-b from-teal-500/10 to-transparent border border-teal-500/10">
+<div class="text-3xl font-black text-white">11</div><div class="text-sm text-gray-400 mt-1">Industries Served</div>
+</div>
+</div>
+
+<!-- Two platforms -->
+<div class="grid md:grid-cols-2 gap-6 mb-16">
+<div class="card-glass rounded-2xl p-8">
+<div class="flex items-center gap-3 mb-4">
+<div class="w-10 h-10 rounded-xl bg-navy-500/20 flex items-center justify-center text-xl">⚛️</div>
+<div><div class="text-white font-bold text-lg">ATOMS</div><div class="text-xs text-gray-500">Manufacturing Operating System</div></div>
+<span class="ml-auto text-xs px-2 py-1 rounded-full bg-green-500/10 text-green-400 border border-green-500/20">Live</span>
+</div>
+<ul class="space-y-2 text-sm text-gray-400">
+<li>✓ 465 manufacturers with structured data</li>
+<li>✓ Searchable by reactions, capacity, certs, categories</li>
+<li>✓ 3C matching (Capacity, Chemistry, Compliance)</li>
+<li>✓ Real-time order tracking & traceability</li>
+</ul>
+<div class="mt-4 pt-4 border-t border-white/5 text-xs text-amber-400">⚠️ Revenue: ₹0 — supports operations, not monetized</div>
+</div>
+<div class="card-glass rounded-2xl p-8">
+<div class="flex items-center gap-3 mb-4">
+<div class="w-10 h-10 rounded-xl bg-teal-500/20 flex items-center justify-center text-xl">🧬</div>
+<div><div class="text-white font-bold text-lg">IONS</div><div class="text-xs text-gray-500">R&D Collaboration Platform</div></div>
+<span class="ml-auto text-xs px-2 py-1 rounded-full bg-green-500/10 text-green-400 border border-green-500/20">Live</span>
+</div>
+<ul class="space-y-2 text-sm text-gray-400">
+<li>✓ Scientist/lab discovery by chemistry capability</li>
+<li>✓ Project tracking & milestones</li>
+<li>✓ Quote management & partner matching</li>
+<li>✓ IP-safe collaboration workspace</li>
+</ul>
+<div class="mt-4 pt-4 border-t border-white/5 text-xs text-amber-400">⚠️ Revenue: ₹0 — 350+ enquiries/week, not monetized</div>
+</div>
+</div>
+
+<div class="rounded-2xl bg-gradient-to-r from-navy-600/30 to-teal-600/10 border border-navy-500/20 p-8 text-center">
+<div class="text-2xl font-bold text-white mb-2">The Hidden Asset: The Transaction Graph</div>
+<p class="text-gray-400 max-w-2xl mx-auto">465 manufacturers × 5,000 customers × products × years of orders = a <strong class="text-white">proprietary map of how specialty chemicals flow globally</strong>. It exists on ATOMS but is not stored as a graph or analytically leveraged. <span class="text-teal-400">Nobody else has this data.</span></p>
+</div>
+</div>
+</section>
+
+<!-- OPPORTUNITY -->
+<section id="opportunity" class="py-24 px-6 bg-navy-800/30">
+<div class="max-w-6xl mx-auto">
+<div class="text-center mb-16">
+<div class="text-teal-400 text-sm font-semibold tracking-wider uppercase mb-3">The Opportunity</div>
+<h2 class="text-4xl font-bold text-white">Three SaaS Revenue Vectors</h2>
+</div>
+<div class="grid md:grid-cols-3 gap-6 mb-16">
+<div class="card-glass rounded-2xl p-8 text-center">
+<div class="w-14 h-14 rounded-2xl bg-navy-500/20 flex items-center justify-center text-2xl mx-auto mb-4">⚙️</div>
+<h3 class="text-white font-bold text-lg mb-2">Workflow SaaS</h3>
+<p class="text-sm text-gray-400 mb-4">Digitize & charge for workflows already running manually</p>
+<div class="text-xs text-gray-500">RFQ Engine · IONS SaaS · Order OS</div>
+</div>
+<div class="card-glass rounded-2xl p-8 text-center">
+<div class="w-14 h-14 rounded-2xl bg-teal-500/20 flex items-center justify-center text-2xl mx-auto mb-4">📊</div>
+<h3 class="text-white font-bold text-lg mb-2">Data Intelligence</h3>
+<p class="text-sm text-gray-400 mb-4">Monetize the network graph + chemistry knowledge</p>
+<div class="text-xs text-gray-500">ChemGraph ⭐ · ATOMS Analytics</div>
+</div>
+<div class="card-glass rounded-2xl p-8 text-center">
+<div class="w-14 h-14 rounded-2xl bg-green-500/20 flex items-center justify-center text-2xl mx-auto mb-4">🛡️</div>
+<h3 class="text-white font-bold text-lg mb-2">Compliance SaaS</h3>
+<p class="text-sm text-gray-400 mb-4">Safety, regulatory, ESG as standalone products</p>
+<div class="text-xs text-gray-500">ComplianceOS · GreenScore</div>
+</div>
+</div>
+
+<!-- Key Insight Box -->
+<div class="card-glass rounded-2xl p-8 border-l-4 border-amber-500">
+<h3 class="text-amber-400 font-bold mb-3">⚡ Key Insight from Stress Testing</h3>
+<div class="grid md:grid-cols-3 gap-6 text-sm">
+<div>
+<div class="text-green-400 font-semibold mb-1">Sell TO Global Buyers = Low Risk</div>
+<div class="text-gray-400">ChemGraph, ComplianceOS, IONS — proven SaaS buyers with real software budgets</div>
+</div>
+<div>
+<div class="text-red-400 font-semibold mb-1">Sell TO Indian Mfgs = High Risk</div>
+<div class="text-gray-400">Moglix tried, pivoted. Indian SME manufacturers don't buy SaaS tools. Period.</div>
+</div>
+<div>
+<div class="text-teal-400 font-semibold mb-1">Compliance = Non-Optional</div>
+<div class="text-gray-400">Regulations force the purchase. Chemwatch, Sphera, Veeva prove $B+ market.</div>
+</div>
+</div>
+</div>
+
+<!-- Revenue Model Spectrum -->
+<div class="card-glass rounded-2xl p-8 mt-8">
+<h3 class="text-white font-bold text-lg mb-6 text-center">Revenue Model Evolution</h3>
+<div class="flex flex-col md:flex-row gap-4">
+<div class="flex-1 rounded-xl p-5 bg-gradient-to-b from-amber-500/10 to-transparent border border-amber-500/10">
+<div class="text-amber-400 font-bold mb-1">Software-Enabled Services</div>
+<div class="text-xs text-gray-400 mb-2">Sell the outcome — reports, managed projects</div>
+<div class="text-xs text-gray-500">40-60% margin · Linear scaling</div>
+</div>
+<div class="flex-1 rounded-xl p-5 bg-gradient-to-b from-navy-500/10 to-transparent border border-navy-500/10">
+<div class="text-navy-400 font-bold mb-1">Hybrid</div>
+<div class="text-xs text-gray-400 mb-2">Platform does 80%, humans handle 20%</div>
+<div class="text-xs text-gray-500">50-70% margin · Semi-scalable</div>
+</div>
+<div class="flex-1 rounded-xl p-5 bg-gradient-to-b from-teal-500/10 to-transparent border border-teal-500/10">
+<div class="text-teal-400 font-bold mb-1">Pure SaaS</div>
+<div class="text-xs text-gray-400 mb-2">Self-serve, no human in loop</div>
+<div class="text-xs text-gray-500">70-90% margin · Fully scalable</div>
+</div>
+</div>
+<div class="text-center mt-4 text-sm text-gray-400"><span class="text-amber-400">Services TODAY</span> → <span class="text-navy-400">Hybrid 6mo</span> → <span class="text-teal-400">Pure SaaS 18mo</span></div>
+</div>
+</div>
+</section>
+
+<!-- PRODUCT ROADMAP -->
+<section id="products" class="py-24 px-6">
+<div class="max-w-6xl mx-auto">
+<div class="text-center mb-16">
+<div class="text-navy-400 text-sm font-semibold tracking-wider uppercase mb-3">Product Roadmap — Stress-Tested</div>
+<h2 class="text-4xl font-bold text-white">8 Products, Re-Prioritized</h2>
+<p class="text-gray-500 mt-2">Each product validated against real-world analogies</p>
+</div>
+
+<!-- Priority tiers -->
+<div class="flex flex-wrap gap-2 mb-10 justify-center">
+<button @click="tier='all'" :class="tier==='all'?'bg-white/10 text-white':'text-gray-500'" class="px-4 py-2 rounded-lg text-sm font-medium transition">All</button>
+<button @click="tier='must'" :class="tier==='must'?'bg-green-500/20 text-green-400':'text-gray-500'" class="px-4 py-2 rounded-lg text-sm font-medium transition">🟢 Must Build</button>
+<button @click="tier='adjust'" :class="tier==='adjust'?'bg-yellow-500/20 text-yellow-400':'text-gray-500'" class="px-4 py-2 rounded-lg text-sm font-medium transition">🟡 Adjusted Strategy</button>
+<button @click="tier='depri'" :class="tier==='depri'?'bg-red-500/20 text-red-400':'text-gray-500'" class="px-4 py-2 rounded-lg text-sm font-medium transition">⬇️ Deprioritized</button>
+</div>
+
+<div class="grid md:grid-cols-2 gap-6">
+<template x-for="p in filteredProducts" :key="p.id">
+<div class="card-glass rounded-2xl overflow-hidden transition-all duration-300 cursor-pointer" :class="p.tier==='must'?'verdict-green':p.tier==='adjust'?'verdict-yellow':'verdict-red'" @click="toggleProduct(p.id)">
+<div class="p-6">
+<div class="flex items-start justify-between mb-3">
+<div class="flex items-center gap-2">
+<span class="text-xs font-bold px-2 py-0.5 rounded-full" :class="p.tier==='must'?'bg-green-500/20 text-green-400':p.tier==='adjust'?'bg-yellow-500/20 text-yellow-400':'bg-red-500/20 text-red-400'" x-text="p.verdictLabel"></span>
+<span x-show="p.crown" class="text-xs px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400">⭐ Crown Jewel</span>
+</div>
+<span class="text-xs text-gray-500" x-text="p.timeline"></span>
+</div>
+<h3 class="text-white font-bold text-lg mb-1" x-text="p.name"></h3>
+<p class="text-sm text-gray-400 mb-4" x-text="p.tagline"></p>
+<div class="flex flex-wrap gap-2 text-xs mb-4">
+<span class="px-2 py-1 rounded bg-white/5 text-gray-400"><span class="text-gray-500">Revenue:</span> <span class="text-white" x-text="p.revenue"></span></span>
+<span class="px-2 py-1 rounded bg-white/5 text-gray-400"><span class="text-gray-500">Model:</span> <span x-text="p.model"></span></span>
+<span class="px-2 py-1 rounded bg-white/5 text-gray-400"><span class="text-gray-500">ICP:</span> <span x-text="p.icp"></span></span>
+</div>
+<!-- Analogy badges -->
+<div class="flex flex-wrap gap-1.5">
+<template x-for="a in p.analogies"><span class="text-xs px-2 py-0.5 rounded-full bg-navy-500/10 text-navy-300 border border-navy-500/10" x-text="a"></span></template>
+</div>
+</div>
+<!-- Expanded -->
+<div x-show="expandedProduct===p.id" x-collapse class="px-6 pb-6 border-t border-white/5">
+<div class="pt-4 space-y-5">
+<div>
+<div class="text-xs text-gray-500 uppercase tracking-wider mb-2">ICP & Their Needs</div>
+<p class="text-sm text-gray-300" x-html="p.icpDetail"></p>
+</div>
+<div>
+<div class="text-xs text-gray-500 uppercase tracking-wider mb-2">Why It Will Work</div>
+<ul class="space-y-1"><template x-for="w in p.willWork"><li class="text-sm text-green-300/80 flex gap-2"><span class="mt-0.5">✅</span><span x-text="w"></span></li></template></ul>
+</div>
+<div>
+<div class="text-xs text-gray-500 uppercase tracking-wider mb-2">Why It Might NOT Work</div>
+<ul class="space-y-1"><template x-for="w in p.wontWork"><li class="text-sm text-red-300/80 flex gap-2"><span class="mt-0.5">⚠️</span><span x-text="w"></span></li></template></ul>
+</div>
+<div>
+<div class="text-xs text-gray-500 uppercase tracking-wider mb-2">Industry Analogies</div>
+<div class="space-y-2"><template x-for="a in p.analogyDetails"><div class="text-sm"><span class="text-white font-medium" x-text="a.name"></span><span class="text-gray-500"> — </span><span class="text-gray-400" x-text="a.lesson"></span></div></template></div>
+</div>
+<div x-show="p.adjustment">
+<div class="text-xs text-amber-400 uppercase tracking-wider mb-2">⚡ Strategy Adjustment</div>
+<p class="text-sm text-amber-200/80" x-text="p.adjustment"></p>
+</div>
+<div>
+<div class="text-xs text-gray-500 uppercase tracking-wider mb-2">MVP Features</div>
+<ul class="space-y-1"><template x-for="f in p.features"><li class="text-sm text-gray-300 flex gap-2"><span class="text-navy-400 mt-0.5">→</span><span x-text="f"></span></li></template></ul>
+</div>
+<div>
+<div class="text-xs text-gray-500 uppercase tracking-wider mb-2">Tech & Team</div>
+<div class="flex flex-wrap gap-1 mb-2"><template x-for="t in p.tech"><span class="text-xs px-2 py-0.5 rounded bg-navy-500/10 text-navy-300 font-mono" x-text="t"></span></template></div>
+<div class="text-sm text-gray-400" x-text="p.team"></div>
+</div>
+</div>
+</div>
+</div>
+</template>
+</div>
+</div>
+</section>
+
+<!-- TIMELINE -->
+<section id="timeline" class="py-24 px-6 bg-navy-800/30">
+<div class="max-w-6xl mx-auto">
+<div class="text-center mb-16">
+<div class="text-teal-400 text-sm font-semibold tracking-wider uppercase mb-3">Execution Plan</div>
+<h2 class="text-4xl font-bold text-white">18-Month Timeline</h2>
+</div>
+<div class="overflow-x-auto">
+<div class="min-w-[800px]">
+<div class="flex mb-2 pl-48"><template x-for="m in 18"><div class="flex-1 text-center text-xs text-gray-500" x-text="'M'+m"></div></template></div>
+<template x-for="g in gantt" :key="g.name">
+<div class="flex items-center mb-2">
+<div class="w-48 pr-4 text-right text-sm truncate" :class="g.depri?'text-gray-600 line-through':'text-gray-400'" x-text="g.name"></div>
+<div class="flex-1 relative h-8">
+<div class="absolute h-full rounded-lg flex items-center justify-center text-xs font-medium"
+:class="g.tier==='must'?'bg-green-500/20 text-green-300 border border-green-500/20':g.tier==='adjust'?'bg-yellow-500/20 text-yellow-300 border border-yellow-500/20':'bg-gray-500/10 text-gray-500 border border-gray-500/10'"
+:style="`left:${(g.start-1)/18*100}%;width:${(g.end-g.start+1)/18*100}%`"
+x-text="g.label">
+</div>
+</div>
+</div>
+</template>
+<div class="flex items-center mt-6 mb-2">
+<div class="w-48 pr-4 text-right text-sm text-white font-semibold">Team Size</div>
+<div class="flex-1 relative h-8 flex">
+<div class="bg-navy-500/20 border border-navy-500/20 rounded-l-lg flex items-center justify-center text-xs text-navy-300" style="width:33.3%">5-6</div>
+<div class="bg-navy-500/30 border border-navy-500/20 flex items-center justify-center text-xs text-navy-300" style="width:33.3%">8-10</div>
+<div class="bg-navy-500/40 border border-navy-500/20 rounded-r-lg flex items-center justify-center text-xs text-navy-200" style="width:33.3%">12-15</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- STRESS TEST SECTION -->
+<section id="stress" class="py-24 px-6">
+<div class="max-w-6xl mx-auto">
+<div class="text-center mb-16">
+<div class="text-amber-400 text-sm font-semibold tracking-wider uppercase mb-3">Validation</div>
+<h2 class="text-4xl font-bold text-white">Stress Test Summary</h2>
+<p class="text-gray-500 mt-2">Each product tested against real-world comparables</p>
+</div>
+
+<!-- Comparison table -->
+<div class="overflow-x-auto mb-12">
+<table class="w-full text-sm">
+<thead>
+<tr class="border-b border-white/10">
+<th class="text-left py-3 px-4 text-gray-500 font-medium">Product</th>
+<th class="text-center py-3 px-2 text-gray-500 font-medium">ICP Clarity</th>
+<th class="text-center py-3 px-2 text-gray-500 font-medium">Market Proof</th>
+<th class="text-left py-3 px-4 text-gray-500 font-medium">Best Comparable</th>
+<th class="text-left py-3 px-4 text-gray-500 font-medium">Biggest Risk</th>
+<th class="text-center py-3 px-4 text-gray-500 font-medium">Verdict</th>
+</tr>
+</thead>
+<tbody>
+<template x-for="s in stressTable" :key="s.name">
+<tr class="border-b border-white/5 hover:bg-white/[0.02]">
+<td class="py-3 px-4 text-white font-medium" x-text="s.name"></td>
+<td class="py-3 px-2 text-center" x-text="s.icpScore"></td>
+<td class="py-3 px-2 text-center" x-text="s.marketScore"></td>
+<td class="py-3 px-4 text-gray-400" x-text="s.comparable"></td>
+<td class="py-3 px-4 text-gray-400 text-xs" x-text="s.risk"></td>
+<td class="py-3 px-4 text-center"><span class="px-2 py-0.5 rounded-full text-xs font-bold" :class="s.verdict==='🟢🟢'?'bg-green-500/20 text-green-400':s.verdict==='🟢'?'bg-green-500/10 text-green-300':s.verdict==='🟡'?'bg-yellow-500/20 text-yellow-400':'bg-red-500/20 text-red-400'" x-text="s.verdict"></span></td>
+</tr>
+</template>
+</tbody>
+</table>
+</div>
+
+<!-- The uncomfortable truth -->
+<div class="card-glass rounded-2xl p-8 border-l-4 border-red-500 mb-8">
+<h3 class="text-red-400 font-bold mb-3">🔴 The Uncomfortable Truth</h3>
+<p class="text-gray-300 mb-4">Products selling <strong class="text-white">TO Indian SME manufacturers</strong> are the highest-risk category. Moglix (now $1B+) tried selling SaaS to Indian manufacturers and pivoted to a procurement marketplace. IndiaMART works only because of millions of monthly searches. Knowde (US, $100M+ raised) pivoted from chemical marketplace to enterprise SaaS tools.</p>
+<p class="text-gray-300"><strong class="text-white">Revised thesis:</strong> Manufacturer-facing products should be <span class="text-green-400">free/bundled</span> (they improve the core CRO/CMO business). Buyer-facing products should be <span class="text-teal-400">paid SaaS</span> (they have budgets). Compliance products are <span class="text-amber-400">non-optional</span> (regulations force purchase).</p>
+</div>
+
+<!-- Top 3 bets -->
+<div class="card-glass rounded-2xl p-8">
+<h3 class="text-white font-bold mb-6 text-center">If We Could Only Build 3 Products</h3>
+<div class="grid md:grid-cols-3 gap-6">
+<div class="text-center p-4 rounded-xl bg-green-500/5 border border-green-500/10">
+<div class="text-2xl mb-2">📊</div>
+<div class="text-white font-bold">ChemGraph</div>
+<div class="text-xs text-gray-400 mt-1">Proprietary data moat. Resilinc built $100M+ with survey data — Scimplify has real transactions.</div>
+<div class="text-xs text-green-400 mt-2">Bloomberg Terminal for chemicals</div>
+</div>
+<div class="text-center p-4 rounded-xl bg-green-500/5 border border-green-500/10">
+<div class="text-2xl mb-2">🛡️</div>
+<div class="text-white font-bold">ComplianceOS</div>
+<div class="text-xs text-gray-400 mt-1">Chemwatch (30yr), Sphera (Blackstone), Lisam (€100M acq.), Veeva ($35B). Proven.</div>
+<div class="text-xs text-green-400 mt-2">Regulatory forcing function</div>
+</div>
+<div class="text-center p-4 rounded-xl bg-green-500/5 border border-green-500/10">
+<div class="text-2xl mb-2">⚡</div>
+<div class="text-white font-bold">RFQ Intelligence</div>
+<div class="text-xs text-gray-400 mt-1">Zero risk. Automating what's already done manually. Even if nobody pays, internal efficiency justifies it.</div>
+<div class="text-xs text-green-400 mt-2">Quickest win, immediate ROI</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- REVENUE -->
+<section id="revenue" class="py-24 px-6 bg-navy-800/30">
+<div class="max-w-6xl mx-auto">
+<div class="text-center mb-16">
+<div class="text-navy-400 text-sm font-semibold tracking-wider uppercase mb-3">Financial Projections</div>
+<h2 class="text-4xl font-bold text-white">Revenue Trajectory</h2>
+</div>
+<!-- Scenario toggle -->
+<div class="flex justify-center gap-2 mb-8" x-data="{scenario:'base'}">
+<button @click="scenario='bear';$dispatch('scenario-change',{s:'bear'})" :class="scenario==='bear'?'bg-red-500/20 text-red-400':'text-gray-500'" class="px-4 py-2 rounded-lg text-sm font-medium transition">🐻 Bear</button>
+<button @click="scenario='base';$dispatch('scenario-change',{s:'base'})" :class="scenario==='base'?'bg-navy-500/20 text-navy-400':'text-gray-500'" class="px-4 py-2 rounded-lg text-sm font-medium transition">📊 Base (Recommended)</button>
+<button @click="scenario='bull';$dispatch('scenario-change',{s:'bull'})" :class="scenario==='bull'?'bg-green-500/20 text-green-400':'text-gray-500'" class="px-4 py-2 rounded-lg text-sm font-medium transition">🐂 Bull</button>
+</div>
+
+<div x-data="{sc:'base'}" @scenario-change.window="sc=$event.detail.s">
+<!-- Bear -->
+<div x-show="sc==='bear'" class="grid grid-cols-4 gap-6 mb-8 items-end" style="height:300px">
+<div class="flex flex-col items-center justify-end h-full">
+<div class="text-white font-bold text-lg mb-2">₹15-25L</div>
+<div class="w-full bg-gradient-to-t from-red-900 to-red-700 rounded-t-xl" style="height:4%"></div>
+<div class="text-sm text-gray-400 mt-3">Month 6</div>
+</div>
+<div class="flex flex-col items-center justify-end h-full">
+<div class="text-white font-bold text-lg mb-2">₹80L-1.5Cr</div>
+<div class="w-full bg-gradient-to-t from-red-800 to-red-600 rounded-t-xl" style="height:15%"></div>
+<div class="text-sm text-gray-400 mt-3">Month 12</div>
+</div>
+<div class="flex flex-col items-center justify-end h-full">
+<div class="text-white font-bold text-lg mb-2">₹2-3.5Cr</div>
+<div class="w-full bg-gradient-to-t from-red-700 to-red-500 rounded-t-xl" style="height:30%"></div>
+<div class="text-sm text-gray-400 mt-3">Month 18</div>
+</div>
+<div class="flex flex-col items-center justify-end h-full">
+<div class="text-white font-bold text-lg mb-2">₹4-7Cr</div>
+<div class="w-full bg-gradient-to-t from-red-600 to-red-400 rounded-t-xl" style="height:50%"></div>
+<div class="text-sm text-gray-400 mt-3">Month 24</div>
+</div>
+</div>
+<div x-show="sc==='bear'" class="text-center text-sm text-red-400 mb-8">Slow adoption, long sales cycles, low ATOMS traffic, pricing resistance</div>
+
+<!-- Base -->
+<div x-show="sc==='base'" class="grid grid-cols-4 gap-6 mb-8 items-end" style="height:300px">
+<div class="flex flex-col items-center justify-end h-full">
+<div class="text-white font-bold text-lg mb-2">₹30-60L</div>
+<div class="w-full bg-gradient-to-t from-navy-600 to-navy-500 rounded-t-xl" style="height:5%"></div>
+<div class="text-sm text-gray-400 mt-3">Month 6</div>
+</div>
+<div class="flex flex-col items-center justify-end h-full">
+<div class="text-white font-bold text-lg mb-2">₹2-3.5Cr</div>
+<div class="w-full bg-gradient-to-t from-navy-600 to-teal-500 rounded-t-xl" style="height:25%"></div>
+<div class="text-sm text-gray-400 mt-3">Month 12</div>
+</div>
+<div class="flex flex-col items-center justify-end h-full">
+<div class="text-white font-bold text-lg mb-2">₹5-8Cr</div>
+<div class="w-full bg-gradient-to-t from-teal-600 to-teal-400 rounded-t-xl" style="height:55%"></div>
+<div class="text-sm text-gray-400 mt-3">Month 18</div>
+</div>
+<div class="flex flex-col items-center justify-end h-full">
+<div class="text-white font-bold text-lg mb-2">₹8-14Cr</div>
+<div class="w-full bg-gradient-to-t from-teal-500 to-green-400 rounded-t-xl" style="height:100%"></div>
+<div class="text-sm text-gray-400 mt-3">Month 24</div>
+</div>
+</div>
+<div x-show="sc==='base'" class="text-center text-sm text-teal-400 mb-8">Moderate adoption, ChemGraph starts as service, ComplianceOS gains regulatory traction</div>
+
+<!-- Bull -->
+<div x-show="sc==='bull'" class="grid grid-cols-4 gap-6 mb-8 items-end" style="height:300px">
+<div class="flex flex-col items-center justify-end h-full">
+<div class="text-white font-bold text-lg mb-2">₹75L-1.2Cr</div>
+<div class="w-full bg-gradient-to-t from-green-800 to-green-600 rounded-t-xl" style="height:5%"></div>
+<div class="text-sm text-gray-400 mt-3">Month 6</div>
+</div>
+<div class="flex flex-col items-center justify-end h-full">
+<div class="text-white font-bold text-lg mb-2">₹4-6Cr</div>
+<div class="w-full bg-gradient-to-t from-green-700 to-green-500 rounded-t-xl" style="height:25%"></div>
+<div class="text-sm text-gray-400 mt-3">Month 12</div>
+</div>
+<div class="flex flex-col items-center justify-end h-full">
+<div class="text-white font-bold text-lg mb-2">₹9-14Cr</div>
+<div class="w-full bg-gradient-to-t from-green-600 to-green-400 rounded-t-xl" style="height:55%"></div>
+<div class="text-sm text-gray-400 mt-3">Month 18</div>
+</div>
+<div class="flex flex-col items-center justify-end h-full">
+<div class="text-white font-bold text-lg mb-2">₹15-25Cr</div>
+<div class="w-full bg-gradient-to-t from-green-500 to-emerald-400 rounded-t-xl" style="height:100%"></div>
+<div class="text-sm text-gray-400 mt-3">Month 24</div>
+</div>
+</div>
+<div x-show="sc==='bull'" class="text-center text-sm text-green-400 mb-8">High ATOMS traffic, rich ChemGraph data, fast compliance adoption, everything clicks</div>
+</div>
+
+<!-- Honesty callout -->
+<div class="card-glass rounded-2xl p-6 border-l-4 border-amber-500 mb-8">
+<h4 class="text-amber-400 font-bold mb-2">📊 Honest Assessment</h4>
+<p class="text-sm text-gray-400">Base case is recommended for planning. Month 6 will feel slow (₹30-60L, not ₹1Cr+). Service revenue dominates Year 1 — pure SaaS kicks in Year 2. This is normal: Palantir, Veeva, and Resilinc all followed this pattern. Investment of ₹2.6-3.9Cr → Base case ₹5-8Cr ARR by M18 = strong ROI regardless of scenario.</p>
+</div>
+
+<div class="card-glass rounded-2xl p-8">
+<h3 class="text-white font-bold mb-6 text-center">Revenue Model Mix Over Time</h3>
+<div class="space-y-4">
+<template x-for="r in revenueMix" :key="r.label">
+<div>
+<div class="flex justify-between text-sm mb-1"><span class="text-gray-400" x-text="r.label"></span><span class="text-gray-500" x-text="r.total"></span></div>
+<div class="flex h-6 rounded-lg overflow-hidden">
+<div class="bg-amber-500/60 flex items-center justify-center text-xs" :style="`width:${r.service}%`" x-show="r.service>8"><span class="text-amber-100" x-text="r.service+'%'"></span></div>
+<div class="bg-navy-500/60 flex items-center justify-center text-xs" :style="`width:${r.hybrid}%`" x-show="r.hybrid>8"><span class="text-navy-100" x-text="r.hybrid+'%'"></span></div>
+<div class="bg-teal-500/60 flex items-center justify-center text-xs" :style="`width:${r.saas}%`" x-show="r.saas>8"><span class="text-teal-100" x-text="r.saas+'%'"></span></div>
+</div>
+</div>
+</template>
+</div>
+<div class="flex justify-center gap-6 mt-6 text-xs">
+<span class="flex items-center gap-2"><span class="w-3 h-3 rounded bg-amber-500/60"></span>Services</span>
+<span class="flex items-center gap-2"><span class="w-3 h-3 rounded bg-navy-500/60"></span>Hybrid</span>
+<span class="flex items-center gap-2"><span class="w-3 h-3 rounded bg-teal-500/60"></span>Pure SaaS</span>
+</div>
+</div>
+</div>
+</section>
+
+<!-- INVESTMENT -->
+<section id="investment" class="py-24 px-6">
+<div class="max-w-6xl mx-auto">
+<div class="text-center mb-16">
+<div class="text-teal-400 text-sm font-semibold tracking-wider uppercase mb-3">Investment</div>
+<h2 class="text-4xl font-bold text-white">Team & Budget</h2>
+</div>
+<div class="grid md:grid-cols-3 gap-6 mb-12">
+<div class="card-glass rounded-2xl p-8 verdict-green">
+<div class="text-green-400 text-sm font-semibold mb-1">Phase 1 · Month 1-6</div>
+<div class="text-3xl font-black text-white mb-3">₹60-90L</div>
+<div class="text-sm text-gray-400 space-y-1"><div>5-6 people</div><div>3 devs, 1 designer, 1 data eng, 1 PM</div></div>
+</div>
+<div class="card-glass rounded-2xl p-8 verdict-yellow">
+<div class="text-yellow-400 text-sm font-semibold mb-1">Phase 2 · Month 7-12</div>
+<div class="text-3xl font-black text-white mb-3">₹1-1.5Cr</div>
+<div class="text-sm text-gray-400 space-y-1"><div>8-10 people</div><div>+2 devs, +1 ML engineer, +1 domain expert</div></div>
+</div>
+<div class="card-glass rounded-2xl p-8 verdict-red">
+<div class="text-red-400 text-sm font-semibold mb-1">Phase 3 · Month 13-18</div>
+<div class="text-3xl font-black text-white mb-3">₹1-1.5Cr</div>
+<div class="text-sm text-gray-400 space-y-1"><div>12-15 people</div><div>+2 devs, +1 data analyst, regulatory expert</div></div>
+</div>
+</div>
+<div class="text-center">
+<div class="inline-block card-glass rounded-2xl p-8">
+<div class="text-sm text-gray-400 mb-2">18-Month Total Investment</div>
+<div class="text-4xl font-black gradient-text mb-2">₹2.6-3.9Cr</div>
+<div class="text-sm text-gray-500">Payback: Month 10-14</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- MOATS -->
+<section id="moats" class="py-24 px-6 bg-navy-800/30">
+<div class="max-w-6xl mx-auto">
+<div class="text-center mb-16">
+<div class="text-navy-400 text-sm font-semibold tracking-wider uppercase mb-3">Defensibility</div>
+<h2 class="text-4xl font-bold text-white">Strategic Moats</h2>
+</div>
+<div class="grid md:grid-cols-5 gap-4">
+<div class="card-glass rounded-2xl p-6 text-center"><div class="text-3xl mb-3">🔗</div><div class="text-white font-semibold text-sm mb-2">Transaction Graph</div><div class="text-xs text-gray-500">Years of data. Impossible to replicate without running the business.</div></div>
+<div class="card-glass rounded-2xl p-6 text-center"><div class="text-3xl mb-3">📈</div><div class="text-white font-semibold text-sm mb-2">Factory Ops Data</div><div class="text-xs text-gray-500">Yield, batch, compliance across 465+ facilities.</div></div>
+<div class="card-glass rounded-2xl p-6 text-center"><div class="text-3xl mb-3">🧪</div><div class="text-white font-semibold text-sm mb-2">Chemistry IP</div><div class="text-xs text-gray-500">30 chemistries, 500+ APIs, 150 patents.</div></div>
+<div class="card-glass rounded-2xl p-6 text-center"><div class="text-3xl mb-3">🌐</div><div class="text-white font-semibold text-sm mb-2">Network Effects</div><div class="text-xs text-gray-500">More participants → more data → more value.</div></div>
+<div class="card-glass rounded-2xl p-6 text-center"><div class="text-3xl mb-3">🔒</div><div class="text-white font-semibold text-sm mb-2">Regulatory Lock-In</div><div class="text-xs text-gray-500">Once compliance is on platform, switching costs are extreme.</div></div>
+</div>
+</div>
+</section>
+
+<!-- OPEN QUESTIONS -->
+<section id="questions" class="py-24 px-6">
+<div class="max-w-4xl mx-auto">
+<div class="text-center mb-16">
+<div class="text-amber-400 text-sm font-semibold tracking-wider uppercase mb-3">Validation Needed</div>
+<h2 class="text-4xl font-bold text-white">Open Questions for Founder</h2>
+</div>
+<div class="space-y-4">
+<template x-for="(q,i) in questions" :key="i">
+<div class="card-glass rounded-xl p-5 flex items-start gap-4">
+<div class="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-400 font-bold text-sm flex-shrink-0" x-text="i+1"></div>
+<div><div class="text-white font-medium" x-text="q.q"></div><div class="text-sm text-gray-500 mt-1" x-text="q.why"></div></div>
+</div>
+</template>
+</div>
+</div>
+</section>
+
+<!-- CLOSING -->
+<section class="py-32 px-6 text-center">
+<div class="max-w-3xl mx-auto">
+<div class="text-6xl mb-6">⚛️</div>
+<h2 class="text-4xl md:text-5xl font-black text-white mb-6 leading-tight">
+The chemicals make money today.<br>
+<span class="gradient-text">The software makes money forever.</span>
+</h2>
+<p class="text-lg text-gray-400 mb-4 max-w-xl mx-auto">
+ATOMS is the Manufacturing OS. IONS is the R&D OS. ChemGraph is the Intelligence OS. ComplianceOS is the Trust OS.
+Together — <strong class="text-white">the Operating System for Specialty Chemicals.</strong>
+</p>
+<p class="text-sm text-gray-500 mb-8">Validated against: Resilinc · Chemwatch · Knowde · EcoVadis · Benchling · Moglix · Sphera · Veeva</p>
+<div class="text-sm text-gray-500">
+Pranshu Jain · <a href="https://linkedin.com/in/jpranshu" class="text-navy-400 hover:text-navy-300 transition">LinkedIn</a> · February 2026
+</div>
+</div>
+</section>
+
+<script>
+function app(){return{
+  tier:'all',
+  expandedProduct:null,
+  sections:[
+    {id:'hero',short:'Home'},{id:'business',short:'Business'},{id:'opportunity',short:'Opportunity'},
+    {id:'products',short:'Products'},{id:'timeline',short:'Timeline'},{id:'stress',short:'Stress Test'},
+    {id:'revenue',short:'Revenue'},{id:'investment',short:'Investment'},{id:'moats',short:'Moats'},{id:'questions',short:'Questions'}
+  ],
+  products:[
+    {id:'rfq',name:'RFQ Intelligence Engine',tagline:'Auto-match RFQs via 3C framework. 7 days → 24 hours. Zero risk — automating what already happens manually.',
+     tier:'must',verdictLabel:'🟢 Must Build',timeline:'M0-3 · 8-10 weeks',revenue:'$240K+ ARR',model:'Hybrid → SaaS',icp:'Global procurement managers',crown:false,
+     analogies:['ZoomInfo','Faire','Thomasnet'],
+     icpDetail:'<strong>Procurement managers at mid-to-large chemical buyers</strong> (pharma, FMCG, industrial) managing 50-200 supplier relationships. They need speed (current RFQ cycle: 7-14 days), transparency (who can make this compound?), and risk reduction (wrong match = failed batches).',
+     willWork:['Already done manually — automating the obvious','Even without standalone revenue, internal efficiency justifies the build','Faster matching = more conversions = more revenue for core business'],
+     wontWork:['Customers may not trust algorithmic matching for high-stakes chemistry','The report may feel too thin without chemist input','Standalone pricing awkward when historically bundled into service fee'],
+     analogyDetails:[{name:'ZoomInfo',lesson:'Value is in ENRICHMENT (yield history, risk score), not just "here are 5 factories"'},{name:'Faire',lesson:'Auto-matches retailers with brands, charges commission not matching fee — consider transaction-based monetization'},{name:'Thomasnet',lesson:'Struggled to charge for quotes because buyers expected it free — don\'t charge for the match, charge for intelligence'}],
+     adjustment:null,
+     features:['Structured RFQ intake (compound, CAS, quantity, purity, compliance)','3C auto-matching algorithm with scoring','Feasibility report generator (top 5 matches, cost estimate, risk flags)','Human review queue (AI drafts, team validates)','Customer portal (submit, track, receive)'],
+     tech:['PostgreSQL','Rules Engine','PDF Gen','Next.js','Redis'],team:'2 devs + PM · ₹15-20L total build cost'},
+
+    {id:'chemgraph',name:'ChemGraph — Network Intelligence',tagline:'Turn the transaction graph into queryable intelligence. The single most defensible product. Nobody else has this data.',
+     tier:'must',verdictLabel:'🟢🟢 Must Build',timeline:'M4-12 · 20-24 weeks',revenue:'$1-2M ARR',model:'Service → SaaS',icp:'Enterprise procurement / supply chain VPs',crown:true,
+     analogies:['Resilinc ($100M+)','Bloomberg','Palantir','Import Genius'],
+     icpDetail:'<strong>Supply chain / procurement VPs at large chemical companies ($500M+)</strong> who spend millions on McKinsey/BCG for supply chain mapping. Also: chemical trading houses who arbitrage information asymmetry. They need supply chain visibility, risk management (post-COVID priority), market intelligence, and sourcing optimization.',
+     willWork:['Resilinc built $100M+ doing this with SURVEY data — Scimplify has REAL transaction data','Post-COVID, supply chain resilience is a board-level priority at every large company','The data moat is real — competitors can build software but not the dataset','Import Genius proved customers pay for "who buys what from whom" intelligence'],
+     wontWork:['Data volume might be too thin (100 active manufacturers × limited history)','Enterprise sales cycles are 6-12 months','Anonymization vs. value tension (best insights reveal specific manufacturer data)','Resilinc has 10-year head start on enterprise relationships'],
+     analogyDetails:[{name:'Resilinc ($100M+ revenue)',lesson:'Maps multi-tier supplier networks for F500. Uses surveys + public data. VALIDATES the thesis. Scimplify has better data.'},{name:'Bloomberg Terminal',lesson:'Won because of REAL transaction data. Competitors with modeled data couldn\'t compete. Same dynamic for ChemGraph.'},{name:'Palantir Foundry',lesson:'Started consulting-heavy, then productized. Do the same: custom reports first, self-serve later.'},{name:'Import Genius',lesson:'Sells customs/trade data to reveal supply chains. Proved willingness to pay for transparency.'}],
+     adjustment:'Start as intelligence-as-a-service (custom reports at $5-20K each), not self-serve SaaS. Build credibility through a free quarterly "India Specialty Chemical Index" report. Self-serve platform comes after data depth is validated.',
+     features:['ETL pipeline: ATOMS + IONS → Neo4j graph DB','Graph model: manufacturers, customers, products, chemistries as nodes','Pre-built queries: supply risk, sourcing optimization, market signals, cross-sell','Interactive dashboard with trend analytics','Alert system: demand shifts, capacity changes','Enterprise: custom queries, API, scheduled reports'],
+     tech:['Neo4j','PostgreSQL','Elasticsearch','D3.js','Next.js','ETL Pipeline'],team:'2 backend + 1 data eng + 1 frontend + PM'},
+
+    {id:'compliance',name:'ComplianceOS — Regulatory SaaS',tagline:'SDS management, GHS classification, certificate tracking, audit trails. Proven $B+ market with regulatory forcing function.',
+     tier:'must',verdictLabel:'🟢🟢 Must Build',timeline:'M6-14 · 18-20 weeks',revenue:'$600K+ ARR',model:'Hybrid',icp:'EHS managers at chemical manufacturers',crown:false,
+     analogies:['Chemwatch (30yr)','Sphera (Blackstone)','Veeva ($35B)','Lisam (€100M acq.)'],
+     icpDetail:'<strong>EHS managers and regulatory affairs teams at chemical manufacturers globally</strong>. 1 per facility, managing 50-500 SDS documents, 10-30 certifications. Also: Indian manufacturers exporting to EU/US who are overwhelmed by REACH/TSCA requirements they barely understand.',
+     willWork:['Chemwatch (30 years, thousands of customers), Sphera (Blackstone-backed), Lisam (acquired for €100M+), Veeva ($35B) all PROVE this market','EU REACH tightening, CBAM, FDA scrutiny on Indian manufacturers — every regulatory trend forces more spending','Scimplify has distribution: 465 manufacturers already in the network vs. Chemwatch cold-selling','Veeva\'s playbook: start narrow in regulated industry, expand to full suite'],
+     wontWork:['Competing with 30-year incumbents who have deep regulatory databases','Domain expertise is the moat, not software — need dedicated regulatory scientists','Indian domestic-only manufacturers may not pay enough','Switching costs favor incumbents (existing Chemwatch customers won\'t switch easily)'],
+     analogyDetails:[{name:'Chemwatch (30+ years)',lesson:'SDS management + GHS authoring. Thousands of global customers. Market is VALIDATED. But hard to replicate their regulatory data.'},{name:'Sphera (Blackstone portfolio)',lesson:'EHS&S + product stewardship. Enterprise SaaS. $1B+ value. Shows ceiling is very high.'},{name:'Veeva Systems ($35B)',lesson:'Started with pharma CRM → expanded to regulatory/compliance/quality. Vertical SaaS in regulated industry = massive TAM.'},{name:'Lisam/ExESS (acquired ~€100M)',lesson:'SDS authoring alone can be a €100M business. Niche but very profitable.'}],
+     adjustment:'Hire a regulatory affairs specialist from Day 1. Start narrow: certificate vault + expiry tracking (3 months). Then add SDS auto-generation (3 more months). Don\'t attempt full GHS classification engine until regulatory expertise is proven.',
+     features:['Certificate vault: central repo, upload, categorize by facility/product','Expiry tracking + automated renewal reminders (30/60/90 days)','SDS template-based generation from formulation data','GHS classification engine (rules-based v1)','Regulatory change alerts (REACH, GHS, TSCA, FDA)','Complete audit trail, role-based access','Exportable audit reports for inspections'],
+     tech:['PostgreSQL','PDF Generation','Rules Engine','Next.js','Audit Logger'],team:'2 devs + 1 regulatory consultant + PM'},
+
+    {id:'ions',name:'IONS External SaaS',tagline:'Open R&D collaboration to external companies. Position as project management tool (like Benchling), NOT as scientist marketplace.',
+     tier:'adjust',verdictLabel:'🟡 Adjusted',timeline:'M2-6 · 14-16 weeks',revenue:'$300-500K ARR',model:'Hybrid',icp:'R&D heads at mid-size pharma/chemical companies',crown:false,
+     analogies:['Benchling ($6B)','Toptal','Science Exchange (pivoted)'],
+     icpDetail:'<strong>R&D heads and innovation managers at mid-size chemical/pharma companies ($50M-$5B)</strong> managing 5-20 external R&D projects. Also: biotech startups needing contract research. They need scientist discovery, IP-safe collaboration, project tracking, and speed to first result.',
+     willWork:['350+ enquiries/week is real, validated, organic demand','Benchling proved vertical R&D SaaS works ($6B+ company)','Scimplify already HAS the scientist network — no cold-start on supply side'],
+     wontWork:['Two-sided marketplace cold start — scientists must actively maintain profiles','Managed tier ($2K/mo) cannibalizes self-serve ($200/mo) — ends up as services, not SaaS','Pharma IP requirements are extreme (SOC 2, sometimes on-premise)','Science Exchange (R&D outsourcing marketplace) struggled with two-sided liquidity and pivoted'],
+     analogyDetails:[{name:'Benchling ($6B+)',lesson:'Succeeded by focusing on INTERNAL lab workflows (ELN/LIMS), not external collaboration. IONS should emphasize project management > marketplace.'},{name:'Science Exchange ($50M+ raised)',lesson:'Marketplace for CROs. Struggled with liquidity. PIVOTED. Warning sign for pure marketplace approach.'},{name:'Toptal (talent marketplace)',lesson:'Succeeded with heavy curation + vetting + premium positioning. IONS should go Toptal-style, not Upwork-style.'}],
+     adjustment:'Position as "R&D project management SaaS" (Benchling for external R&D), NOT as "scientist marketplace." The Managed tier will drive 80% of early revenue. Self-serve is the long game. Invest in IP security (SOC 2) before targeting pharma.',
+     features:['Self-serve signup + company onboarding','Scientist/lab discovery by chemistry capabilities','Project workspace: milestones, doc sharing, version control','IP-safe: watermarking, access audit logs','Quote request flow','Tier-based feature gating'],
+     tech:['PostgreSQL','Stripe','Next.js','Document Engine','Elasticsearch'],team:'3 devs + designer + PM'},
+
+    {id:'atoms',name:'ATOMS Marketplace Tiers',tagline:'Freemium subscriptions for manufacturers. But validate buyer traffic FIRST — Knowde and Chemondis both pivoted away from this model.',
+     tier:'adjust',verdictLabel:'🟡 Adjusted',timeline:'M1-5 · 12-14 weeks',revenue:'₹1-2.5Cr ARR',model:'Pure SaaS',icp:'Indian SME manufacturers wanting more customers',crown:false,
+     analogies:['IndiaMART (₹3,500Cr rev)','Alibaba.com','Knowde (pivoted)','Chemondis (struggled)'],
+     icpDetail:'<strong>Small-to-mid Indian specialty chemical manufacturers (₹10-500Cr revenue)</strong> who want international buyers but lack sales/marketing. They have capacity but struggle with demand generation. Need visibility, credibility (verified badge), analytics, and lead flow.',
+     willWork:['IndiaMART makes ₹3,500Cr/year from manufacturer subscriptions — model is proven at scale','465 manufacturers already on ATOMS — captive audience','Analytics ("who viewed your profile") is sticky once manufacturers see the data'],
+     wontWork:['ATOMS buyer traffic may be too low — if <500 monthly searches, premium placement is meaningless','₹15-25K/mo is 5-10x IndiaMART\'s entry price — steep for Indian SMEs','Knowde ($100M+ raised) started as chemical marketplace, pivoted to SaaS tools — marketplace liquidity was the problem','Chemondis (EU) struggled with marketplace liquidity in specialty chemicals','Manufacturers may feel entitled to equal visibility since they already supply to Scimplify'],
+     analogyDetails:[{name:'IndiaMART (₹3,500Cr revenue)',lesson:'Works because of MILLIONS of monthly searches. At <5K searches, don\'t tier.'},{name:'Knowde ($100M+ raised)',lesson:'Started as chemical marketplace → pivoted to Master Data Management + CX Platform for suppliers. The bigger opportunity may be selling tools TO manufacturers, not placement.'},{name:'Chemondis',lesson:'EU chemical marketplace. Raised funding. Struggled with two-sided liquidity. Niche B2B marketplaces are HARD.'},{name:'Alibaba.com',lesson:'Gold Supplier ($2-6K/year) works because 40M+ active buyers. Scale matters.'}],
+     adjustment:'DON\'T tier before validating buyer traffic on ATOMS. If traffic is low, pivot to selling analytics-as-a-product (manufacturers pay for market intelligence, not placement). Knowde\'s pivot is the cautionary tale here.',
+     features:['Three-tier system: Free → Pro (₹15-25K/mo) → Enterprise (₹50-100K/mo)','Manufacturer analytics dashboard (views, impressions, inquiry funnel)','Verified badge system','Priority search ranking for paid tiers','Subscription billing (Razorpay, GST compliant)'],
+     tech:['Razorpay','PostgreSQL','Analytics Engine','Next.js','Elasticsearch'],team:'2 devs + designer + PM'},
+
+    {id:'green',name:'GreenScore — ESG Platform',tagline:'Product-level carbon intelligence. EcoVadis owns company-level — differentiate on per-route, per-product carbon tracking.',
+     tier:'adjust',verdictLabel:'🟡 Adjusted',timeline:'M13-18 · 14-16 weeks',revenue:'$300-500K ARR',model:'Hybrid',icp:'EU buyers needing CBAM data + Indian exporters',crown:false,
+     analogies:['EcoVadis (€500M+)','Watershed ($1.8B)','CDP','TfS Consortium'],
+     icpDetail:'<strong>Sustainability/ESG managers at large EU/US chemical buyers ($1B+)</strong> needing ESG data from Indian suppliers for CBAM compliance. Also: Indian manufacturers exporting to EU who need to provide carbon data or lose contracts.',
+     willWork:['EcoVadis built €500M+ business on sustainability ratings with 150K+ rated companies','EU CBAM is a regulatory forcing function — not optional','Scimplify uniquely positioned: controls recipe, manufacturer, AND production process — can compare Route A vs Route B for same molecule'],
+     wontWork:['EcoVadis rates COMPANIES not PRODUCTS — product-level carbon accounting is much harder','Manufacturers must self-report ESG data — accuracy questionable without third-party verification','The "ESG premium" may be a myth — procurement still driven by price','Together for Sustainability (TfS) consortium already rates chemical suppliers'],
+     analogyDetails:[{name:'EcoVadis (€500M+ funding, 150K+ companies)',lesson:'VALIDATED at scale. But company-level, not product-level. Scimplify\'s product-level angle is differentiated but harder.'},{name:'Watershed ($1.8B valuation)',lesson:'Carbon accounting SaaS works. But serves large enterprises with existing data infrastructure.'},{name:'TfS (chemical industry consortium)',lesson:'50+ member companies (BASF, Dow, etc.) already rate suppliers. Need to clearly differentiate from existing standard.'}],
+     adjustment:'Bundle with existing orders as a service ("your order comes with a carbon certificate"), NOT as standalone SaaS. Product-level carbon is the differentiation vs. EcoVadis. Don\'t build standalone until CBAM enforcement creates hard demand.',
+     features:['ESG data collection forms (energy, water, waste per batch)','Carbon footprint calculator (GHG Protocol, Scope 1+2)','GreenScore composite rating (A+ to D)','Route comparison: "same product, greener route"','CBAM-compatible export reports','Certification badge program'],
+     tech:['PostgreSQL','Emission Factor DB','Calculation Engine','Next.js','PDF/API Export'],team:'2 devs + sustainability consultant + PM'},
+
+    {id:'orderos',name:'Order & Fulfillment OS',tagline:'Full order lifecycle tracking. Build as INTERNAL infrastructure — Flexport proved visibility tools don\'t generate independent revenue.',
+     tier:'depri',verdictLabel:'⬇️ Internal Only',timeline:'M7-14 · 20-24 weeks',revenue:'Internal efficiency',model:'Internal infra',icp:'Scimplify ops team + customers',crown:false,
+     analogies:['Flexport ($8B → struggles)','SAP/Oracle ERP'],
+     icpDetail:'<strong>Primarily Scimplify\'s own operations team.</strong> Secondarily: large customers managing 10+ active orders who want visibility. This is infrastructure, not a product.',
+     willWork:['Every B2B company needs order management — any system beats email/Excel','Flexport built great visibility tools (proves customers want transparency)','ATOMS already promises "real-time traceability" — this makes it real'],
+     wontWork:['Flexport ($8B peak → layoffs → profitability struggles) proves visibility ≠ revenue','Customers expect order tracking as baseline service, not something to pay for','Manufacturers won\'t update status in a system (they prefer WhatsApp)','Competing with SAP for large customers (they won\'t use two systems)'],
+     analogyDetails:[{name:'Flexport',lesson:'Amazing order/shipment visibility. But $8B peak → massive layoffs → profitability issues. Visibility is nice but doesn\'t change unit economics.'},{name:'SAP/Oracle',lesson:'Every large chemical company already uses ERP for orders. You\'re competing with "nothing" (SMEs) or "SAP" (enterprises). Both are hard.'}],
+     adjustment:'Build as internal infrastructure only. Do NOT treat as a revenue product. Value: better customer NPS, operational efficiency, data for ChemGraph. No standalone pricing.',
+     features:['12-stage order lifecycle state machine','Customer portal: tracking, docs, reorder','Manufacturer portal: order queue, status updates','Ops dashboard: bottleneck detection, SLA tracking','Automated stage-change notifications'],
+     tech:['PostgreSQL','State Machine','Next.js','Notification Service','S3'],team:'3 devs + PM'},
+
+    {id:'mfg',name:'Manufacturing Intelligence Dashboard',tagline:'Yield analytics for factories. Indian SME manufacturers DON\'T buy SaaS (Moglix lesson). Offer FREE — improves Scimplify\'s own outcomes.',
+     tier:'depri',verdictLabel:'⬇️ Free Tool',timeline:'M5-10 · 16-18 weeks',revenue:'Free (bundled)',model:'Free / bundled',icp:'Plant managers at partner factories',crown:false,
+     analogies:['Moglix (pivoted from SaaS)','Sight Machine (enterprise only)'],
+     icpDetail:'<strong>Plant managers at small-to-mid Indian chemical manufacturers (₹10-200Cr revenue).</strong> Running production on Excel and WhatsApp. No real-time visibility. BUT: they are among the hardest SaaS customers in the world.',
+     willWork:['Manufacturing analytics SaaS is proven (Sight Machine, Uptake — $100M+ businesses)','Data collection infrastructure already exists (Scimplify monitors factory output)','Network benchmarking ("your yield vs. network") is a killer unique feature'],
+     wontWork:['Indian SME manufacturers are among the HARDEST SaaS customers in the world — they don\'t buy software','Moglix tried selling SaaS tools to Indian manufacturers, pivoted to marketplace ($1B+ valuation came from marketplace, NOT SaaS)','Data quality from small Indian chemical plants is likely poor','Sight Machine/Uptake sell to $1B+ enterprises with digital infrastructure — totally different ICP','Manufacturers may resent benchmarking ("you\'re grading us to negotiate our prices down")'],
+     analogyDetails:[{name:'Moglix ($1B+ valuation)',lesson:'Tried selling SaaS to Indian manufacturers. PIVOTED to procurement marketplace. The lesson is brutal: Indian manufacturers buy products, not software.'},{name:'Sight Machine',lesson:'Manufacturing analytics for large enterprises. Works for auto/FMCG. Struggled in chemicals (process manufacturing is different from discrete).'}],
+     adjustment:'Offer as a FREE tool bundled with Scimplify partnership. "You share yield data with us anyway — here\'s a dashboard so YOU can see it too." Monetize only if adoption proves strong (premium benchmarking layer). Do NOT build as standalone revenue product.',
+     features:['Factory dashboard: yield tracking, production overview','Batch-to-batch consistency scoring (SPC charts)','Lab-to-factory deviation alerts','Network benchmarking (anonymized)','Certification expiry alerts'],
+     tech:['TimescaleDB','PostgreSQL','Grafana/Custom','Next.js'],team:'2 devs + PM'}
+  ],
+  gantt:[
+    {name:'RFQ Intelligence',start:1,end:3,tier:'must',label:'MVP',depri:false},
+    {name:'ChemGraph (data eng → product)',start:4,end:12,tier:'must',label:'Data Eng → Product',depri:false},
+    {name:'ComplianceOS',start:6,end:14,tier:'must',label:'MVP',depri:false},
+    {name:'IONS SaaS',start:2,end:6,tier:'adjust',label:'MVP',depri:false},
+    {name:'ATOMS Tiers (validate first)',start:3,end:7,tier:'adjust',label:'Validate → Build',depri:false},
+    {name:'GreenScore',start:13,end:18,tier:'adjust',label:'Bundle first',depri:false},
+    {name:'Order OS (internal)',start:7,end:14,tier:'depri',label:'Internal',depri:true},
+    {name:'Mfg Intelligence (free)',start:5,end:10,tier:'depri',label:'Free tool',depri:true}
+  ],
+  stressTable:[
+    {name:'RFQ Intelligence',icpScore:'⭐⭐⭐⭐⭐',marketScore:'⭐⭐⭐⭐',comparable:'ZoomInfo, Faire',risk:'May not pay separately for reports',verdict:'🟢'},
+    {name:'ChemGraph ⭐',icpScore:'⭐⭐⭐⭐⭐',marketScore:'⭐⭐⭐⭐⭐',comparable:'Resilinc ($100M+), Bloomberg',risk:'Data depth, enterprise sales cycle',verdict:'🟢🟢'},
+    {name:'ComplianceOS',icpScore:'⭐⭐⭐⭐⭐',marketScore:'⭐⭐⭐⭐⭐',comparable:'Chemwatch, Sphera, Veeva ($35B)',risk:'Domain expertise gap',verdict:'🟢🟢'},
+    {name:'IONS SaaS',icpScore:'⭐⭐⭐',marketScore:'⭐⭐⭐⭐',comparable:'Benchling ($6B)',risk:'Two-sided cold start, IP paranoia',verdict:'🟡'},
+    {name:'ATOMS Tiers',icpScore:'⭐⭐⭐⭐',marketScore:'⭐⭐⭐',comparable:'IndiaMART, Knowde (pivoted)',risk:'Low traffic kills the thesis',verdict:'🟡'},
+    {name:'GreenScore',icpScore:'⭐⭐⭐⭐',marketScore:'⭐⭐⭐⭐',comparable:'EcoVadis (€500M+)',risk:'EcoVadis competition, data quality',verdict:'🟡'},
+    {name:'Order OS',icpScore:'⭐⭐⭐⭐',marketScore:'⭐⭐⭐⭐',comparable:'Flexport ($8B → struggles)',risk:'Visibility ≠ revenue',verdict:'🟡'},
+    {name:'Mfg Intelligence',icpScore:'⭐⭐⭐',marketScore:'⭐⭐⭐',comparable:'Moglix (pivoted from SaaS)',risk:'Indian SMEs don\'t buy SaaS',verdict:'🔴'}
+  ],
+  revenueMix:[
+    {label:'Month 6',service:50,hybrid:35,saas:15,total:'₹75L-1.2Cr'},
+    {label:'Month 12',service:25,hybrid:40,saas:35,total:'₹4-6Cr'},
+    {label:'Month 18',service:15,hybrid:35,saas:50,total:'₹9-14Cr'},
+    {label:'Month 24',service:10,hybrid:30,saas:60,total:'₹15-25Cr'}
+  ],
+  questions:[
+    {q:'Revenue model today — margin on chemicals or commission?',why:'Determines SaaS pricing strategy to avoid cannibalization'},
+    {q:'Recipe IP ownership — can Scimplify license route synthesis?',why:'Unlocks "Recipe-as-a-Service" product line'},
+    {q:'Specific compliance pain points — SDS? GHS? Audit management?',why:'Prioritizes ComplianceOS features and validates domain expert hire'},
+    {q:'ESG data maturity — tracked quantitatively or aspirational?',why:'Determines GreenScore v1 scope and feasibility'},
+    {q:'ATOMS buyer traffic — how many external searches/month?',why:'Determines whether ATOMS Tiers is viable or needs to be analytics-only'},
+    {q:'Willingness to open ATOMS/IONS to non-Scimplify customers?',why:'Strategic decision that determines TAM for every SaaS product'},
+    {q:'Current tech stack (ATOMS/IONS)?',why:'Build on top vs. greenfield changes everything'}
+  ],
+  get filteredProducts(){return this.tier==='all'?this.products:this.products.filter(p=>p.tier===this.tier)},
+  toggleProduct(id){this.expandedProduct=this.expandedProduct===id?null:id}
+}}
+</script>
+</body>
+</html>
