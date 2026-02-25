@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="en" x-data="app()" x-init="init()">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scimplify — Digital Product Roadmap</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      fontFamily: { sans: ['Inter', 'sans-serif'] },
+      colors: {
+        navy: '#0f0d2e',
+        indigo: '#6366f1',
+        teal: '#14b8a6',
+        amber: '#fbbf24',
+      }
+    }
+  }
+}
+</script>
+<style>
+[x-cloak]{display:none!important}
+body{background:#0f0d2e;font-family:'Inter',sans-serif;color:#e2e8f0}
+.glass{background:rgba(255,255,255,0.03);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.08)}
+.glass-hover:hover{background:rgba(255,255,255,0.06);border-color:rgba(255,255,255,0.15)}
+.glow{box-shadow:0 0 30px rgba(99,102,241,0.15)}
+.glow-teal{box-shadow:0 0 30px rgba(20,184,166,0.15)}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:#0f0d2e}::-webkit-scrollbar-thumb{background:#6366f1;border-radius:3px}
+.fade-in{animation:fadeIn .4s ease}@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.pulse-dot{animation:pulse 2s infinite}@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.node-line{stroke:rgba(255,255,255,0.1);stroke-width:1}
+.node-line.highlighted{stroke:#6366f1;stroke-width:2;opacity:1}
+.node-circle{transition:all .3s}.node-circle.dimmed{opacity:.2}.node-circle.highlighted{filter:drop-shadow(0 0 8px currentColor)}
+.gantt-bar{border-radius:4px;height:24px;transition:all .3s}
+.tier-must{background:linear-gradient(135deg,#6366f1,#818cf8)}.tier-next{background:linear-gradient(135deg,#14b8a6,#2dd4bf)}.tier-traction{background:linear-gradient(135deg,#f59e0b,#fbbf24)}
+.score-bar{height:6px;border-radius:3px;transition:width .8s ease}
+.matching-anim{animation:matchPulse 1.5s ease infinite}@keyframes matchPulse{0%{box-shadow:0 0 0 0 rgba(99,102,241,.4)}70%{box-shadow:0 0 0 20px rgba(99,102,241,0)}100%{box-shadow:0 0 0 0 rgba(99,102,241,0)}}
+</style>
+</head>
+<body class="min-h-screen">
+
+<!-- NAV -->
+<nav class="fixed top-0 w-full z-50 glass border-b border-white/10" style="background:rgba(15,13,46,0.9)">
+<div class="max-w-7xl mx-auto flex items-center justify-between px-4 h-14">
+  <div class="flex items-center gap-6">
+    <span class="text-lg font-bold bg-gradient-to-r from-indigo to-teal bg-clip-text text-transparent">⚗️ Scimplify</span>
+    <div class="flex gap-1 bg-white/5 rounded-lg p-0.5">
+      <button @click="mode='roadmap'" :class="mode==='roadmap'?'bg-indigo text-white':'text-gray-400 hover:text-white'" class="px-3 py-1 rounded-md text-sm font-medium transition">Roadmap</button>
+      <button @click="mode='products'" :class="mode==='products'?'bg-indigo text-white':'text-gray-400 hover:text-white'" class="px-3 py-1 rounded-md text-sm font-medium transition">Products</button>
+    </div>
+  </div>
+  <span class="text-sm text-gray-400">Pranshu Jain</span>
+</div>
+</nav>
+
+<div class="pt-14">
+
+<!-- ==================== ROADMAP MODE ==================== -->
+<div x-show="mode==='roadmap'" x-cloak class="fade-in">
+
+<!-- Hero -->
+<section class="max-w-6xl mx-auto px-4 py-20 text-center">
+  <div class="inline-block px-3 py-1 rounded-full text-xs font-medium bg-indigo/20 text-indigo border border-indigo/30 mb-6">Strategic Roadmap 2025-2026</div>
+  <h1 class="text-4xl md:text-5xl font-bold mb-4 leading-tight">Digital Product &amp; SaaS<br><span class="bg-gradient-to-r from-indigo to-teal bg-clip-text text-transparent">Revenue Roadmap</span></h1>
+  <p class="text-gray-400 text-lg max-w-2xl mx-auto">Transforming Scimplify from a services company into a platform-powered chemical intelligence business</p>
+</section>
+
+<!-- Stats -->
+<section class="max-w-5xl mx-auto px-4 pb-16">
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+  <template x-for="s in [{n:'465',l:'Manufacturers'},{n:'5,000+',l:'Customers'},{n:'350+',l:'Enquiries/Week'},{n:'11',l:'Industries'}]">
+    <div class="glass rounded-xl p-5 text-center">
+      <div class="text-2xl font-bold text-indigo" x-text="s.n"></div>
+      <div class="text-xs text-gray-400 mt-1" x-text="s.l"></div>
+    </div>
+  </template>
+</div>
+</section>
+
+<!-- Two Business Models -->
+<section class="max-w-5xl mx-auto px-4 pb-16">
+<h2 class="text-2xl font-bold mb-6 text-center">Two Business Models</h2>
+<div class="grid md:grid-cols-2 gap-6">
+  <div class="glass rounded-xl p-6 border-l-4 border-indigo">
+    <h3 class="text-lg font-semibold text-indigo mb-2">🏭 High-Touch Solutions</h3>
+    <p class="text-sm text-gray-400 mb-3">Cases 1-4: China+1 Switching, Route Optimization, Custom Molecules</p>
+    <div class="text-xl font-bold text-white">$50K — $500K <span class="text-sm font-normal text-gray-400">per deal</span></div>
+    <div class="mt-3 flex flex-wrap gap-2">
+      <span class="text-xs px-2 py-1 rounded bg-indigo/20 text-indigo">China+1</span>
+      <span class="text-xs px-2 py-1 rounded bg-indigo/20 text-indigo">Route Opt</span>
+      <span class="text-xs px-2 py-1 rounded bg-indigo/20 text-indigo">Custom Molecules</span>
+    </div>
+  </div>
+  <div class="glass rounded-xl p-6 border-l-4 border-teal">
+    <h3 class="text-lg font-semibold text-teal mb-2">🛒 Self-Serve Commerce</h3>
+    <p class="text-sm text-gray-400 mb-3">Case 5: Catalog chemicals, instant quotes, online ordering</p>
+    <div class="text-xl font-bold text-white">$5K — $50K <span class="text-sm font-normal text-gray-400">per deal</span></div>
+    <div class="mt-3 flex flex-wrap gap-2">
+      <span class="text-xs px-2 py-1 rounded bg-teal/20 text-teal">Catalog</span>
+      <span class="text-xs px-2 py-1 rounded bg-teal/20 text-teal">Instant Quotes</span>
+      <span class="text-xs px-2 py-1 rounded bg-teal/20 text-teal">Online Commerce</span>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- 6 Product Cards -->
+<section class="max-w-6xl mx-auto px-4 pb-16">
+<h2 class="text-2xl font-bold mb-6 text-center">The Six Products</h2>
+<div class="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+  <template x-for="p in products" :key="p.id">
+    <div class="glass rounded-xl p-5 glass-hover transition cursor-pointer" @click="mode='products';activeProduct=p.id">
+      <div class="flex justify-between items-start mb-3">
+        <span class="text-2xl" x-text="p.icon"></span>
+        <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full text-white" :class="p.tier==='Must Build'?'tier-must':p.tier==='Build Next'?'tier-next':'tier-traction'" x-text="p.tier"></span>
+      </div>
+      <h3 class="font-semibold mb-1" x-text="p.name"></h3>
+      <p class="text-xs text-gray-400 mb-3" x-text="p.tagline"></p>
+      <div class="text-xs text-gray-500 mb-1"><span class="text-gray-300 font-medium">Revenue:</span> <span x-text="p.revenue"></span></div>
+      <div class="text-xs text-gray-500 mb-1"><span class="text-gray-300 font-medium">ICP:</span> <span x-text="p.icp"></span></div>
+      <div class="text-xs text-gray-500"><span class="text-gray-300 font-medium">Like:</span> <span x-text="p.analogy"></span></div>
+    </div>
+  </template>
+</div>
+</section>
+
+<!-- Revenue Projections -->
+<section class="max-w-5xl mx-auto px-4 pb-16" x-data="{scenario:'base'}">
+<h2 class="text-2xl font-bold mb-2 text-center">Revenue Projections</h2>
+<p class="text-xs text-gray-500 text-center mb-6">Includes productized services revenue</p>
+<div class="flex justify-center gap-2 mb-6">
+  <template x-for="s in ['bear','base','bull']">
+    <button @click="scenario=s" :class="scenario===s?'bg-indigo text-white':'bg-white/5 text-gray-400'" class="px-4 py-1.5 rounded-lg text-sm font-medium capitalize transition" x-text="s"></button>
+  </template>
+</div>
+<div class="glass rounded-xl p-6">
+  <div class="grid grid-cols-3 gap-6 text-center">
+    <div>
+      <div class="text-xs text-gray-400 mb-1">Month 6</div>
+      <div class="text-xl font-bold" x-text="scenario==='bear'?'₹0.5-1Cr':scenario==='base'?'₹2-4Cr':'₹3-6Cr'"></div>
+    </div>
+    <div>
+      <div class="text-xs text-gray-400 mb-1">Month 12</div>
+      <div class="text-xl font-bold" x-text="scenario==='bear'?'₹2-4Cr':scenario==='base'?'₹8-15Cr':'₹12-22Cr'"></div>
+    </div>
+    <div>
+      <div class="text-xs text-gray-400 mb-1">Month 24</div>
+      <div class="text-2xl font-bold bg-gradient-to-r from-indigo to-teal bg-clip-text text-transparent" x-text="scenario==='bear'?'₹4-7Cr':scenario==='base'?'₹20-36Cr':'₹30-50Cr'"></div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- Timeline Gantt -->
+<section class="max-w-5xl mx-auto px-4 pb-16">
+<h2 class="text-2xl font-bold mb-6 text-center">18-Month Timeline</h2>
+<div class="glass rounded-xl p-6 overflow-x-auto">
+  <div class="min-w-[600px]">
+    <div class="flex text-xs text-gray-500 mb-4">
+      <div class="w-36 shrink-0"></div>
+      <div class="flex-1 grid grid-cols-6 text-center">
+        <span>M1-3</span><span>M4-6</span><span>M7-9</span><span>M10-12</span><span>M13-15</span><span>M16-18</span>
+      </div>
+    </div>
+    <template x-for="g in ganttData" :key="g.name">
+      <div class="flex items-center mb-3">
+        <div class="w-36 shrink-0 text-xs font-medium truncate" x-text="g.name"></div>
+        <div class="flex-1 relative h-6">
+          <div class="gantt-bar absolute" :class="g.color" :style="'left:'+g.start+'%;width:'+g.width+'%'"></div>
+        </div>
+      </div>
+    </template>
+  </div>
+</div>
+</section>
+
+<!-- Investment -->
+<section class="max-w-3xl mx-auto px-4 pb-16 text-center">
+<div class="glass rounded-xl p-8 glow">
+  <h2 class="text-2xl font-bold mb-2">Investment Required</h2>
+  <div class="text-3xl font-bold bg-gradient-to-r from-indigo to-teal bg-clip-text text-transparent mb-2">₹2.5 — 3.6 Cr</div>
+  <p class="text-gray-400 text-sm">Over 18 months — engineering, infrastructure, go-to-market</p>
+</div>
+</section>
+
+<!-- Closing -->
+<section class="max-w-4xl mx-auto px-4 pb-20 text-center">
+<blockquote class="text-2xl md:text-3xl font-bold italic leading-relaxed">
+  "The chemicals make money <span class="text-teal">today</span>.<br>The software makes money <span class="text-indigo">forever</span>."
+</blockquote>
+</section>
+
+</div><!-- end roadmap -->
+
+<!-- ==================== PRODUCTS MODE ==================== -->
+<div x-show="mode==='products'" x-cloak class="flex min-h-[calc(100vh-56px)]">
+
+<!-- Sidebar -->
+<aside class="w-56 shrink-0 border-r border-white/8 bg-white/[0.02] hidden md:block">
+  <div class="p-3">
+    <template x-for="p in products" :key="p.id">
+      <button @click="activeProduct=p.id" :class="activeProduct===p.id?'bg-indigo/20 text-indigo border-indigo/30':'text-gray-400 hover:text-white hover:bg-white/5 border-transparent'" class="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium mb-1 border transition text-left">
+        <span x-text="p.icon"></span>
+        <span class="truncate" x-text="p.shortName||p.name"></span>
+      </button>
+    </template>
+  </div>
+</aside>
+
+<!-- Mobile product selector -->
+<div class="md:hidden fixed bottom-0 left-0 right-0 z-40 glass border-t border-white/10 flex overflow-x-auto px-2 py-2 gap-1" style="background:rgba(15,13,46,0.95)">
+  <template x-for="p in products" :key="p.id">
+    <button @click="activeProduct=p.id" :class="activeProduct===p.id?'bg-indigo text-white':'text-gray-400'" class="shrink-0 px-3 py-1.5 rounded-lg text-xs font-medium transition" x-text="p.icon+' '+p.shortName"></button>
+  </template>
+</div>
+
+<!-- Main Content Area -->
+<main class="flex-1 overflow-y-auto p-4 md:p-6 pb-20 md:pb-6">
+
+<!-- ====== PRODUCT 1: RFQ Intelligence ====== -->
+<div x-show="activeProduct===1" x-cloak class="fade-in max-w-4xl" x-data="rfqApp()">
+<h2 class="text-xl font-bold mb-4">🔍 RFQ Intelligence + China+1</h2>
+
+<div x-show="!showResults">
+<div class="glass rounded-xl p-6">
+  <h3 class="font-semibold mb-4">Submit RFQ</h3>
+  <div class="grid md:grid-cols-2 gap-4">
+    <div><label class="text-xs text-gray-400 block mb-1">Compound Name</label><input x-model="form.compound" class="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm focus:border-indigo outline-none" placeholder="e.g. Pymetrozine"></div>
+    <div><label class="text-xs text-gray-400 block mb-1">CAS Number</label><input x-model="form.cas" class="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm focus:border-indigo outline-none" placeholder="e.g. 123456-78-9"></div>
+    <div><label class="text-xs text-gray-400 block mb-1">Quantity (kg)</label><input x-model="form.qty" type="number" class="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm focus:border-indigo outline-none" placeholder="500"></div>
+    <div><label class="text-xs text-gray-400 block mb-1">Required Purity %</label><input x-model="form.purity" type="number" class="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm focus:border-indigo outline-none" placeholder="99"></div>
+    <div class="md:col-span-2">
+      <label class="text-xs text-gray-400 block mb-1">Compliance Needs</label>
+      <div class="flex flex-wrap gap-2">
+        <template x-for="c in ['FDA','GMP','CGMP','ISO','REACH','HALAL']">
+          <button @click="toggleCert(c)" :class="form.certs.includes(c)?'bg-indigo text-white':'bg-white/5 text-gray-400'" class="px-3 py-1 rounded-lg text-xs font-medium border border-white/10 transition" x-text="c"></button>
+        </template>
+      </div>
+    </div>
+    <div><label class="text-xs text-gray-400 block mb-1">Delivery Timeline</label>
+      <select x-model="form.timeline" class="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm focus:border-indigo outline-none">
+        <option value="1">1 Month</option><option value="3">3 Months</option><option value="6">6 Months</option>
+      </select>
+    </div>
+    <div class="flex items-end">
+      <label class="flex items-center gap-2 cursor-pointer">
+        <input type="checkbox" x-model="form.china1" class="accent-indigo w-4 h-4">
+        <span class="text-sm">China+1 Switch?</span>
+      </label>
+    </div>
+  </div>
+  <div x-show="form.china1" class="grid md:grid-cols-3 gap-4 mt-4 pt-4 border-t border-white/10">
+    <div><label class="text-xs text-gray-400 block mb-1">Current China Supplier</label><input x-model="form.chinaSupplier" class="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm focus:border-indigo outline-none" placeholder="Supplier name"></div>
+    <div><label class="text-xs text-gray-400 block mb-1">Current Price/kg ($)</label><input x-model="form.chinaPrice" type="number" class="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm focus:border-indigo outline-none" placeholder="45"></div>
+    <div><label class="text-xs text-gray-400 block mb-1">Current Lead Time (weeks)</label><input x-model="form.chinaLead" type="number" class="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm focus:border-indigo outline-none" placeholder="8"></div>
+  </div>
+  <button @click="submitRFQ()" class="mt-6 bg-indigo hover:bg-indigo/80 text-white px-6 py-2 rounded-lg text-sm font-medium transition">Submit RFQ →</button>
+</div>
+</div>
+
+<!-- Matching Animation -->
+<div x-show="matching" x-cloak class="flex flex-col items-center justify-center py-20">
+  <div class="w-16 h-16 rounded-full bg-indigo/20 matching-anim flex items-center justify-center mb-4"><span class="text-2xl">🔍</span></div>
+  <div class="text-lg font-semibold">Matching manufacturers...</div>
+  <div class="text-sm text-gray-400 mt-1">Analyzing 465 facilities across 11 industries</div>
+</div>
+
+<!-- Results -->
+<div x-show="showResults && !matching" x-cloak class="fade-in space-y-4">
+  <div class="flex justify-between items-center">
+    <h3 class="font-semibold">Feasibility Report</h3>
+    <button @click="showResults=false;matching=false" class="text-xs text-gray-400 hover:text-white">← New RFQ</button>
+  </div>
+  <div class="grid gap-3">
+    <template x-for="(m,i) in matchResults" :key="i">
+      <div class="glass rounded-xl p-4">
+        <div class="flex justify-between items-start mb-3">
+          <div>
+            <div class="font-semibold text-sm" x-text="m.name"></div>
+            <div class="text-xs text-gray-400" x-text="m.location"></div>
+          </div>
+          <div class="text-right">
+            <div class="text-lg font-bold" :class="m.overall>85?'text-teal':m.overall>70?'text-indigo':'text-amber'" x-text="m.overall+'%'"></div>
+            <div class="text-[10px] text-gray-500">Overall Match</div>
+          </div>
+        </div>
+        <div class="grid grid-cols-3 gap-3 mb-3">
+          <div><div class="text-[10px] text-gray-500 mb-1">Capacity</div><div class="w-full bg-white/5 rounded-full h-1.5"><div class="score-bar bg-indigo rounded-full" :style="'width:'+m.capacity+'%'"></div></div><div class="text-[10px] text-gray-400 mt-0.5" x-text="m.capacity+'%'"></div></div>
+          <div><div class="text-[10px] text-gray-500 mb-1">Chemistry</div><div class="w-full bg-white/5 rounded-full h-1.5"><div class="score-bar bg-teal rounded-full" :style="'width:'+m.chemistry+'%'"></div></div><div class="text-[10px] text-gray-400 mt-0.5" x-text="m.chemistry+'%'"></div></div>
+          <div><div class="text-[10px] text-gray-500 mb-1">Compliance</div><div class="w-full bg-white/5 rounded-full h-1.5"><div class="score-bar bg-amber rounded-full" :style="'width:'+m.compliance+'%'"></div></div><div class="text-[10px] text-gray-400 mt-0.5" x-text="m.compliance+'%'"></div></div>
+        </div>
+        <div class="flex flex-wrap gap-1">
+          <template x-for="c in m.certs"><span class="text-[10px] px-1.5 py-0.5 rounded bg-white/5 text-gray-400" x-text="c"></span></template>
+        </div>
+      </div>
+    </template>
+  </div>
+  <div class="glass rounded-xl p-4">
+    <div class="text-sm font-medium mb-2">Estimated Cost & Timeline</div>
+    <div class="grid grid-cols-3 gap-4 text-center text-sm">
+      <div><div class="text-gray-400 text-xs">Cost Range</div><div class="font-semibold">$38 — $52/kg</div></div>
+      <div><div class="text-gray-400 text-xs">Delivery</div><div class="font-semibold" x-text="form.timeline+' month(s)'"></div></div>
+      <div><div class="text-gray-400 text-xs">Risk Level</div><div class="font-semibold text-teal">Low</div></div>
+    </div>
+  </div>
+  <!-- China+1 comparison -->
+  <div x-show="form.china1" class="glass rounded-xl p-4">
+    <div class="text-sm font-medium mb-3">🇨🇳 → 🇮🇳 China+1 Comparison</div>
+    <table class="w-full text-sm">
+      <thead><tr class="text-xs text-gray-500"><th class="text-left pb-2">Factor</th><th class="text-center pb-2">China</th><th class="text-center pb-2">India</th><th class="text-center pb-2">Savings</th></tr></thead>
+      <tbody>
+        <tr class="border-t border-white/5"><td class="py-2 text-gray-400">Price/kg</td><td class="text-center" x-text="'$'+(form.chinaPrice||45)"></td><td class="text-center text-teal">$38-42</td><td class="text-center text-teal">~12%</td></tr>
+        <tr class="border-t border-white/5"><td class="py-2 text-gray-400">Lead Time</td><td class="text-center" x-text="(form.chinaLead||8)+' weeks'"></td><td class="text-center text-teal">4-5 weeks</td><td class="text-center text-teal">~40%</td></tr>
+        <tr class="border-t border-white/5"><td class="py-2 text-gray-400">CBAM Impact</td><td class="text-center text-red-400">€8.2/ton CO₂</td><td class="text-center text-teal">€3.1/ton CO₂</td><td class="text-center text-teal">€5.1/ton</td></tr>
+        <tr class="border-t border-white/5"><td class="py-2 text-gray-400">Tariff Risk</td><td class="text-center text-amber">High</td><td class="text-center text-teal">Low</td><td class="text-center text-teal">✓</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+</div>
+
+<!-- ====== PRODUCT 2: IONS Project Hub ====== -->
+<div x-show="activeProduct===2" x-cloak class="fade-in max-w-4xl" x-data="ionsApp()">
+<h2 class="text-xl font-bold mb-4">📋 IONS Project Hub</h2>
+
+<div x-show="!selectedProject && !showNewProject">
+  <div class="flex justify-between items-center mb-4">
+    <span class="text-sm text-gray-400"><span x-text="ionsProjects.length"></span> Active Projects</span>
+    <button @click="showNewProject=true" class="bg-indigo hover:bg-indigo/80 text-white px-4 py-1.5 rounded-lg text-xs font-medium transition">+ New Project</button>
+  </div>
+  <div class="grid md:grid-cols-2 gap-4">
+    <template x-for="p in ionsProjects" :key="p.id">
+      <div @click="selectedProject=p" class="glass rounded-xl p-5 cursor-pointer glass-hover transition">
+        <div class="flex justify-between items-start mb-3">
+          <h3 class="font-semibold text-sm" x-text="p.name"></h3>
+          <span class="text-[10px] px-2 py-0.5 rounded-full font-medium" :class="p.complete===100?'bg-teal/20 text-teal':'bg-indigo/20 text-indigo'" x-text="p.stage"></span>
+        </div>
+        <div class="w-full bg-white/5 rounded-full h-2 mb-2"><div class="h-2 rounded-full transition-all" :class="p.complete===100?'bg-teal':'bg-indigo'" :style="'width:'+p.complete+'%'"></div></div>
+        <div class="text-xs text-gray-400" x-text="p.complete+'% complete'"></div>
+      </div>
+    </template>
+  </div>
+</div>
+
+<!-- New Project template selector -->
+<div x-show="showNewProject" x-cloak class="fade-in">
+  <button @click="showNewProject=false" class="text-xs text-gray-400 hover:text-white mb-4">← Back</button>
+  <h3 class="font-semibold mb-4">Select Project Template</h3>
+  <div class="grid md:grid-cols-3 gap-4">
+    <template x-for="t in ['Route Optimization','Custom Molecule','China+1 Switch']">
+      <div @click="showNewProject=false" class="glass rounded-xl p-5 cursor-pointer glass-hover transition text-center">
+        <div class="text-2xl mb-2" x-text="t==='Route Optimization'?'🧪':t==='Custom Molecule'?'🔬':'🔄'"></div>
+        <div class="text-sm font-medium" x-text="t"></div>
+      </div>
+    </template>
+  </div>
+</div>
+
+<!-- Project Detail -->
+<div x-show="selectedProject" x-cloak class="fade-in">
+  <button @click="selectedProject=null" class="text-xs text-gray-400 hover:text-white mb-4">← Back to Projects</button>
+  <template x-if="selectedProject">
+  <div>
+    <h3 class="font-semibold mb-1" x-text="selectedProject.name"></h3>
+    <div class="text-xs text-gray-400 mb-6" x-text="selectedProject.stage+' — '+selectedProject.complete+'%'"></div>
+    <!-- Milestones -->
+    <div class="glass rounded-xl p-5 mb-4 overflow-x-auto">
+      <div class="text-xs font-medium text-gray-400 mb-3">Milestones</div>
+      <div class="flex gap-0 min-w-[500px]">
+        <template x-for="(ms,i) in selectedProject.milestones" :key="i">
+          <div class="flex-1 flex flex-col items-center relative">
+            <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold z-10" :class="ms.status==='done'?'bg-teal text-white':ms.status==='active'?'bg-indigo text-white matching-anim':'bg-white/10 text-gray-500'" x-text="ms.status==='done'?'✓':(i+1)"></div>
+            <div class="text-[10px] mt-1 text-center" :class="ms.status==='done'?'text-teal':ms.status==='active'?'text-indigo':'text-gray-500'" x-text="ms.name"></div>
+            <div class="text-[9px] text-gray-600" x-text="ms.date"></div>
+            <div x-show="i<selectedProject.milestones.length-1" class="absolute top-3.5 left-[calc(50%+14px)] h-0.5 right-[-50%]" :class="ms.status==='done'?'bg-teal':'bg-white/10'"></div>
+          </div>
+        </template>
+      </div>
+    </div>
+    <!-- Sample Tracking -->
+    <div class="glass rounded-xl p-5 mb-4">
+      <div class="text-xs font-medium text-gray-400 mb-3">Sample Tracking</div>
+      <table class="w-full text-xs">
+        <thead><tr class="text-gray-500"><th class="text-left pb-2">Sample</th><th class="text-left pb-2">Sent</th><th class="text-left pb-2">Status</th></tr></thead>
+        <tbody>
+          <template x-for="s in selectedProject.samples" :key="s.id">
+            <tr class="border-t border-white/5"><td class="py-1.5" x-text="s.id"></td><td class="text-gray-400" x-text="s.sent"></td><td><span class="px-1.5 py-0.5 rounded text-[10px]" :class="s.status==='Approved'?'bg-teal/20 text-teal':s.status==='Pending'?'bg-amber/20 text-amber':'bg-red-500/20 text-red-400'" x-text="s.status"></span></td></tr>
+          </template>
+        </tbody>
+      </table>
+    </div>
+    <!-- Iteration History -->
+    <div class="glass rounded-xl p-5">
+      <div class="text-xs font-medium text-gray-400 mb-3">Iteration History</div>
+      <template x-for="it in selectedProject.iterations" :key="it">
+        <div class="text-xs py-1 border-b border-white/5 last:border-0" x-text="it"></div>
+      </template>
+    </div>
+  </div>
+  </template>
+</div>
+</div>
+
+<!-- ====== PRODUCT 3: ChemGraph ====== -->
+<div x-show="activeProduct===3" x-cloak class="fade-in max-w-5xl" x-data="chemGraphApp()">
+<h2 class="text-xl font-bold mb-4">🕸️ ChemGraph</h2>
+<div class="text-xs text-gray-400 mb-4 flex gap-4 flex-wrap">
+  <span>🔵 465 Manufacturers</span><span>🟢 5,000+ Customers</span><span>🟠 847 Products</span><span>🔗 12,400 Connections</span>
+</div>
+
+<!-- SVG Network -->
+<div class="glass rounded-xl p-4 mb-4 relative overflow-hidden" style="height:320px">
+<svg width="100%" height="100%" class="absolute inset-0">
+  <template x-for="l in graphLines" :key="l.id">
+    <line :x1="l.x1" :y1="l.y1" :x2="l.x2" :y2="l.y2" class="node-line" :class="l.highlighted?'highlighted':l.dimmed?'opacity-5':''"/>
+  </template>
+</svg>
+<template x-for="n in graphNodes" :key="n.id">
+  <div class="absolute node-circle flex flex-col items-center" :class="n.dimmed?'dimmed':n.highlighted?'highlighted':''" :style="'left:'+n.x+'%;top:'+n.y+'%'">
+    <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold" :style="'background:'+n.color+'33;color:'+n.color" x-text="n.label.substring(0,2)"></div>
+    <div class="text-[9px] text-gray-500 mt-0.5 whitespace-nowrap" x-text="n.label"></div>
+  </div>
+</template>
+</div>
+
+<!-- Query Buttons -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-2 mb-4">
+  <button @click="runQuery('risk')" :class="activeQuery==='risk'?'border-indigo bg-indigo/10':''" class="glass rounded-lg px-3 py-2 text-xs text-left glass-hover transition border border-transparent">⚠️ Supply Risk:<br><span class="text-gray-400">Anand Chemtex offline</span></button>
+  <button @click="runQuery('cost')" :class="activeQuery==='cost'?'border-indigo bg-indigo/10':''" class="glass rounded-lg px-3 py-2 text-xs text-left glass-hover transition border border-transparent">💰 Cost Benchmark:<br><span class="text-gray-400">Pymetrozine</span></button>
+  <button @click="runQuery('capacity')" :class="activeQuery==='capacity'?'border-indigo bg-indigo/10':''" class="glass rounded-lg px-3 py-2 text-xs text-left glass-hover transition border border-transparent">🏭 Capacity Match:<br><span class="text-gray-400">Idle Hydrogenation</span></button>
+  <button @click="runQuery('china')" :class="activeQuery==='china'?'border-indigo bg-indigo/10':''" class="glass rounded-lg px-3 py-2 text-xs text-left glass-hover transition border border-transparent">🔄 China+1:<br><span class="text-gray-400">>70% dependency</span></button>
+</div>
+
+<!-- Results -->
+<div x-show="queryResult" x-cloak class="glass rounded-xl p-4 fade-in">
+  <div class="text-sm font-medium mb-3" x-text="queryTitle"></div>
+  <div x-html="queryResult"></div>
+</div>
+</div>
+
+<!-- ====== PRODUCT 4: ComplianceOS ====== -->
+<div x-show="activeProduct===4" x-cloak class="fade-in max-w-4xl" x-data="complianceApp()">
+<h2 class="text-xl font-bold mb-4">🛡️ ComplianceOS</h2>
+
+<!-- Tabs -->
+<div class="flex gap-1 bg-white/5 rounded-lg p-0.5 mb-4 w-fit">
+  <button @click="cTab='certs'" :class="cTab==='certs'?'bg-indigo text-white':'text-gray-400'" class="px-3 py-1 rounded-md text-xs font-medium transition">Certificates</button>
+  <button @click="cTab='sds'" :class="cTab==='sds'?'bg-indigo text-white':'text-gray-400'" class="px-3 py-1 rounded-md text-xs font-medium transition">Generate SDS</button>
+  <button @click="cTab='gap'" :class="cTab==='gap'?'bg-indigo text-white':'text-gray-400'" class="px-3 py-1 rounded-md text-xs font-medium transition">Gap Analysis</button>
+</div>
+
+<!-- Certs Dashboard -->
+<div x-show="cTab==='certs'">
+  <div class="grid grid-cols-3 gap-4 mb-4">
+    <div class="glass rounded-xl p-4 text-center"><div class="text-2xl font-bold text-teal">8</div><div class="text-xs text-gray-400">Total</div></div>
+    <div class="glass rounded-xl p-4 text-center"><div class="text-2xl font-bold text-amber">2</div><div class="text-xs text-gray-400">Expiring Soon</div></div>
+    <div class="glass rounded-xl p-4 text-center"><div class="text-2xl font-bold text-red-400">1</div><div class="text-xs text-gray-400">Expired</div></div>
+  </div>
+  <div class="glass rounded-xl overflow-hidden">
+    <table class="w-full text-xs">
+      <thead><tr class="text-gray-500 bg-white/[0.02]"><th class="text-left p-3">Facility</th><th class="text-left p-3">Cert Type</th><th class="text-left p-3">Issued</th><th class="text-left p-3">Expires</th><th class="text-left p-3">Status</th></tr></thead>
+      <tbody>
+        <template x-for="c in certData" :key="c.id">
+          <tr class="border-t border-white/5">
+            <td class="p-3" x-text="c.facility"></td><td class="p-3" x-text="c.type"></td><td class="p-3 text-gray-400" x-text="c.issued"></td><td class="p-3 text-gray-400" x-text="c.expires"></td>
+            <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] font-medium" :class="c.status==='Valid'?'bg-teal/20 text-teal':c.status==='Expiring'?'bg-amber/20 text-amber':'bg-red-500/20 text-red-400'" x-text="c.status"></span></td>
+          </tr>
+        </template>
+      </tbody>
+    </table>
+  </div>
+  <!-- Alerts -->
+  <div class="mt-4 space-y-2">
+    <div class="text-xs font-medium text-gray-400 mb-2">⚠️ Regulatory Alerts</div>
+    <div class="glass rounded-lg p-3 border-l-2 border-amber text-xs">REACH Annex XIV updated — 3 products affected. Review required by March 2025.</div>
+    <div class="glass rounded-lg p-3 border-l-2 border-red-400 text-xs">FDA registration renewal due in 45 days for Anand Chemtex facility.</div>
+    <div class="glass rounded-lg p-3 border-l-2 border-indigo text-xs">New GMP guidelines published — voluntary compliance window: 6 months.</div>
+  </div>
+</div>
+
+<!-- SDS Generator -->
+<div x-show="cTab==='sds'" x-cloak>
+  <div x-show="!sdsPreview" class="glass rounded-xl p-6">
+    <h3 class="font-semibold text-sm mb-4">Generate Safety Data Sheet</h3>
+    <div class="grid md:grid-cols-2 gap-4">
+      <div><label class="text-xs text-gray-400 block mb-1">Product Name</label><input x-model="sdsForm.name" class="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo" placeholder="Pymetrozine"></div>
+      <div><label class="text-xs text-gray-400 block mb-1">CAS Number</label><input x-model="sdsForm.cas" class="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo" placeholder="123456-78-9"></div>
+      <div class="md:col-span-2"><label class="text-xs text-gray-400 block mb-1">Composition</label><textarea x-model="sdsForm.comp" class="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo h-20" placeholder="Active ingredient 98%, excipients 2%"></textarea></div>
+      <div><label class="text-xs text-gray-400 block mb-1">Hazard Classification</label>
+        <select x-model="sdsForm.hazard" class="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo">
+          <option value="Irritant">Irritant</option><option value="Toxic">Toxic</option><option value="Flammable">Flammable</option><option value="Corrosive">Corrosive</option><option value="Environmental Hazard">Environmental Hazard</option>
+        </select>
+      </div>
+    </div>
+    <button @click="sdsPreview=true" class="mt-4 bg-indigo hover:bg-indigo/80 text-white px-6 py-2 rounded-lg text-sm font-medium transition">Generate SDS →</button>
+  </div>
+  <div x-show="sdsPreview" x-cloak class="fade-in">
+    <button @click="sdsPreview=false" class="text-xs text-gray-400 hover:text-white mb-4">← Back</button>
+    <div class="glass rounded-xl p-6 border-l-4 border-indigo">
+      <div class="flex justify-between items-start mb-4">
+        <div><h3 class="font-bold text-lg">Safety Data Sheet</h3><div class="text-xs text-gray-400">GHS Compliant — Rev 1.0</div></div>
+        <div class="text-3xl" x-text="sdsForm.hazard==='Toxic'?'☠️':sdsForm.hazard==='Flammable'?'🔥':sdsForm.hazard==='Corrosive'?'⚗️':sdsForm.hazard==='Environmental Hazard'?'🌍':'⚠️'"></div>
+      </div>
+      <div class="grid grid-cols-2 gap-4 text-sm">
+        <div><span class="text-gray-400">Product:</span> <span x-text="sdsForm.name||'N/A'"></span></div>
+        <div><span class="text-gray-400">CAS:</span> <span x-text="sdsForm.cas||'N/A'"></span></div>
+        <div><span class="text-gray-400">Hazard:</span> <span class="text-amber" x-text="sdsForm.hazard"></span></div>
+        <div><span class="text-gray-400">Composition:</span> <span x-text="sdsForm.comp||'N/A'"></span></div>
+      </div>
+      <div class="mt-4 pt-4 border-t border-white/10 text-xs text-gray-500">Generated by ComplianceOS • Scimplify • <span x-text="new Date().toLocaleDateString()"></span></div>
+    </div>
+  </div>
+</div>
+
+<!-- Gap Analysis -->
+<div x-show="cTab==='gap'" x-cloak>
+  <div class="glass rounded-xl p-5">
+    <label class="text-xs text-gray-400 block mb-2">Select Facility</label>
+    <select x-model="gapFacility" class="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo mb-4">
+      <option value="anand">Anand Chemtex — Vadodara</option>
+      <option value="deccan">Deccan Fine Chemicals — Pune</option>
+      <option value="kaivin">KaiVin Chemical — Ankleshwar</option>
+    </select>
+    <div class="space-y-2">
+      <template x-for="g in gapData[gapFacility]||[]" :key="g.cert">
+        <div class="flex items-center justify-between py-2 border-b border-white/5">
+          <div class="flex items-center gap-2">
+            <span :class="g.has?'text-teal':'text-red-400'" x-text="g.has?'✓':'✗'"></span>
+            <span class="text-sm" x-text="g.cert"></span>
+          </div>
+          <span x-show="!g.has" class="text-[10px] text-amber bg-amber/10 px-2 py-0.5 rounded" x-text="g.fix"></span>
+        </div>
+      </template>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ====== PRODUCT 5: ATOMS Commerce ====== -->
+<div x-show="activeProduct===5" x-cloak class="fade-in max-w-5xl" x-data="atomsApp()">
+<h2 class="text-xl font-bold mb-4">🛒 ATOMS Commerce</h2>
+
+<!-- Cart indicator -->
+<div x-show="cart.length>0" class="fixed top-16 right-4 z-30">
+  <button @click="showCart=!showCart" class="bg-indigo text-white px-3 py-1.5 rounded-lg text-xs font-medium shadow-lg">🛒 <span x-text="cart.length"></span> items</button>
+</div>
+
+<div x-show="!showDetail && !showCart && !showQuote">
+<!-- Search & Filters -->
+<div class="flex flex-wrap gap-2 mb-4">
+  <input x-model="search" class="bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-sm outline-none focus:border-indigo flex-1 min-w-[200px]" placeholder="Search products...">
+  <select x-model="filterPurity" class="bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-xs outline-none">
+    <option value="">All Purity</option><option value="99">≥99%</option><option value="98">≥98%</option>
+  </select>
+</div>
+<!-- Product Grid -->
+<div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+  <template x-for="p in filteredProducts" :key="p.id">
+    <div class="glass rounded-xl p-4 glass-hover transition">
+      <div @click="showDetail=p" class="cursor-pointer">
+        <h3 class="font-semibold text-sm mb-1" x-text="p.name"></h3>
+        <div class="text-[10px] text-gray-500 mb-2" x-text="'CAS: '+p.cas"></div>
+        <div class="flex justify-between items-end mb-3">
+          <div><div class="text-xs text-gray-400">Purity</div><div class="font-semibold text-sm" x-text="p.purity+'%'"></div></div>
+          <div class="text-right"><div class="text-xs text-gray-400">Price/kg</div><div class="font-semibold text-sm text-teal" x-text="'₹'+p.price"></div></div>
+        </div>
+        <div class="text-[10px] text-gray-500 mb-2" x-text="'Min order: '+p.minOrder+' kg'"></div>
+        <div class="flex flex-wrap gap-1 mb-3">
+          <template x-for="c in p.certs"><span class="text-[10px] px-1.5 py-0.5 rounded bg-teal/10 text-teal" x-text="c"></span></template>
+        </div>
+      </div>
+      <button @click="addToCart(p)" class="w-full bg-indigo/20 hover:bg-indigo/40 text-indigo py-1.5 rounded-lg text-xs font-medium transition">Add to Cart</button>
+    </div>
+  </template>
+</div>
+</div>
+
+<!-- Product Detail -->
+<div x-show="showDetail" x-cloak class="fade-in">
+  <button @click="showDetail=null" class="text-xs text-gray-400 hover:text-white mb-4">← Back to Catalog</button>
+  <template x-if="showDetail">
+  <div class="glass rounded-xl p-6">
+    <h3 class="text-lg font-bold mb-1" x-text="showDetail.name"></h3>
+    <div class="text-xs text-gray-400 mb-4" x-text="'CAS: '+showDetail.cas"></div>
+    <div class="grid md:grid-cols-2 gap-6">
+      <div class="space-y-3 text-sm">
+        <div><span class="text-gray-400">Purity:</span> <span x-text="showDetail.purity+'%'"></span></div>
+        <div><span class="text-gray-400">Molecular Weight:</span> <span x-text="showDetail.mw||'N/A'"></span></div>
+        <div><span class="text-gray-400">Delivery:</span> 5-7 business days</div>
+        <div><span class="text-gray-400">Manufacturer:</span> Verified Facility (Anonymized)</div>
+        <div class="flex flex-wrap gap-1"><template x-for="c in showDetail.certs"><span class="text-xs px-2 py-0.5 rounded bg-teal/10 text-teal" x-text="c"></span></template></div>
+      </div>
+      <div>
+        <div class="text-xs font-medium text-gray-400 mb-2">Pack Sizes</div>
+        <div class="space-y-2">
+          <div class="flex justify-between text-sm glass rounded-lg px-3 py-2"><span>25 kg</span><span class="text-teal" x-text="'₹'+(showDetail.price*1.1).toFixed(0)+'/kg'"></span></div>
+          <div class="flex justify-between text-sm glass rounded-lg px-3 py-2"><span>100 kg</span><span class="text-teal" x-text="'₹'+showDetail.price+'/kg'"></span></div>
+          <div class="flex justify-between text-sm glass rounded-lg px-3 py-2"><span>500 kg</span><span class="text-teal" x-text="'₹'+(showDetail.price*0.92).toFixed(0)+'/kg'"></span></div>
+        </div>
+        <button @click="addToCart(showDetail);showDetail=null" class="mt-4 w-full bg-indigo hover:bg-indigo/80 text-white py-2 rounded-lg text-sm font-medium transition">Add to Cart</button>
+      </div>
+    </div>
+  </div>
+  </template>
+</div>
+
+<!-- Cart -->
+<div x-show="showCart" x-cloak class="fade-in">
+  <button @click="showCart=false" class="text-xs text-gray-400 hover:text-white mb-4">← Back</button>
+  <div class="glass rounded-xl p-6">
+    <h3 class="font-semibold mb-4">Your Cart</h3>
+    <template x-for="(item,i) in cart" :key="i">
+      <div class="flex justify-between items-center py-2 border-b border-white/5 text-sm">
+        <span x-text="item.name"></span>
+        <div class="flex items-center gap-3">
+          <span class="text-gray-400" x-text="item.qty+' kg'"></span>
+          <span class="text-teal" x-text="'₹'+(item.price*item.qty).toLocaleString()"></span>
+          <button @click="cart.splice(i,1)" class="text-red-400 text-xs">✗</button>
+        </div>
+      </div>
+    </template>
+    <div class="flex justify-between items-center mt-4 pt-4 border-t border-white/10">
+      <span class="font-semibold">Total</span>
+      <span class="text-lg font-bold text-teal" x-text="'₹'+cartTotal().toLocaleString()"></span>
+    </div>
+    <button @click="showCart=false;showQuote=true" class="mt-4 w-full bg-indigo hover:bg-indigo/80 text-white py-2 rounded-lg text-sm font-medium transition">Get Instant Quote →</button>
+  </div>
+</div>
+
+<!-- Quote -->
+<div x-show="showQuote" x-cloak class="fade-in">
+  <button @click="showQuote=false" class="text-xs text-gray-400 hover:text-white mb-4">← Back</button>
+  <div class="glass rounded-xl p-6 border-l-4 border-teal glow-teal">
+    <h3 class="font-bold text-lg mb-1">Quote Summary</h3>
+    <div class="text-xs text-gray-400 mb-4">Quote #SCM-<span x-text="Math.floor(Math.random()*9000+1000)"></span></div>
+    <template x-for="item in cart" :key="item.name">
+      <div class="flex justify-between text-sm py-1 border-b border-white/5">
+        <span x-text="item.name+' × '+item.qty+' kg'"></span>
+        <span x-text="'₹'+(item.price*item.qty).toLocaleString()"></span>
+      </div>
+    </template>
+    <div class="flex justify-between font-bold mt-3 text-lg"><span>Total</span><span class="text-teal" x-text="'₹'+cartTotal().toLocaleString()"></span></div>
+    <div class="mt-4 grid grid-cols-3 gap-4 text-xs text-center">
+      <div><span class="text-gray-400 block">Delivery</span><span>5-7 days</span></div>
+      <div><span class="text-gray-400 block">Payment</span><span>Net 30</span></div>
+      <div><span class="text-gray-400 block">Valid For</span><span>7 days</span></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ====== PRODUCT 6: GreenScore ====== -->
+<div x-show="activeProduct===6" x-cloak class="fade-in max-w-4xl" x-data="greenApp()">
+<h2 class="text-xl font-bold mb-4">🌱 GreenScore</h2>
+
+<div class="flex gap-1 bg-white/5 rounded-lg p-0.5 mb-4 w-fit">
+  <button @click="gTab='compare'" :class="gTab==='compare'?'bg-indigo text-white':'text-gray-400'" class="px-3 py-1 rounded-md text-xs font-medium transition">Route Compare</button>
+  <button @click="gTab='cert'" :class="gTab==='cert'?'bg-indigo text-white':'text-gray-400'" class="px-3 py-1 rounded-md text-xs font-medium transition">Carbon Certificate</button>
+  <button @click="gTab='cbam'" :class="gTab==='cbam'?'bg-indigo text-white':'text-gray-400'" class="px-3 py-1 rounded-md text-xs font-medium transition">CBAM Calculator</button>
+</div>
+
+<!-- Route Comparison -->
+<div x-show="gTab==='compare'">
+  <div class="text-sm text-gray-400 mb-4">Pymetrozine: Traditional Route vs Scimplify Optimized Route</div>
+  <div class="grid md:grid-cols-2 gap-4">
+    <template x-for="r in routes" :key="r.name">
+      <div class="glass rounded-xl p-5">
+        <h3 class="font-semibold text-sm mb-1" x-text="r.name"></h3>
+        <div class="text-3xl font-bold mb-3" :class="r.grade==='A+'?'text-teal':r.grade==='B'?'text-amber':'text-red-400'" x-text="r.grade"></div>
+        <div class="space-y-3">
+          <template x-for="m in ['steps','energy','water','waste','co2']" :key="m">
+            <div>
+              <div class="flex justify-between text-xs mb-1"><span class="text-gray-400" x-text="metricLabels[m]"></span><span x-text="r[m]+' '+metricUnits[m]"></span></div>
+              <div class="w-full bg-white/5 rounded-full h-2"><div class="h-2 rounded-full" :class="r===routes[1]?'bg-teal':'bg-amber'" :style="'width:'+Math.min(100,r[m]/maxMetric(m)*100)+'%'"></div></div>
+            </div>
+          </template>
+        </div>
+      </div>
+    </template>
+  </div>
+</div>
+
+<!-- Carbon Certificate -->
+<div x-show="gTab==='cert'" x-cloak>
+  <div class="glass rounded-xl p-6 border-l-4 border-teal max-w-md mx-auto glow-teal">
+    <div class="flex justify-between items-start mb-4">
+      <div><div class="text-xs text-teal font-medium">CARBON CERTIFICATE</div><div class="text-lg font-bold mt-1">Pymetrozine</div></div>
+      <div class="w-12 h-12 rounded-full bg-teal/20 flex items-center justify-center text-xl">🌿</div>
+    </div>
+    <div class="grid grid-cols-2 gap-4 text-sm mb-4">
+      <div><span class="text-gray-400 text-xs block">Route</span>Scimplify Optimized</div>
+      <div><span class="text-gray-400 text-xs block">GreenScore</span><span class="text-teal font-bold text-lg">A+</span></div>
+      <div><span class="text-gray-400 text-xs block">CO₂/kg</span>2.1 kg CO₂e</div>
+      <div><span class="text-gray-400 text-xs block">Date</span><span x-text="new Date().toLocaleDateString()"></span></div>
+    </div>
+    <div class="border-t border-white/10 pt-3 flex items-center gap-2">
+      <div class="w-5 h-5 rounded-full bg-teal flex items-center justify-center text-[10px] text-white font-bold">✓</div>
+      <span class="text-xs text-gray-400">Verified by Scimplify GreenScore™</span>
+    </div>
+  </div>
+</div>
+
+<!-- CBAM Calculator -->
+<div x-show="gTab==='cbam'" x-cloak>
+  <div class="glass rounded-xl p-6">
+    <h3 class="font-semibold text-sm mb-4">CBAM Impact Calculator</h3>
+    <div class="grid md:grid-cols-2 gap-4 mb-4">
+      <div><label class="text-xs text-gray-400 block mb-1">Import Volume (tons)</label><input x-model.number="cbamTons" type="number" class="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo" placeholder="100"></div>
+      <div><label class="text-xs text-gray-400 block mb-1">Destination</label><select class="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo"><option>European Union</option></select></div>
+    </div>
+    <div x-show="cbamTons>0" class="grid md:grid-cols-2 gap-4">
+      <div class="glass rounded-lg p-4 border-l-2 border-amber">
+        <div class="text-xs text-gray-400 mb-1">Traditional Route</div>
+        <div class="text-xl font-bold text-amber" x-text="'€'+(cbamTons*5.8*75).toLocaleString()"></div>
+        <div class="text-xs text-gray-500">@ 5.8 tCO₂/ton × €75/tCO₂</div>
+      </div>
+      <div class="glass rounded-lg p-4 border-l-2 border-teal">
+        <div class="text-xs text-gray-400 mb-1">Scimplify Optimized</div>
+        <div class="text-xl font-bold text-teal" x-text="'€'+(cbamTons*2.1*75).toLocaleString()"></div>
+        <div class="text-xs text-gray-500">@ 2.1 tCO₂/ton × €75/tCO₂</div>
+      </div>
+    </div>
+    <div x-show="cbamTons>0" class="mt-4 text-center">
+      <div class="text-sm text-gray-400">Potential Savings</div>
+      <div class="text-2xl font-bold text-teal" x-text="'€'+(cbamTons*(5.8-2.1)*75).toLocaleString()"></div>
+    </div>
+  </div>
+</div>
+</div>
+
+</main>
+</div><!-- end products mode flex -->
+
+</div><!-- end pt-14 -->
+
+<script>
+function app(){return{
+  mode:'roadmap',
+  activeProduct:1,
+  products:[
+    {id:1,icon:'🔍',name:'RFQ Intelligence + China+1',shortName:'RFQ Intel',tagline:'AI-powered manufacturer matching and China+1 switching',revenue:'₹3-8Cr/yr',icp:'Chemical buyers, procurement heads',analogy:'Alibaba RFQ + AI matching',tier:'Must Build'},
+    {id:2,icon:'📋',name:'IONS Project Hub',shortName:'IONS Hub',tagline:'End-to-end project tracking for custom chemistry',revenue:'₹2-5Cr/yr',icp:'R&D teams, project managers',analogy:'Monday.com for chemistry',tier:'Must Build'},
+    {id:3,icon:'🕸️',name:'ChemGraph',shortName:'ChemGraph',tagline:'Network intelligence across manufacturers, products, customers',revenue:'₹1-3Cr/yr',icp:'Strategy teams, supply chain',analogy:'Palantir for chemicals',tier:'Build Next'},
+    {id:4,icon:'🛡️',name:'ComplianceOS',shortName:'ComplianceOS',tagline:'Automated compliance, SDS generation, gap analysis',revenue:'₹1-2Cr/yr',icp:'Quality & regulatory teams',analogy:'Vanta for chemical compliance',tier:'Build Next'},
+    {id:5,icon:'🛒',name:'ATOMS Commerce',shortName:'ATOMS',tagline:'Self-serve catalog, instant quotes, online ordering',revenue:'₹5-15Cr/yr',icp:'Lab managers, small buyers',analogy:'Amazon Business for chemicals',tier:'Must Build'},
+    {id:6,icon:'🌱',name:'GreenScore',shortName:'GreenScore',tagline:'Carbon scoring, route comparison, CBAM readiness',revenue:'₹1-3Cr/yr',icp:'EU buyers, ESG teams',analogy:'EcoVadis for synthesis routes',tier:'Build on Traction'},
+  ],
+  ganttData:[
+    {name:'RFQ Intelligence',start:0,width:55,color:'tier-must'},
+    {name:'IONS Project Hub',start:8,width:50,color:'tier-must'},
+    {name:'ATOMS Commerce',start:16,width:55,color:'tier-must'},
+    {name:'ChemGraph',start:33,width:45,color:'tier-next'},
+    {name:'ComplianceOS',start:42,width:40,color:'tier-next'},
+    {name:'GreenScore',start:58,width:42,color:'tier-traction'},
+  ],
+  init(){}
+}}
+
+function rfqApp(){return{
+  form:{compound:'',cas:'',qty:'',purity:'',certs:[],timeline:'3',china1:false,chinaSupplier:'',chinaPrice:'',chinaLead:''},
+  matching:false,showResults:false,matchResults:[],
+  toggleCert(c){let i=this.form.certs.indexOf(c);i>-1?this.form.certs.splice(i,1):this.form.certs.push(c)},
+  submitRFQ(){
+    this.matching=true;this.showResults=false;
+    const mfrs=[
+      {name:"Gujarat Fluorochemicals",location:"Ahmedabad, Gujarat",certs:["FDA","ISO 9001","ISO 14001","REACH","CGMP"]},
+      {name:"Anand Chemtex",location:"Vadodara, Gujarat",certs:["FDA","GMP","ISO 9001","REACH"]},
+      {name:"Navi Organics",location:"Hyderabad, Telangana",certs:["FDA","GMP","CGMP","ISO 9001","REACH"]},
+      {name:"Deccan Fine Chemicals",location:"Pune, Maharashtra",certs:["GMP","CGMP","ISO 9001","ISO 14001"]},
+      {name:"Sree Krishna Pharma",location:"Hyderabad, Telangana",certs:["ISO 9001","ISO 14001","ISO 45001"]},
+    ];
+    setTimeout(()=>{
+      this.matchResults=mfrs.map((m,i)=>{
+        let cap=95-i*7+Math.floor(Math.random()*10),chem=92-i*5+Math.floor(Math.random()*8),comp=90-i*8+Math.floor(Math.random()*12);
+        return{...m,capacity:Math.min(99,cap),chemistry:Math.min(99,chem),compliance:Math.min(99,comp),overall:Math.min(99,Math.round((cap+chem+comp)/3))}
+      });
+      this.matching=false;this.showResults=true;
+    },2000);
+  }
+}}
+
+function ionsApp(){
+  const milestones=['Discovery','Feasibility','Lab Scale','Pilot','Tech Transfer','Qualification','Production'];
+  function makeMilestones(activeIdx){return milestones.map((m,i)=>({name:m,status:i<activeIdx?'done':i===activeIdx?'active':'pending',date:i<activeIdx?'2024-'+(i+1).toString().padStart(2,'0'):'—'}))}
+  return{
+    selectedProject:null,showNewProject:false,
+    ionsProjects:[
+      {id:1,name:'Pymetrozine Route Optimization',stage:'Tech Transfer',complete:70,milestones:makeMilestones(4),samples:[{id:'S-001',sent:'Jan 15',status:'Approved'},{id:'S-002',sent:'Feb 20',status:'Approved'},{id:'S-003',sent:'Mar 10',status:'Pending'}],iterations:['V1: Purity 95% — rejected by client','V2: Modified catalyst, temp 180°C — 97.5%','V3: Optimized temp to 165°C — 98.2% ✓ Approved']},
+      {id:2,name:'Custom Musk — Sciolide Variant',stage:'Sample Testing',complete:45,milestones:makeMilestones(2),samples:[{id:'S-010',sent:'Feb 1',status:'Pending'},{id:'S-011',sent:'Mar 5',status:'Rejected'}],iterations:['V1: Initial synthesis — odor profile mismatch','V2: Adjusted side chain — 85% match, iterating']},
+      {id:3,name:'Fexo Chloro Alternative Route',stage:'Lab Validation',complete:30,milestones:makeMilestones(2),samples:[{id:'S-020',sent:'Mar 1',status:'Pending'}],iterations:['V1: Chlorination route A — yield 62%, needs improvement']},
+      {id:4,name:'CBAM Compliance — EU Buyer',stage:'Complete ✓',complete:100,milestones:makeMilestones(7),samples:[{id:'S-030',sent:'Dec 1',status:'Approved'},{id:'S-031',sent:'Jan 10',status:'Approved'}],iterations:['V1: Full LCA completed','V2: Documentation reviewed — approved by EU buyer ✓']},
+    ]
+  }
+}
+
+function chemGraphApp(){
+  const nodes=[
+    {id:'m1',label:'Anand Chemtex',x:15,y:25,color:'#6366f1',type:'mfr'},
+    {id:'m2',label:'Navi Organics',x:10,y:60,color:'#6366f1',type:'mfr'},
+    {id:'m3',label:'Gujarat Fluoro',x:25,y:80,color:'#6366f1',type:'mfr'},
+    {id:'m4',label:'Deccan Fine',x:40,y:15,color:'#6366f1',type:'mfr'},
+    {id:'m5',label:'Sree Krishna',x:5,y:40,color:'#6366f1',type:'mfr'},
+    {id:'p1',label:'Pymetrozine',x:45,y:50,color:'#f97316',type:'prod'},
+    {id:'p2',label:'Fexofenadine',x:55,y:25,color:'#f97316',type:'prod'},
+    {id:'p3',label:'TiO₂',x:35,y:65,color:'#f97316',type:'prod'},
+    {id:'p4',label:'Salicylic Acid',x:60,y:70,color:'#f97316',type:'prod'},
+    {id:'c1',label:'EU Pharma Co',x:75,y:20,color:'#22c55e',type:'cust'},
+    {id:'c2',label:'US Agri Corp',x:85,y:50,color:'#22c55e',type:'cust'},
+    {id:'c3',label:'JP Cosmetics',x:70,y:75,color:'#22c55e',type:'cust'},
+  ];
+  const links=[
+    ['m1','p1'],['m1','p2'],['m2','p1'],['m2','p4'],['m3','p3'],['m3','p1'],['m4','p2'],['m4','p4'],['m5','p1'],
+    ['p1','c1'],['p1','c2'],['p2','c1'],['p3','c2'],['p4','c3'],['p2','c3']
+  ];
+  const lineData=links.map((l,i)=>{
+    const a=nodes.find(n=>n.id===l[0]),b=nodes.find(n=>n.id===l[1]);
+    return{id:i,x1:a.x+'%',y1:a.y+'%',x2:b.x+'%',y2:b.y+'%',from:l[0],to:l[1],highlighted:false,dimmed:false}
+  });
+  return{
+    graphNodes:nodes.map(n=>({...n,highlighted:false,dimmed:false})),
+    graphLines:lineData,activeQuery:'',queryTitle:'',queryResult:'',
+    runQuery(q){
+      this.activeQuery=q;
+      // Reset
+      this.graphNodes.forEach(n=>{n.highlighted=false;n.dimmed=false});
+      this.graphLines.forEach(l=>{l.highlighted=false;l.dimmed=false});
+      if(q==='risk'){
+        this.queryTitle='⚠️ Supply Risk: Anand Chemtex Offline';
+        this.graphNodes.forEach(n=>{if(n.id==='m1')n.highlighted=true;});
+        const affected=this.graphLines.filter(l=>l.from==='m1'||l.to==='m1');
+        affected.forEach(l=>l.highlighted=true);
+        this.graphNodes.forEach(n=>{if(!affected.some(l=>l.from===n.id||l.to===n.id)&&n.id!=='m1')n.dimmed=true});
+        this.queryResult='<div class="text-xs space-y-2"><div class="text-red-400 font-medium">2 products directly affected: Pymetrozine, Fexofenadine</div><div class="text-gray-400">Alternative manufacturers:</div><div>• Navi Organics (Hyderabad) — Hydrogenation, Grignard capable</div><div>• Gujarat Fluorochemicals — Hydrogenation capable, 250 MT capacity</div><div class="text-amber mt-2">⚠️ 3 customer orders at risk if not rerouted within 2 weeks</div></div>';
+      } else if(q==='cost'){
+        this.queryTitle='💰 Cost Benchmark: Pymetrozine';
+        this.queryResult='<table class="w-full text-xs"><thead><tr class="text-gray-500"><th class="text-left pb-1">Manufacturer</th><th class="text-right pb-1">Price/kg</th><th class="text-right pb-1">Capacity</th></tr></thead><tbody><tr class="border-t border-white/5"><td class="py-1">Anand Chemtex</td><td class="text-right text-teal">$42</td><td class="text-right">200 MT</td></tr><tr class="border-t border-white/5"><td class="py-1">Navi Organics</td><td class="text-right">$45</td><td class="text-right">175 MT</td></tr><tr class="border-t border-white/5"><td class="py-1">Gujarat Fluoro</td><td class="text-right">$48</td><td class="text-right">250 MT</td></tr><tr class="border-t border-white/5"><td class="py-1">Sree Krishna</td><td class="text-right">$51</td><td class="text-right">121 MT</td></tr></tbody></table>';
+      } else if(q==='capacity'){
+        this.queryTitle='🏭 Idle Hydrogenation Capacity';
+        this.queryResult='<div class="text-xs space-y-2"><div class="flex justify-between py-1 border-b border-white/5"><span>Anand Chemtex</span><span class="text-teal">60 MT idle</span></div><div class="flex justify-between py-1 border-b border-white/5"><span>Navi Organics</span><span class="text-teal">40 MT idle</span></div><div class="flex justify-between py-1 border-b border-white/5"><span>Gujarat Fluorochemicals</span><span class="text-amber">15 MT idle</span></div><div class="mt-2 text-gray-400">3 pending orders could utilize this capacity (est. ₹2.1Cr revenue)</div></div>';
+      } else {
+        this.queryTitle='🔄 China+1 Opportunities (>70% China Dependency)';
+        this.queryResult='<div class="text-xs space-y-2"><div class="flex justify-between py-1 border-b border-white/5"><span>Pymetrozine</span><span class="text-red-400">82% China</span><span class="text-teal">3 Indian alternatives</span></div><div class="flex justify-between py-1 border-b border-white/5"><span>Fexofenadine Intermediate</span><span class="text-red-400">76% China</span><span class="text-teal">2 Indian alternatives</span></div><div class="flex justify-between py-1 border-b border-white/5"><span>Specialty Fluorine</span><span class="text-amber">71% China</span><span class="text-teal">1 Indian alternative</span></div><div class="mt-2 text-gray-400">Estimated switching revenue opportunity: $2.4M over 18 months</div></div>';
+      }
+    }
+  }
+}
+
+function complianceApp(){return{
+  cTab:'certs',sdsPreview:false,gapFacility:'anand',
+  sdsForm:{name:'',cas:'',comp:'',hazard:'Irritant'},
+  certData:[
+    {id:1,facility:'Anand Chemtex',type:'FDA',issued:'2023-06-15',expires:'2026-06-15',status:'Valid'},
+    {id:2,facility:'Anand Chemtex',type:'ISO 9001',issued:'2022-01-10',expires:'2025-01-10',status:'Expired'},
+    {id:3,facility:'Navi Organics',type:'GMP',issued:'2024-03-01',expires:'2027-03-01',status:'Valid'},
+    {id:4,facility:'Navi Organics',type:'REACH',issued:'2023-09-20',expires:'2025-04-20',status:'Expiring'},
+    {id:5,facility:'Deccan Fine',type:'CGMP',issued:'2024-01-15',expires:'2027-01-15',status:'Valid'},
+    {id:6,facility:'Gujarat Fluoro',type:'ISO 14001',issued:'2023-11-01',expires:'2025-05-01',status:'Expiring'},
+    {id:7,facility:'Sree Krishna',type:'ISO 9001',issued:'2024-06-01',expires:'2027-06-01',status:'Valid'},
+    {id:8,facility:'Surya Life Sci',type:'HALAL',issued:'2024-02-10',expires:'2026-02-10',status:'Valid'},
+  ],
+  gapData:{
+    anand:[{cert:'FDA',has:true},{cert:'ISO 9001',has:true},{cert:'ISO 14001',has:false,fix:'~3 months, audit required'},{cert:'REACH',has:true},{cert:'CGMP',has:false,fix:'~6 months, process upgrade needed'},{cert:'HALAL',has:false,fix:'~2 months, certification body visit'}],
+    deccan:[{cert:'FDA',has:false,fix:'~6 months, facility upgrade needed'},{cert:'ISO 9001',has:true},{cert:'ISO 14001',has:true},{cert:'REACH',has:false,fix:'~4 months, registration pending'},{cert:'CGMP',has:true},{cert:'HALAL',has:false,fix:'~2 months'}],
+    kaivin:[{cert:'FDA',has:false,fix:'~8 months, major upgrade'},{cert:'ISO 9001',has:true},{cert:'ISO 14001',has:false,fix:'~4 months'},{cert:'REACH',has:false,fix:'~5 months'},{cert:'CGMP',has:false,fix:'~6 months'},{cert:'HALAL',has:false,fix:'~2 months'}],
+  }
+}}
+
+function atomsApp(){
+  const prods=[
+    {id:1,name:'Magnesium Hydroxide',cas:'1309-42-8',purity:99,price:420,minOrder:25,certs:['ISO 9001','GMP'],mw:'58.32'},
+    {id:2,name:'Pymetrozine',cas:'123312-89-0',purity:98,price:3200,minOrder:5,certs:['FDA','GMP','REACH'],mw:'217.23'},
+    {id:3,name:'Fexofenadine HCl',cas:'153439-40-8',purity:99.5,price:4800,minOrder:1,certs:['FDA','CGMP','ISO 9001'],mw:'538.12'},
+    {id:4,name:'Sodium Fluoride',cas:'7681-49-4',purity:99,price:280,minOrder:50,certs:['ISO 9001'],mw:'41.99'},
+    {id:5,name:'Zinc Stearate',cas:'557-05-1',purity:98,price:350,minOrder:25,certs:['ISO 9001','GMP'],mw:'632.33'},
+    {id:6,name:'Titanium Dioxide',cas:'13463-67-7',purity:99,price:520,minOrder:50,certs:['ISO 9001','ISO 14001','REACH'],mw:'79.87'},
+    {id:7,name:'Citric Acid Anhydrous',cas:'77-92-9',purity:99.5,price:180,minOrder:100,certs:['FDA','GMP','HALAL'],mw:'192.12'},
+    {id:8,name:'Salicylic Acid',cas:'69-72-7',purity:99,price:650,minOrder:10,certs:['FDA','GMP','ISO 9001'],mw:'138.12'},
+  ];
+  return{
+    products:prods,search:'',filterPurity:'',showDetail:null,showCart:false,showQuote:false,cart:[],
+    get filteredProducts(){return this.products.filter(p=>{
+      if(this.search&&!p.name.toLowerCase().includes(this.search.toLowerCase()))return false;
+      if(this.filterPurity&&p.purity<parseFloat(this.filterPurity))return false;
+      return true;
+    })},
+    addToCart(p){if(!this.cart.find(c=>c.name===p.name))this.cart.push({name:p.name,price:p.price,qty:p.minOrder})},
+    cartTotal(){return this.cart.reduce((s,c)=>s+c.price*c.qty,0)}
+  }
+}
+
+function greenApp(){return{
+  gTab:'compare',cbamTons:100,
+  routes:[
+    {name:'Traditional Route',grade:'B',steps:8,energy:45,water:120,waste:3.2,co2:5.8},
+    {name:'Scimplify Optimized',grade:'A+',steps:5,energy:22,water:45,waste:0.8,co2:2.1},
+  ],
+  metricLabels:{steps:'Steps',energy:'Energy',water:'Water',waste:'Waste',co2:'CO₂'},
+  metricUnits:{steps:'steps',energy:'kWh/kg',water:'L/kg',waste:'kg/kg',co2:'kg CO₂e/kg'},
+  maxMetric(m){return Math.max(...this.routes.map(r=>r[m]))}
+}}
+</script>
+</body>
+</html>
