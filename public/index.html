@@ -874,48 +874,102 @@ body{background:#0f0d2e;font-family:'Inter',sans-serif;color:#e2e8f0}
 <div x-show="activeProduct===2" x-cloak class="fade-in max-w-4xl" x-data="ionsApp()">
 <h2 class="text-xl font-bold mb-4">📋 IONS Project Hub</h2>
 
-<div x-show="!selectedProject && !showNewProject">
+<!-- ── Projects List View ── -->
+<div x-show="!selectedProject && !showNewProject && !showCreateForm">
+
+  <!-- Analytics Dashboard -->
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+    <div class="glass rounded-xl p-4 text-center"><div class="text-2xl font-bold text-indigo" x-text="ionsProjects.length"></div><div class="text-[10px] text-gray-400">Active Projects</div></div>
+    <div class="glass rounded-xl p-4 text-center"><div class="text-2xl font-bold text-teal" x-text="avgCompletion+'%'"></div><div class="text-[10px] text-gray-400">Avg Completion</div></div>
+    <div class="glass rounded-xl p-4 text-center"><div class="text-2xl font-bold text-amber" x-text="pendingSamples"></div><div class="text-[10px] text-gray-400">Samples Pending</div></div>
+    <div class="glass rounded-xl p-4 text-center"><div class="text-lg font-bold"><span class="text-teal" x-text="onTrack"></span><span class="text-gray-500">/</span><span class="text-red-400" x-text="delayed"></span></div><div class="text-[10px] text-gray-400">On-Track / Delayed</div></div>
+  </div>
+
+  <!-- Scientist Workload -->
+  <div class="glass rounded-xl p-3 mb-4 flex flex-wrap gap-4 items-center">
+    <div class="text-[10px] text-gray-500 font-medium uppercase tracking-wider">Scientist Workload</div>
+    <template x-for="sc in scientists" :key="sc.name">
+      <div class="flex items-center gap-2 text-xs">
+        <div class="w-6 h-6 rounded-full bg-indigo/20 text-indigo flex items-center justify-center text-[10px] font-bold" x-text="sc.name.split(' ')[0].charAt(0)+sc.name.split(' ')[1].charAt(0)"></div>
+        <span x-text="sc.name"></span>
+        <span class="text-gray-500" x-text="sc.count+' projects'"></span>
+        <div class="w-16 bg-white/5 rounded-full h-1.5"><div class="h-1.5 rounded-full bg-indigo" :style="'width:'+Math.min(sc.count*10,100)+'%'"></div></div>
+      </div>
+    </template>
+  </div>
+
   <div class="flex justify-between items-center mb-4">
     <span class="text-sm text-gray-400"><span x-text="ionsProjects.length"></span> Active Projects</span>
     <button @click="showNewProject=true" class="bg-indigo hover:bg-indigo/80 text-white px-4 py-1.5 rounded-lg text-xs font-medium transition">+ New Project</button>
   </div>
   <div class="grid md:grid-cols-2 gap-4">
     <template x-for="p in ionsProjects" :key="p.id">
-      <div @click="selectedProject=p" class="glass rounded-xl p-5 cursor-pointer glass-hover transition">
+      <div @click="selectedProject=p;detailTab='milestones'" class="glass rounded-xl p-5 cursor-pointer glass-hover transition">
         <div class="flex justify-between items-start mb-3">
           <h3 class="font-semibold text-sm" x-text="p.name"></h3>
           <span class="text-[10px] px-2 py-0.5 rounded-full font-medium" :class="p.complete===100?'bg-teal/20 text-teal':'bg-indigo/20 text-indigo'" x-text="p.stage"></span>
         </div>
         <div class="w-full bg-white/5 rounded-full h-2 mb-2"><div class="h-2 rounded-full transition-all" :class="p.complete===100?'bg-teal':'bg-indigo'" :style="'width:'+p.complete+'%'"></div></div>
-        <div class="text-xs text-gray-400" x-text="p.complete+'% complete'"></div>
+        <div class="flex justify-between text-xs text-gray-400">
+          <span x-text="p.complete+'% complete'"></span>
+          <span x-text="p.scientist"></span>
+        </div>
       </div>
     </template>
   </div>
 </div>
 
-<!-- New Project template selector -->
+<!-- ── New Project: Template Selector ── -->
 <div x-show="showNewProject" x-cloak class="fade-in">
   <button @click="showNewProject=false" class="text-xs text-gray-400 hover:text-white mb-4">← Back</button>
   <h3 class="font-semibold mb-4">Select Project Template</h3>
   <div class="grid md:grid-cols-3 gap-4">
-    <template x-for="t in ['Route Optimization','Custom Molecule','China+1 Switch']">
-      <div @click="showNewProject=false" class="glass rounded-xl p-5 cursor-pointer glass-hover transition text-center">
-        <div class="text-2xl mb-2" x-text="t==='Route Optimization'?'🧪':t==='Custom Molecule'?'🔬':'🔄'"></div>
-        <div class="text-sm font-medium" x-text="t"></div>
+    <template x-for="t in templates" :key="t.name">
+      <div @click="selectTemplate(t)" class="glass rounded-xl p-5 cursor-pointer glass-hover transition text-center">
+        <div class="text-2xl mb-2" x-text="t.icon"></div>
+        <div class="text-sm font-medium" x-text="t.name"></div>
+        <div class="text-[10px] text-gray-500 mt-1" x-text="t.desc"></div>
       </div>
     </template>
   </div>
 </div>
 
-<!-- Project Detail -->
+<!-- ── New Project: Creation Form ── -->
+<div x-show="showCreateForm" x-cloak class="fade-in">
+  <button @click="showCreateForm=false;showNewProject=true" class="text-xs text-gray-400 hover:text-white mb-4">← Back to Templates</button>
+  <div class="glass rounded-xl p-6">
+    <h3 class="font-semibold text-sm mb-1">New Project: <span x-text="newProject.template" class="text-indigo"></span></h3>
+    <div class="text-[10px] text-gray-500 mb-4" x-text="newProject.templateIcon+' '+newProject.templateDesc"></div>
+    <div class="grid md:grid-cols-2 gap-4">
+      <div><label class="text-xs text-gray-400 block mb-1">Molecule Name</label><input x-model="newProject.molecule" class="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo" placeholder="e.g. Ibuprofen"></div>
+      <div><label class="text-xs text-gray-400 block mb-1">Target Purity (%)</label><input x-model="newProject.purity" type="number" class="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo" placeholder="99.5"></div>
+      <div><label class="text-xs text-gray-400 block mb-1">Volume (MT)</label><input x-model="newProject.volume" type="number" class="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo" placeholder="50"></div>
+      <div><label class="text-xs text-gray-400 block mb-1">Timeline (months)</label><input x-model="newProject.timeline" type="number" class="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo" placeholder="6"></div>
+    </div>
+    <button @click="createProject()" class="mt-4 bg-indigo hover:bg-indigo/80 text-white px-6 py-2 rounded-lg text-sm font-medium transition" :disabled="!newProject.molecule" :class="!newProject.molecule?'opacity-40':''">Create Project →</button>
+  </div>
+</div>
+
+<!-- ── Project Detail ── -->
 <div x-show="selectedProject" x-cloak class="fade-in">
   <button @click="selectedProject=null" class="text-xs text-gray-400 hover:text-white mb-4">← Back to Projects</button>
   <template x-if="selectedProject">
   <div>
-    <h3 class="font-semibold mb-1" x-text="selectedProject.name"></h3>
-    <div class="text-xs text-gray-400 mb-6" x-text="selectedProject.stage+' — '+selectedProject.complete+'%'"></div>
-    <!-- Milestones -->
-    <div class="glass rounded-xl p-5 mb-4 overflow-x-auto">
+    <div class="flex justify-between items-start mb-1">
+      <h3 class="font-semibold" x-text="selectedProject.name"></h3>
+      <span class="text-[10px] text-gray-500" x-text="'Lead: '+selectedProject.scientist"></span>
+    </div>
+    <div class="text-xs text-gray-400 mb-4" x-text="selectedProject.stage+' — '+selectedProject.complete+'%'"></div>
+
+    <!-- Detail Tabs -->
+    <div class="flex gap-1 bg-white/5 rounded-lg p-0.5 mb-4 w-fit flex-wrap">
+      <template x-for="tab in ['milestones','samples','activity','documents','iterations']" :key="tab">
+        <button @click="detailTab=tab" :class="detailTab===tab?'bg-indigo text-white':'text-gray-400'" class="px-3 py-1 rounded-md text-xs font-medium transition capitalize" x-text="tab"></button>
+      </template>
+    </div>
+
+    <!-- Milestones Tab -->
+    <div x-show="detailTab==='milestones'" class="glass rounded-xl p-5 mb-4 overflow-x-auto">
       <div class="text-xs font-medium text-gray-400 mb-3">Milestones</div>
       <div class="flex gap-0 min-w-[500px]">
         <template x-for="(ms,i) in selectedProject.milestones" :key="i">
@@ -928,20 +982,67 @@ body{background:#0f0d2e;font-family:'Inter',sans-serif;color:#e2e8f0}
         </template>
       </div>
     </div>
-    <!-- Sample Tracking -->
-    <div class="glass rounded-xl p-5 mb-4">
+
+    <!-- Samples Tab -->
+    <div x-show="detailTab==='samples'" class="glass rounded-xl p-5 mb-4">
       <div class="text-xs font-medium text-gray-400 mb-3">Sample Tracking</div>
       <table class="w-full text-xs">
-        <thead><tr class="text-gray-500"><th class="text-left pb-2">Sample</th><th class="text-left pb-2">Sent</th><th class="text-left pb-2">Status</th></tr></thead>
+        <thead><tr class="text-gray-500"><th class="text-left pb-2">Sample</th><th class="text-left pb-2">Sent</th><th class="text-left pb-2">Status</th><th class="text-right pb-2">Actions</th></tr></thead>
         <tbody>
           <template x-for="s in selectedProject.samples" :key="s.id">
-            <tr class="border-t border-white/5"><td class="py-1.5" x-text="s.id"></td><td class="text-gray-400" x-text="s.sent"></td><td><span class="px-1.5 py-0.5 rounded text-[10px]" :class="s.status==='Approved'?'bg-teal/20 text-teal':s.status==='Pending'?'bg-amber/20 text-amber':'bg-red-500/20 text-red-400'" x-text="s.status"></span></td></tr>
+            <tr class="border-t border-white/5 transition-all" :class="s.flash||''">
+              <td class="py-2" x-text="s.id"></td>
+              <td class="text-gray-400" x-text="s.sent"></td>
+              <td><span class="px-1.5 py-0.5 rounded text-[10px] transition-all" :class="s.status==='Approved'?'bg-teal/20 text-teal':s.status==='Pending'?'bg-amber/20 text-amber':s.status==='Revision Requested'?'bg-indigo/20 text-indigo':'bg-red-500/20 text-red-400'" x-text="s.status"></span></td>
+              <td class="text-right">
+                <template x-if="s.status==='Pending'">
+                  <div class="flex gap-1 justify-end">
+                    <button @click="sampleAction(s,'Approved')" class="px-2 py-0.5 rounded text-[10px] bg-teal/20 text-teal hover:bg-teal/40 transition">✓ Approve</button>
+                    <button @click="sampleAction(s,'Rejected')" class="px-2 py-0.5 rounded text-[10px] bg-red-500/20 text-red-400 hover:bg-red-500/40 transition">✗ Reject</button>
+                    <button @click="sampleAction(s,'Revision Requested')" class="px-2 py-0.5 rounded text-[10px] bg-indigo/20 text-indigo hover:bg-indigo/40 transition">↺ Revise</button>
+                  </div>
+                </template>
+              </td>
+            </tr>
           </template>
         </tbody>
       </table>
     </div>
-    <!-- Iteration History -->
-    <div class="glass rounded-xl p-5">
+
+    <!-- Activity Timeline Tab -->
+    <div x-show="detailTab==='activity'" class="glass rounded-xl p-5 mb-4">
+      <div class="text-xs font-medium text-gray-400 mb-3">Activity Timeline</div>
+      <div class="relative pl-4 border-l border-white/10 space-y-3">
+        <template x-for="(ev,i) in selectedProject.activity" :key="i">
+          <div class="relative">
+            <div class="absolute -left-[21px] top-1 w-2.5 h-2.5 rounded-full" :class="ev.type==='shipped'?'bg-indigo':ev.type==='received'?'bg-teal':ev.type==='rejected'?'bg-red-400':ev.type==='approved'?'bg-teal':'bg-amber'"></div>
+            <div class="text-[10px] text-gray-500" x-text="ev.date"></div>
+            <div class="text-xs" x-text="ev.text"></div>
+          </div>
+        </template>
+      </div>
+    </div>
+
+    <!-- Documents Tab -->
+    <div x-show="detailTab==='documents'" class="glass rounded-xl p-5 mb-4">
+      <div class="text-xs font-medium text-gray-400 mb-3">Project Documents</div>
+      <div class="space-y-2">
+        <template x-for="doc in selectedProject.documents" :key="doc.name">
+          <div class="flex items-center gap-3 p-2 rounded-lg bg-white/[0.02] hover:bg-white/[0.05] transition">
+            <div class="text-lg" x-text="doc.icon"></div>
+            <div class="flex-1">
+              <div class="text-xs font-medium" x-text="doc.name"></div>
+              <div class="text-[10px] text-gray-500" x-text="doc.size+' • '+doc.date"></div>
+            </div>
+            <span class="text-[10px] px-2 py-0.5 rounded bg-white/5 text-gray-400" x-text="doc.type"></span>
+          </div>
+        </template>
+      </div>
+      <button class="mt-3 text-xs text-indigo hover:text-indigo/80 transition">+ Upload Document (simulated)</button>
+    </div>
+
+    <!-- Iterations Tab -->
+    <div x-show="detailTab==='iterations'" class="glass rounded-xl p-5">
       <div class="text-xs font-medium text-gray-400 mb-3">Iteration History</div>
       <template x-for="it in selectedProject.iterations" :key="it">
         <div class="text-xs py-1 border-b border-white/5 last:border-0" x-text="it"></div>
@@ -953,33 +1054,59 @@ body{background:#0f0d2e;font-family:'Inter',sans-serif;color:#e2e8f0}
 </div>
 
 <!-- ====== PRODUCT 3: ChemGraph ====== -->
+<style>
+@keyframes cg-draw-line{from{stroke-dashoffset:300}to{stroke-dashoffset:0}}
+.cg-line-anim{stroke-dasharray:300;animation:cg-draw-line .6s ease forwards}
+.cg-tooltip{position:absolute;background:rgba(15,15,30,0.95);border:1px solid rgba(99,102,241,0.3);border-radius:8px;padding:6px 10px;font-size:10px;color:#e5e7eb;pointer-events:none;white-space:nowrap;z-index:50;transform:translate(-50%,-110%)}
+</style>
 <div x-show="activeProduct===3" x-cloak class="fade-in max-w-5xl" x-data="chemGraphApp()">
 <h2 class="text-xl font-bold mb-4">🕸️ ChemGraph</h2>
-<div class="text-xs text-gray-400 mb-4 flex gap-4 flex-wrap">
+<div class="text-xs text-gray-400 mb-2 flex gap-4 flex-wrap">
   <span>🔵 465 Manufacturers</span><span>🟢 5,000+ Customers</span><span>🟠 847 Products</span><span>🔗 12,400 Connections</span>
 </div>
 
+<!-- Search Bar -->
+<div class="mb-3">
+  <input type="text" x-model="searchTerm" @input="applySearch()" placeholder="🔍 Search manufacturer, product, or customer..." class="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo placeholder-gray-500">
+</div>
+
+<!-- Network Stats -->
+<div class="text-[10px] text-gray-500 mb-2" x-text="'Showing ' + visibleNodeCount + ' nodes, ' + visibleLineCount + ' connections'"></div>
+
 <!-- SVG Network -->
-<div class="glass rounded-xl p-4 mb-4 relative overflow-hidden" style="height:320px">
+<div class="glass rounded-xl p-4 mb-4 relative overflow-hidden" style="height:380px" @click="if($event.target===($event.currentTarget.querySelector('svg')||$event.currentTarget)){closeDetail()}">
 <svg width="100%" height="100%" class="absolute inset-0">
   <template x-for="l in graphLines" :key="l.id">
-    <line :x1="l.x1" :y1="l.y1" :x2="l.x2" :y2="l.y2" class="node-line" :class="l.highlighted?'highlighted':l.dimmed?'opacity-5':''"/>
+    <line :x1="l.x1" :y1="l.y1" :x2="l.x2" :y2="l.y2" class="node-line" :class="(l.highlighted?'highlighted':'') + (l.dimmed?' opacity-5':'') + (l.animated?' cg-line-anim':'')"/>
   </template>
 </svg>
 <template x-for="n in graphNodes" :key="n.id">
-  <div class="absolute node-circle flex flex-col items-center" :class="n.dimmed?'dimmed':n.highlighted?'highlighted':''" :style="'left:'+n.x+'%;top:'+n.y+'%'">
-    <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold" :style="'background:'+n.color+'33;color:'+n.color" x-text="n.label.substring(0,2)"></div>
+  <div class="absolute node-circle flex flex-col items-center cursor-pointer" :class="(n.dimmed?'dimmed':'') + (n.highlighted?' highlighted':'')" :style="'left:'+n.x+'%;top:'+n.y+'%'" @mouseenter="hoverNode(n.id)" @mouseleave="unhoverNode()" @click.stop="clickNode(n.id)">
+    <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all" :style="'background:'+n.color+'33;color:'+n.color+';'+(selectedNode===n.id?'box-shadow:0 0 12px '+n.color:'')" x-text="n.label.substring(0,2)"></div>
     <div class="text-[9px] text-gray-500 mt-0.5 whitespace-nowrap" x-text="n.label"></div>
   </div>
 </template>
+<!-- Tooltip -->
+<div x-show="tooltipVisible" x-cloak class="cg-tooltip" :style="'left:'+tooltipX+'%;top:'+tooltipY+'%'" x-html="tooltipContent"></div>
+</div>
+
+<!-- Detail Panel -->
+<div x-show="detailPanel" x-cloak class="glass rounded-xl p-4 mb-4 fade-in border border-indigo/20">
+  <div class="flex justify-between items-start mb-2">
+    <div class="text-sm font-semibold" x-text="detailTitle"></div>
+    <button @click="closeDetail()" class="text-gray-500 hover:text-white text-xs">✕</button>
+  </div>
+  <div x-html="detailContent" class="text-xs space-y-1"></div>
 </div>
 
 <!-- Query Buttons -->
-<div class="grid grid-cols-2 md:grid-cols-4 gap-2 mb-4">
+<div class="grid grid-cols-2 md:grid-cols-3 gap-2 mb-4">
   <button @click="runQuery('risk')" :class="activeQuery==='risk'?'border-indigo bg-indigo/10':''" class="glass rounded-lg px-3 py-2 text-xs text-left glass-hover transition border border-transparent">⚠️ Supply Risk:<br><span class="text-gray-400">Anand Chemtex offline</span></button>
   <button @click="runQuery('cost')" :class="activeQuery==='cost'?'border-indigo bg-indigo/10':''" class="glass rounded-lg px-3 py-2 text-xs text-left glass-hover transition border border-transparent">💰 Cost Benchmark:<br><span class="text-gray-400">Pymetrozine</span></button>
   <button @click="runQuery('capacity')" :class="activeQuery==='capacity'?'border-indigo bg-indigo/10':''" class="glass rounded-lg px-3 py-2 text-xs text-left glass-hover transition border border-transparent">🏭 Capacity Match:<br><span class="text-gray-400">Idle Hydrogenation</span></button>
   <button @click="runQuery('china')" :class="activeQuery==='china'?'border-indigo bg-indigo/10':''" class="glass rounded-lg px-3 py-2 text-xs text-left glass-hover transition border border-transparent">🔄 China+1:<br><span class="text-gray-400">>70% dependency</span></button>
+  <button @click="runQuery('crosssell')" :class="activeQuery==='crosssell'?'border-indigo bg-indigo/10':''" class="glass rounded-lg px-3 py-2 text-xs text-left glass-hover transition border border-transparent">🔄 Cross-Sell:<br><span class="text-gray-400">Customer X also needs...</span></button>
+  <button @click="runQuery('anomaly')" :class="activeQuery==='anomaly'?'border-indigo bg-indigo/10':''" class="glass rounded-lg px-3 py-2 text-xs text-left glass-hover transition border border-transparent">📊 Price Anomaly:<br><span class="text-gray-400">Above-market pricing</span></button>
 </div>
 
 <!-- Results -->
@@ -1580,14 +1707,50 @@ function rfqApp(){return{
 function ionsApp(){
   const milestones=['Discovery','Feasibility','Lab Scale','Pilot','Tech Transfer','Qualification','Production'];
   function makeMilestones(activeIdx){return milestones.map((m,i)=>({name:m,status:i<activeIdx?'done':i===activeIdx?'active':'pending',date:i<activeIdx?'2024-'+(i+1).toString().padStart(2,'0'):'—'}))}
+  function makeDocs(type){
+    const base=[{icon:'📄',name:'Project Brief.pdf',size:'245 KB',date:'Jan 5, 2024',type:'Brief'},{icon:'🧪',name:'Synthesis Route.pdf',size:'1.2 MB',date:'Jan 12, 2024',type:'SOP'}];
+    if(type>1) base.push({icon:'📊',name:'Analytical Report.xlsx',size:'890 KB',date:'Feb 8, 2024',type:'Report'});
+    if(type>2) base.push({icon:'📋',name:'Recipe v3.pdf',size:'430 KB',date:'Mar 1, 2024',type:'Recipe'},{icon:'✅',name:'Customer Specs.pdf',size:'310 KB',date:'Jan 2, 2024',type:'Specs'});
+    return base;
+  }
   return{
-    selectedProject:null,showNewProject:false,
+    selectedProject:null,showNewProject:false,showCreateForm:false,detailTab:'milestones',
+    newProject:{template:'',templateIcon:'',templateDesc:'',molecule:'',purity:'',volume:'',timeline:''},
+    templates:[
+      {name:'Route Optimization',icon:'🧪',desc:'Optimize synthesis route for cost & yield'},
+      {name:'Custom Molecule',icon:'🔬',desc:'Build a new molecule to customer specs'},
+      {name:'China+1 Switch',icon:'🔄',desc:'Replace China-sourced intermediate'}
+    ],
+    scientists:[{name:'Dr. Ravi',count:8},{name:'Dr. Prem',count:6},{name:'Dr. Kumar',count:4}],
     ionsProjects:[
-      {id:1,name:'Pymetrozine Route Optimization',stage:'Tech Transfer',complete:70,milestones:makeMilestones(4),samples:[{id:'S-001',sent:'Jan 15',status:'Approved'},{id:'S-002',sent:'Feb 20',status:'Approved'},{id:'S-003',sent:'Mar 10',status:'Pending'}],iterations:['V1: Purity 95% — rejected by client','V2: Modified catalyst, temp 180°C — 97.5%','V3: Optimized temp to 165°C — 98.2% ✓ Approved']},
-      {id:2,name:'Custom Musk — Sciolide Variant',stage:'Sample Testing',complete:45,milestones:makeMilestones(2),samples:[{id:'S-010',sent:'Feb 1',status:'Pending'},{id:'S-011',sent:'Mar 5',status:'Rejected'}],iterations:['V1: Initial synthesis — odor profile mismatch','V2: Adjusted side chain — 85% match, iterating']},
-      {id:3,name:'Fexo Chloro Alternative Route',stage:'Lab Validation',complete:30,milestones:makeMilestones(2),samples:[{id:'S-020',sent:'Mar 1',status:'Pending'}],iterations:['V1: Chlorination route A — yield 62%, needs improvement']},
-      {id:4,name:'CBAM Compliance — EU Buyer',stage:'Complete ✓',complete:100,milestones:makeMilestones(7),samples:[{id:'S-030',sent:'Dec 1',status:'Approved'},{id:'S-031',sent:'Jan 10',status:'Approved'}],iterations:['V1: Full LCA completed','V2: Documentation reviewed — approved by EU buyer ✓']},
-    ]
+      {id:1,name:'Pymetrozine Route Optimization',stage:'Tech Transfer',complete:70,scientist:'Dr. Ravi',milestones:makeMilestones(4),samples:[{id:'S-001',sent:'Jan 15',status:'Approved',flash:''},{id:'S-002',sent:'Feb 20',status:'Approved',flash:''},{id:'S-003',sent:'Mar 10',status:'Pending',flash:''}],iterations:['V1: Purity 95% — rejected by client','V2: Modified catalyst, temp 180°C — 97.5%','V3: Optimized temp to 165°C — 98.2% ✓ Approved'],activity:[{date:'Jan 10',text:'Project created from Route Optimization template',type:'info'},{date:'Jan 15',text:'Sample S-001 shipped to customer',type:'shipped'},{date:'Jan 28',text:'Sample S-001 received by customer',type:'received'},{date:'Feb 5',text:'S-001 approved — purity 98.2%',type:'approved'},{date:'Feb 20',text:'Sample S-002 shipped',type:'shipped'},{date:'Mar 1',text:'S-002 approved',type:'approved'},{date:'Mar 10',text:'Sample S-003 shipped — awaiting feedback',type:'shipped'}],documents:makeDocs(3)},
+      {id:2,name:'Custom Musk — Sciolide Variant',stage:'Sample Testing',complete:45,scientist:'Dr. Prem',milestones:makeMilestones(2),samples:[{id:'S-010',sent:'Feb 1',status:'Pending',flash:''},{id:'S-011',sent:'Mar 5',status:'Rejected',flash:''}],iterations:['V1: Initial synthesis — odor profile mismatch','V2: Adjusted side chain — 85% match, iterating'],activity:[{date:'Jan 5',text:'Project created from Custom Molecule template',type:'info'},{date:'Feb 1',text:'Sample S-010 shipped',type:'shipped'},{date:'Feb 15',text:'S-010 pending customer review',type:'info'},{date:'Mar 5',text:'Sample S-011 shipped',type:'shipped'},{date:'Mar 18',text:'S-011 rejected — odor profile 85%, need >95%',type:'rejected'}],documents:makeDocs(2)},
+      {id:3,name:'Fexo Chloro Alternative Route',stage:'Lab Validation',complete:30,scientist:'Dr. Kumar',milestones:makeMilestones(2),samples:[{id:'S-020',sent:'Mar 1',status:'Pending',flash:''}],iterations:['V1: Chlorination route A — yield 62%, needs improvement'],activity:[{date:'Feb 10',text:'Project created from Route Optimization template',type:'info'},{date:'Feb 20',text:'Feasibility study complete',type:'approved'},{date:'Mar 1',text:'Sample S-020 shipped for testing',type:'shipped'}],documents:makeDocs(1)},
+      {id:4,name:'CBAM Compliance — EU Buyer',stage:'Complete ✓',complete:100,scientist:'Dr. Ravi',milestones:makeMilestones(7),samples:[{id:'S-030',sent:'Dec 1',status:'Approved',flash:''},{id:'S-031',sent:'Jan 10',status:'Approved',flash:''}],iterations:['V1: Full LCA completed','V2: Documentation reviewed — approved by EU buyer ✓'],activity:[{date:'Nov 1',text:'Project created from China+1 Switch template',type:'info'},{date:'Nov 20',text:'LCA assessment completed',type:'approved'},{date:'Dec 1',text:'Sample S-030 shipped',type:'shipped'},{date:'Dec 15',text:'S-030 approved by EU buyer',type:'approved'},{date:'Jan 10',text:'Final sample S-031 shipped',type:'shipped'},{date:'Jan 25',text:'S-031 approved — project complete ✓',type:'approved'}],documents:makeDocs(3)},
+    ],
+    get avgCompletion(){return Math.round(this.ionsProjects.reduce((s,p)=>s+p.complete,0)/this.ionsProjects.length)},
+    get pendingSamples(){return this.ionsProjects.reduce((s,p)=>s+p.samples.filter(x=>x.status==='Pending').length,0)},
+    get onTrack(){return this.ionsProjects.filter(p=>p.complete>=40||p.complete===100).length},
+    get delayed(){return this.ionsProjects.filter(p=>p.complete<40&&p.complete!==100).length},
+    selectTemplate(t){this.showNewProject=false;this.showCreateForm=true;this.newProject={template:t.name,templateIcon:t.icon,templateDesc:t.desc,molecule:'',purity:'',volume:'',timeline:''}},
+    createProject(){
+      const p={
+        id:Date.now(),name:this.newProject.molecule+' — '+this.newProject.template,
+        stage:'Discovery',complete:5,scientist:this.scientists[Math.floor(Math.random()*this.scientists.length)].name,
+        milestones:makeMilestones(0),
+        samples:[],
+        iterations:['Project created — '+this.newProject.template+' template'],
+        activity:[{date:'Today',text:'Project created: '+this.newProject.molecule+' ('+this.newProject.template+')',type:'info'},{date:'Today',text:'Target purity: '+this.newProject.purity+'% | Volume: '+this.newProject.volume+' MT | Timeline: '+this.newProject.timeline+' months',type:'info'}],
+        documents:[{icon:'📄',name:'Project Brief.pdf',size:'120 KB',date:'Today',type:'Brief'}]
+      };
+      this.ionsProjects.unshift(p);this.showCreateForm=false;this.selectedProject=p;this.detailTab='milestones';
+    },
+    sampleAction(s,status){
+      s.status=status;s.flash='bg-white/10';
+      const label=status==='Approved'?'approved':status==='Rejected'?'rejected':'revision requested';
+      this.selectedProject.activity.push({date:'Now',text:s.id+' '+label+' by customer',type:status==='Approved'?'approved':status==='Rejected'?'rejected':'info'});
+      setTimeout(()=>{s.flash=''},600);
+    }
   }
 }
 
