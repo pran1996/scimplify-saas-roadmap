@@ -1121,27 +1121,80 @@ body{background:#0f0d2e;font-family:'Inter',sans-serif;color:#e2e8f0}
 <h2 class="text-xl font-bold mb-4">🛡️ ComplianceOS</h2>
 
 <!-- Tabs -->
-<div class="flex gap-1 bg-white/5 rounded-lg p-0.5 mb-4 w-fit">
+<div class="flex gap-1 bg-white/5 rounded-lg p-0.5 mb-4 w-fit flex-wrap">
   <button @click="cTab='certs'" :class="cTab==='certs'?'bg-indigo text-white':'text-gray-400'" class="px-3 py-1 rounded-md text-xs font-medium transition">Certificates</button>
   <button @click="cTab='sds'" :class="cTab==='sds'?'bg-indigo text-white':'text-gray-400'" class="px-3 py-1 rounded-md text-xs font-medium transition">Generate SDS</button>
   <button @click="cTab='gap'" :class="cTab==='gap'?'bg-indigo text-white':'text-gray-400'" class="px-3 py-1 rounded-md text-xs font-medium transition">Gap Analysis</button>
+  <button @click="cTab='onboard'" :class="cTab==='onboard'?'bg-indigo text-white':'text-gray-400'" class="px-3 py-1 rounded-md text-xs font-medium transition">Onboard Factory</button>
+</div>
+
+<!-- Renewal Modal -->
+<div x-show="renewCert" x-cloak class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" @click.self="renewCert=null;renewStep=1">
+  <div class="glass rounded-xl p-6 max-w-md w-full border border-white/10" @click.stop>
+    <h3 class="font-bold text-sm mb-4">🔄 Renew Certificate — <span x-text="renewCert?.type"></span> (<span x-text="renewCert?.facility"></span>)</h3>
+    <!-- Step 1: Schedule -->
+    <div x-show="renewStep===1">
+      <p class="text-xs text-gray-400 mb-3">Step 1: Schedule Audit</p>
+      <input type="date" class="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo mb-3" x-model="renewDate">
+      <button @click="renewStep=2" class="w-full bg-indigo hover:bg-indigo/80 text-white py-2 rounded-lg text-xs font-medium transition">Schedule Audit →</button>
+    </div>
+    <!-- Step 2: Upload -->
+    <div x-show="renewStep===2" class="fade-in">
+      <p class="text-xs text-gray-400 mb-1">Step 2: Upload New Certificate</p>
+      <p class="text-[10px] text-teal mb-3">✓ Audit scheduled for <span x-text="renewDate"></span></p>
+      <div class="border-2 border-dashed border-white/10 rounded-lg p-6 text-center mb-3 cursor-pointer hover:border-indigo/50 transition" @click="renewStep=3">
+        <div class="text-2xl mb-1">📄</div>
+        <div class="text-xs text-gray-400">Click to upload certificate (simulated)</div>
+      </div>
+    </div>
+    <!-- Step 3: Done -->
+    <div x-show="renewStep===3" class="fade-in text-center">
+      <div class="text-4xl mb-2">✅</div>
+      <p class="text-sm font-semibold text-teal mb-1">Certificate Renewed!</p>
+      <p class="text-xs text-gray-400 mb-4">Status updated to Valid. Next audit: <span x-text="renewDate"></span></p>
+      <button @click="completeRenewal()" class="bg-teal/20 text-teal px-6 py-2 rounded-lg text-xs font-medium transition hover:bg-teal/30">Done</button>
+    </div>
+  </div>
+</div>
+
+<!-- Alert Impact Modal -->
+<div x-show="alertImpact" x-cloak class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" @click.self="alertImpact=null">
+  <div class="glass rounded-xl p-6 max-w-md w-full border border-white/10" @click.stop>
+    <h3 class="font-bold text-sm mb-3">📊 Impact Assessment</h3>
+    <p class="text-xs text-gray-400 mb-3" x-text="alertImpact?.title"></p>
+    <div class="space-y-2 mb-4">
+      <template x-for="item in alertImpact?.impacts||[]" :key="item">
+        <div class="flex items-center gap-2 text-xs glass rounded-lg px-3 py-2">
+          <span class="text-amber">⚠</span><span x-text="item"></span>
+        </div>
+      </template>
+    </div>
+    <button @click="alertImpact=null" class="w-full bg-white/5 hover:bg-white/10 py-2 rounded-lg text-xs font-medium transition">Close</button>
+  </div>
 </div>
 
 <!-- Certs Dashboard -->
 <div x-show="cTab==='certs'">
-  <div class="grid grid-cols-3 gap-4 mb-4">
-    <div class="glass rounded-xl p-4 text-center"><div class="text-2xl font-bold text-teal">8</div><div class="text-xs text-gray-400">Total</div></div>
-    <div class="glass rounded-xl p-4 text-center"><div class="text-2xl font-bold text-amber">2</div><div class="text-xs text-gray-400">Expiring Soon</div></div>
-    <div class="glass rounded-xl p-4 text-center"><div class="text-2xl font-bold text-red-400">1</div><div class="text-xs text-gray-400">Expired</div></div>
+  <!-- Dashboard Stats -->
+  <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-4">
+    <div class="glass rounded-xl p-3 text-center"><div class="text-2xl font-bold text-teal" x-text="certData.length"></div><div class="text-[10px] text-gray-400">Total Certs</div></div>
+    <div class="glass rounded-xl p-3 text-center"><div class="text-2xl font-bold text-green-400">↑2</div><div class="text-[10px] text-gray-400">New This Quarter</div></div>
+    <div class="glass rounded-xl p-3 text-center"><div class="text-2xl font-bold text-amber" x-text="certData.filter(c=>c.status==='Expiring').length"></div><div class="text-[10px] text-gray-400">Expiring Soon</div></div>
+    <div class="glass rounded-xl p-3 text-center"><div class="text-2xl font-bold text-red-400" x-text="certData.filter(c=>c.status==='Expired').length"></div><div class="text-[10px] text-gray-400 flex items-center justify-center gap-1">↓1 Expired</div></div>
+    <div class="glass rounded-xl p-3 text-center"><div class="text-2xl font-bold text-indigo">3</div><div class="text-[10px] text-gray-400">Renewals &lt;90d</div></div>
   </div>
   <div class="glass rounded-xl overflow-hidden">
     <table class="w-full text-xs">
-      <thead><tr class="text-gray-500 bg-white/[0.02]"><th class="text-left p-3">Facility</th><th class="text-left p-3">Cert Type</th><th class="text-left p-3">Issued</th><th class="text-left p-3">Expires</th><th class="text-left p-3">Status</th></tr></thead>
+      <thead><tr class="text-gray-500 bg-white/[0.02]"><th class="text-left p-3">Facility</th><th class="text-left p-3">Cert Type</th><th class="text-left p-3">Issued</th><th class="text-left p-3">Expires</th><th class="text-left p-3">Status</th><th class="text-left p-3">Action</th></tr></thead>
       <tbody>
         <template x-for="c in certData" :key="c.id">
-          <tr class="border-t border-white/5">
+          <tr class="border-t border-white/5" :class="c._renewed?'bg-teal/5':''">
             <td class="p-3" x-text="c.facility"></td><td class="p-3" x-text="c.type"></td><td class="p-3 text-gray-400" x-text="c.issued"></td><td class="p-3 text-gray-400" x-text="c.expires"></td>
-            <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] font-medium" :class="c.status==='Valid'?'bg-teal/20 text-teal':c.status==='Expiring'?'bg-amber/20 text-amber':'bg-red-500/20 text-red-400'" x-text="c.status"></span></td>
+            <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] font-medium transition-all duration-500" :class="c.status==='Valid'?'bg-teal/20 text-teal':c.status==='Expiring'?'bg-amber/20 text-amber':'bg-red-500/20 text-red-400'" x-text="c.status"></span></td>
+            <td class="p-3">
+              <button x-show="c.status==='Expiring'||c.status==='Expired'" @click="startRenewal(c)" class="px-2 py-0.5 rounded text-[10px] font-medium bg-indigo/20 text-indigo hover:bg-indigo/40 transition">Renew</button>
+              <span x-show="c._renewed" class="text-[10px] text-teal">✓ Renewed</span>
+            </td>
           </tr>
         </template>
       </tbody>
@@ -1150,9 +1203,16 @@ body{background:#0f0d2e;font-family:'Inter',sans-serif;color:#e2e8f0}
   <!-- Alerts -->
   <div class="mt-4 space-y-2">
     <div class="text-xs font-medium text-gray-400 mb-2">⚠️ Regulatory Alerts</div>
-    <div class="glass rounded-lg p-3 border-l-2 border-amber text-xs">REACH Annex XIV updated — 3 products affected. Review required by March 2025.</div>
-    <div class="glass rounded-lg p-3 border-l-2 border-red-400 text-xs">FDA registration renewal due in 45 days for Anand Chemtex facility.</div>
-    <div class="glass rounded-lg p-3 border-l-2 border-indigo text-xs">New GMP guidelines published — voluntary compliance window: 6 months.</div>
+    <template x-for="(alert,ai) in alerts" :key="ai">
+      <div x-show="!alert.dismissed" class="glass rounded-lg p-3 border-l-2 text-xs" :class="alert.color">
+        <div class="mb-2" x-text="alert.text"></div>
+        <div class="flex gap-2">
+          <button @click="showAlertImpact(alert)" class="px-2 py-0.5 rounded bg-white/5 hover:bg-white/10 text-[10px] transition">📊 Review Impact</button>
+          <button @click="alert.assigned=true" class="px-2 py-0.5 rounded bg-white/5 hover:bg-white/10 text-[10px] transition" :class="alert.assigned?'text-teal':''" x-text="alert.assigned?'✓ Assigned':'👥 Assign to Team'"></button>
+          <button @click="alert.dismissed=true" class="px-2 py-0.5 rounded bg-white/5 hover:bg-white/10 text-[10px] text-gray-500 transition">Dismiss</button>
+        </div>
+      </div>
+    </template>
   </div>
 </div>
 
@@ -1176,16 +1236,27 @@ body{background:#0f0d2e;font-family:'Inter',sans-serif;color:#e2e8f0}
     <button @click="sdsPreview=false" class="text-xs text-gray-400 hover:text-white mb-4">← Back</button>
     <div class="glass rounded-xl p-6 border-l-4 border-indigo">
       <div class="flex justify-between items-start mb-4">
-        <div><h3 class="font-bold text-lg">Safety Data Sheet</h3><div class="text-xs text-gray-400">GHS Compliant — Rev 1.0</div></div>
+        <div><h3 class="font-bold text-lg">Safety Data Sheet</h3><div class="text-xs text-gray-400">GHS Compliant — Rev 1.0 — 16 Sections</div></div>
         <div class="text-3xl" x-text="sdsForm.hazard==='Toxic'?'☠️':sdsForm.hazard==='Flammable'?'🔥':sdsForm.hazard==='Corrosive'?'⚗️':sdsForm.hazard==='Environmental Hazard'?'🌍':'⚠️'"></div>
       </div>
-      <div class="grid grid-cols-2 gap-4 text-sm">
-        <div><span class="text-gray-400">Product:</span> <span x-text="sdsForm.name||'N/A'"></span></div>
-        <div><span class="text-gray-400">CAS:</span> <span x-text="sdsForm.cas||'N/A'"></span></div>
-        <div><span class="text-gray-400">Hazard:</span> <span class="text-amber" x-text="sdsForm.hazard"></span></div>
-        <div><span class="text-gray-400">Composition:</span> <span x-text="sdsForm.comp||'N/A'"></span></div>
+      <!-- Full 16-section SDS -->
+      <div class="space-y-3 max-h-[60vh] overflow-y-auto pr-2">
+        <template x-for="(sec,si) in sdsSections()" :key="si">
+          <div class="border border-white/5 rounded-lg p-3">
+            <div class="text-xs font-semibold text-indigo mb-1" x-text="'Section '+(si+1)+': '+sec.title"></div>
+            <div class="text-[11px] text-gray-300 leading-relaxed whitespace-pre-line" x-text="sec.content"></div>
+          </div>
+        </template>
       </div>
-      <div class="mt-4 pt-4 border-t border-white/10 text-xs text-gray-500">Generated by ComplianceOS • Scimplify • <span x-text="new Date().toLocaleDateString()"></span></div>
+      <div class="mt-4 pt-4 border-t border-white/10 flex flex-wrap gap-2 items-center">
+        <button @click="sdsDownloaded='pdf'" class="bg-indigo/20 text-indigo px-4 py-1.5 rounded-lg text-xs font-medium hover:bg-indigo/30 transition">
+          <span x-text="sdsDownloaded==='pdf'?'✓ Downloaded':'📥 Download PDF'"></span>
+        </button>
+        <button @click="sdsDownloaded='eu'" class="bg-amber/20 text-amber px-4 py-1.5 rounded-lg text-xs font-medium hover:bg-amber/30 transition">
+          <span x-text="sdsDownloaded==='eu'?'✓ Exported':'🇪🇺 Export EU Format'"></span>
+        </button>
+        <span class="text-[10px] text-gray-500 ml-auto">Generated by ComplianceOS • Scimplify • <span x-text="new Date().toLocaleDateString()"></span></span>
+      </div>
     </div>
   </div>
 </div>
@@ -1194,7 +1265,7 @@ body{background:#0f0d2e;font-family:'Inter',sans-serif;color:#e2e8f0}
 <div x-show="cTab==='gap'" x-cloak>
   <div class="glass rounded-xl p-5">
     <label class="text-xs text-gray-400 block mb-2">Select Facility</label>
-    <select x-model="gapFacility" class="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo mb-4">
+    <select x-model="gapFacility" @change="remediationStarted=false;remediationPlan=[]" class="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo mb-4">
       <option value="anand">Anand Chemtex — Vadodara</option>
       <option value="deccan">Deccan Fine Chemicals — Pune</option>
       <option value="kaivin">KaiVin Chemical — Ankleshwar</option>
@@ -1209,6 +1280,103 @@ body{background:#0f0d2e;font-family:'Inter',sans-serif;color:#e2e8f0}
           <span x-show="!g.has" class="text-[10px] text-amber bg-amber/10 px-2 py-0.5 rounded" x-text="g.fix"></span>
         </div>
       </template>
+    </div>
+    <!-- Remediation Tracking -->
+    <div class="mt-4 pt-4 border-t border-white/10">
+      <button x-show="!remediationStarted" @click="startRemediation()" class="bg-indigo hover:bg-indigo/80 text-white px-5 py-2 rounded-lg text-xs font-medium transition">🛠 Start Remediation Plan</button>
+      <div x-show="remediationStarted" class="fade-in space-y-2">
+        <div class="text-xs font-medium text-gray-400 mb-2">📋 Remediation Plan</div>
+        <template x-for="(r,ri) in remediationPlan" :key="ri">
+          <div class="flex items-center justify-between glass rounded-lg px-3 py-2">
+            <div class="flex items-center gap-2">
+              <span class="text-xs" x-text="r.cert"></span>
+              <span class="text-[10px] text-gray-500" x-text="r.timeline"></span>
+            </div>
+            <button @click="advanceRemediation(ri)" class="px-2 py-0.5 rounded text-[10px] font-medium transition"
+              :class="r.stage===0?'bg-gray-500/20 text-gray-400':r.stage===1?'bg-amber/20 text-amber':r.stage===2?'bg-indigo/20 text-indigo':'bg-teal/20 text-teal'"
+              x-text="['Not Started','In Progress →','Audit Scheduled →','✓ Complete'][r.stage]"
+              :disabled="r.stage>=3"></button>
+          </div>
+        </template>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Onboard Factory -->
+<div x-show="cTab==='onboard'" x-cloak>
+  <div class="glass rounded-xl p-6">
+    <h3 class="font-semibold text-sm mb-4">🏭 Self-Serve Factory Onboarding</h3>
+    <!-- Progress -->
+    <div class="flex gap-1 mb-6">
+      <template x-for="s in 4" :key="s">
+        <div class="h-1 flex-1 rounded-full transition-all duration-300" :class="onboardStep>=s?'bg-indigo':'bg-white/10'"></div>
+      </template>
+    </div>
+
+    <!-- Step 1 -->
+    <div x-show="onboardStep===1">
+      <label class="text-xs text-gray-400 block mb-1">Factory Name</label>
+      <input x-model="onboardForm.name" class="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo mb-3" placeholder="e.g. Sunrise Chemicals">
+      <label class="text-xs text-gray-400 block mb-1">Location</label>
+      <input x-model="onboardForm.location" class="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo mb-4" placeholder="e.g. Vadodara, Gujarat">
+      <button @click="onboardStep=2" :disabled="!onboardForm.name||!onboardForm.location" class="bg-indigo hover:bg-indigo/80 disabled:opacity-40 text-white px-6 py-2 rounded-lg text-xs font-medium transition">Next →</button>
+    </div>
+    <!-- Step 2 -->
+    <div x-show="onboardStep===2" class="fade-in">
+      <label class="text-xs text-gray-400 block mb-2">Current Certifications</label>
+      <div class="grid grid-cols-2 gap-2 mb-4">
+        <template x-for="cert in allCertTypes" :key="cert">
+          <label class="flex items-center gap-2 glass rounded-lg px-3 py-2 cursor-pointer hover:bg-white/5 transition">
+            <input type="checkbox" :value="cert" x-model="onboardForm.certs" class="accent-indigo">
+            <span class="text-xs" x-text="cert"></span>
+          </label>
+        </template>
+      </div>
+      <div class="flex gap-2">
+        <button @click="onboardStep=1" class="bg-white/5 hover:bg-white/10 px-4 py-2 rounded-lg text-xs transition">← Back</button>
+        <button @click="onboardStep=3" class="bg-indigo hover:bg-indigo/80 text-white px-6 py-2 rounded-lg text-xs font-medium transition">Next →</button>
+      </div>
+    </div>
+    <!-- Step 3 -->
+    <div x-show="onboardStep===3" class="fade-in">
+      <label class="text-xs text-gray-400 block mb-2">Target Buyer Segments</label>
+      <div class="grid grid-cols-2 gap-2 mb-4">
+        <template x-for="seg in buyerSegments" :key="seg.name">
+          <label class="flex items-center gap-2 glass rounded-lg px-3 py-2 cursor-pointer hover:bg-white/5 transition">
+            <input type="checkbox" :value="seg.name" x-model="onboardForm.segments" class="accent-indigo">
+            <span class="text-xs" x-text="seg.name"></span>
+          </label>
+        </template>
+      </div>
+      <div class="flex gap-2">
+        <button @click="onboardStep=2" class="bg-white/5 hover:bg-white/10 px-4 py-2 rounded-lg text-xs transition">← Back</button>
+        <button @click="onboardStep=4;generateOnboardGap()" class="bg-indigo hover:bg-indigo/80 text-white px-6 py-2 rounded-lg text-xs font-medium transition">Generate Gap Report →</button>
+      </div>
+    </div>
+    <!-- Step 4: Report -->
+    <div x-show="onboardStep===4" class="fade-in">
+      <div class="text-center mb-4">
+        <div class="text-2xl mb-1">📋</div>
+        <h4 class="font-semibold text-sm">Gap Report for <span x-text="onboardForm.name"></span></h4>
+        <div class="text-[10px] text-gray-400" x-text="onboardForm.location"></div>
+      </div>
+      <div class="space-y-2 mb-4">
+        <template x-for="g in onboardGaps" :key="g.cert">
+          <div class="flex items-center justify-between py-2 border-b border-white/5">
+            <div class="flex items-center gap-2">
+              <span :class="g.has?'text-teal':'text-red-400'" x-text="g.has?'✓ Have':'✗ Need'"></span>
+              <span class="text-xs" x-text="g.cert"></span>
+            </div>
+            <span x-show="!g.has" class="text-[10px] text-amber bg-amber/10 px-2 py-0.5 rounded" x-text="g.est"></span>
+          </div>
+        </template>
+      </div>
+      <div x-show="onboardGaps.length" class="glass rounded-lg p-3 text-center mb-4">
+        <div class="text-xs text-gray-400">Estimated time to full compliance</div>
+        <div class="text-lg font-bold text-indigo" x-text="onboardGaps.filter(g=>!g.has).length===0?'Already Qualified! ✅':onboardGaps.filter(g=>!g.has).length*2+' — '+onboardGaps.filter(g=>!g.has).length*3+' months'"></div>
+      </div>
+      <button @click="onboardStep=1;onboardForm={name:'',location:'',certs:[],segments:[]};onboardGaps=[]" class="w-full bg-white/5 hover:bg-white/10 py-2 rounded-lg text-xs font-medium transition">Start Over</button>
     </div>
   </div>
 </div>
@@ -1331,21 +1499,29 @@ body{background:#0f0d2e;font-family:'Inter',sans-serif;color:#e2e8f0}
 <div x-show="activeProduct===6" x-cloak class="fade-in max-w-4xl" x-data="greenApp()">
 <h2 class="text-xl font-bold mb-4">🌱 GreenScore</h2>
 
-<div class="flex gap-1 bg-white/5 rounded-lg p-0.5 mb-4 w-fit">
+<div class="flex flex-wrap gap-1 bg-white/5 rounded-lg p-0.5 mb-4 w-fit">
   <button @click="gTab='compare'" :class="gTab==='compare'?'bg-indigo text-white':'text-gray-400'" class="px-3 py-1 rounded-md text-xs font-medium transition">Route Compare</button>
   <button @click="gTab='cert'" :class="gTab==='cert'?'bg-indigo text-white':'text-gray-400'" class="px-3 py-1 rounded-md text-xs font-medium transition">Carbon Certificate</button>
   <button @click="gTab='cbam'" :class="gTab==='cbam'?'bg-indigo text-white':'text-gray-400'" class="px-3 py-1 rounded-md text-xs font-medium transition">CBAM Calculator</button>
+  <button @click="gTab='portfolio'" :class="gTab==='portfolio'?'bg-indigo text-white':'text-gray-400'" class="px-3 py-1 rounded-md text-xs font-medium transition">Portfolio</button>
   <button @click="gTab='how'" :class="gTab==='how'?'bg-indigo text-white':'text-gray-400'" class="px-3 py-1 rounded-md text-xs font-medium transition">How It Works</button>
 </div>
 
 <!-- Route Comparison -->
 <div x-show="gTab==='compare'">
-  <div class="text-sm text-gray-400 mb-4">Pymetrozine: Traditional Route vs Scimplify Optimized Route</div>
+  <!-- Product Selector -->
+  <div class="flex items-center gap-3 mb-4">
+    <label class="text-xs text-gray-400">Product:</label>
+    <select x-model="selectedProduct" @change="updateRoutes()" class="bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-sm outline-none focus:border-indigo">
+      <template x-for="p in Object.keys(productData)" :key="p"><option :value="p" x-text="p"></option></template>
+    </select>
+  </div>
+  <div class="text-sm text-gray-400 mb-4" x-text="selectedProduct+': Traditional Route vs Scimplify Optimized Route'"></div>
   <div class="grid md:grid-cols-2 gap-4">
     <template x-for="r in routes" :key="r.name">
       <div class="glass rounded-xl p-5">
         <h3 class="font-semibold text-sm mb-1" x-text="r.name"></h3>
-        <div class="text-3xl font-bold mb-3" :class="r.grade==='A+'?'text-teal':r.grade==='B'?'text-amber':'text-red-400'" x-text="r.grade"></div>
+        <div class="text-3xl font-bold mb-3" :class="r.grade==='A+'?'text-teal':r.grade==='A'?'text-teal':r.grade==='B'?'text-amber':'text-red-400'" x-text="r.grade"></div>
         <div class="space-y-3">
           <template x-for="m in ['steps','energy','water','waste','co2']" :key="m">
             <div>
@@ -1357,24 +1533,148 @@ body{background:#0f0d2e;font-family:'Inter',sans-serif;color:#e2e8f0}
       </div>
     </template>
   </div>
+
+  <!-- Carbon Reduction Over Time -->
+  <div class="glass rounded-xl p-5 mt-4">
+    <h3 class="font-semibold text-sm mb-3">📉 Optimization Journey: <span class="text-teal" x-text="selectedProduct"></span></h3>
+    <div class="flex items-end gap-2 h-32 mb-2">
+      <template x-for="(v,i) in currentIterations" :key="i">
+        <div class="flex-1 flex flex-col items-center gap-1">
+          <div class="text-xs font-bold" :class="i===currentIterations.length-1?'text-teal':'text-gray-400'" x-text="v.co2+' kg'"></div>
+          <div class="w-full rounded-t-md transition-all duration-500" :class="i===currentIterations.length-1?'bg-teal':'bg-amber/60'" :style="'height:'+((v.co2/currentIterations[0].co2)*100)+'%'"></div>
+          <div class="text-[10px] text-gray-500" x-text="v.label"></div>
+        </div>
+      </template>
+    </div>
+    <div class="text-center text-xs text-gray-500">Each iteration optimizes catalyst, temperature, solvent, and energy source</div>
+  </div>
+
+  <!-- Interactive Route Builder -->
+  <div class="glass rounded-xl p-5 mt-4">
+    <h3 class="font-semibold text-sm mb-3">🔧 Build Custom Route</h3>
+    <div class="grid md:grid-cols-3 gap-4 mb-4">
+      <div>
+        <label class="text-xs text-gray-400 block mb-1">Synthesis Steps</label>
+        <input type="range" x-model.number="builder.steps" min="3" max="8" class="w-full accent-indigo">
+        <div class="text-center text-sm font-medium" x-text="builder.steps+' steps'"></div>
+      </div>
+      <div>
+        <label class="text-xs text-gray-400 block mb-1">Energy Source</label>
+        <select x-model="builder.energy" class="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-sm outline-none focus:border-indigo">
+          <option value="grid">Grid (Coal-heavy)</option>
+          <option value="mixed">Mixed (Grid + Solar)</option>
+          <option value="solar">Solar / Renewable</option>
+        </select>
+      </div>
+      <div>
+        <label class="text-xs text-gray-400 block mb-1">Factory Location</label>
+        <select x-model="builder.location" class="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-sm outline-none focus:border-indigo">
+          <option value="gujarat">Gujarat</option>
+          <option value="tamilnadu">Tamil Nadu</option>
+          <option value="maharashtra">Maharashtra</option>
+        </select>
+      </div>
+    </div>
+    <div class="glass rounded-lg p-4 text-center">
+      <div class="text-xs text-gray-400 mb-1">Estimated Carbon Footprint</div>
+      <div class="text-3xl font-bold" :class="builderScore()<3?'text-teal':builderScore()<5?'text-amber':'text-red-400'" x-text="builderScore().toFixed(1)+' kg CO₂e/kg'"></div>
+      <div class="flex justify-center gap-4 mt-2 text-[11px] text-gray-500">
+        <span>Steps: <span class="text-white" x-text="'+'+((builder.steps-3)*0.4).toFixed(1)"></span></span>
+        <span>Energy: <span class="text-white" x-text="builder.energy==='grid'?'+1.8':builder.energy==='mixed'?'+0.9':'+0.2'"></span></span>
+        <span>Location: <span class="text-white" x-text="builder.location==='gujarat'?'+0.6':builder.location==='tamilnadu'?'+0.3':'+0.5'"></span></span>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- Carbon Certificate -->
 <div x-show="gTab==='cert'" x-cloak>
-  <div class="glass rounded-xl p-6 border-l-4 border-teal max-w-md mx-auto glow-teal">
-    <div class="flex justify-between items-start mb-4">
-      <div><div class="text-xs text-teal font-medium">CARBON CERTIFICATE</div><div class="text-lg font-bold mt-1">Pymetrozine</div></div>
-      <div class="w-12 h-12 rounded-full bg-teal/20 flex items-center justify-center text-xl">🌿</div>
+  <div class="glass rounded-xl p-6 border-l-4 border-teal max-w-lg mx-auto glow-teal">
+    <!-- Header -->
+    <div class="flex justify-between items-start mb-1">
+      <div>
+        <div class="text-[10px] tracking-widest text-gray-500 uppercase">Scimplify GreenScore™</div>
+        <div class="text-xs text-teal font-medium mt-1">PRODUCT CARBON FOOTPRINT CERTIFICATE</div>
+      </div>
+      <div class="w-14 h-14 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-[9px] text-gray-500 text-center leading-tight">QR<br>Code</div>
     </div>
+    <div class="border-b border-white/10 mb-4 pb-2">
+      <div class="text-lg font-bold">Pymetrozine</div>
+      <div class="text-[11px] text-gray-500">CAS 123312-89-0 · MW 217.23 g/mol</div>
+    </div>
+
+    <!-- Metrics -->
     <div class="grid grid-cols-2 gap-4 text-sm mb-4">
-      <div><span class="text-gray-400 text-xs block">Route</span>Scimplify Optimized</div>
-      <div><span class="text-gray-400 text-xs block">GreenScore</span><span class="text-teal font-bold text-lg">A+</span></div>
-      <div><span class="text-gray-400 text-xs block">CO₂/kg</span>2.1 kg CO₂e</div>
-      <div><span class="text-gray-400 text-xs block">Date</span><span x-text="new Date().toLocaleDateString()"></span></div>
+      <div><span class="text-gray-400 text-xs block">Synthesis Route</span>Scimplify Optimized (5-step)</div>
+      <div><span class="text-gray-400 text-xs block">GreenScore Grade</span><span class="text-teal font-bold text-lg">A+</span></div>
+      <div><span class="text-gray-400 text-xs block">Carbon Footprint</span><span class="font-semibold">2.1 kg CO₂e / kg</span></div>
+      <div><span class="text-gray-400 text-xs block">Scope</span>Cradle-to-gate</div>
+      <div><span class="text-gray-400 text-xs block">Issue Date</span><span x-text="new Date().toLocaleDateString()"></span></div>
+      <div><span class="text-gray-400 text-xs block">Valid Until</span><span x-text="new Date(Date.now()+365*86400000).toLocaleDateString()"></span></div>
     </div>
-    <div class="border-t border-white/10 pt-3 flex items-center gap-2">
-      <div class="w-5 h-5 rounded-full bg-teal flex items-center justify-center text-[10px] text-white font-bold">✓</div>
-      <span class="text-xs text-gray-400">Verified by Scimplify GreenScore™</span>
+
+    <!-- Methodology -->
+    <div class="glass rounded-lg p-3 mb-4">
+      <div class="text-[11px] text-gray-400 space-y-1">
+        <div class="flex gap-2"><span class="text-teal">Methodology:</span> ISO 14067:2018 — Carbon footprint of products</div>
+        <div class="flex gap-2"><span class="text-teal">Database:</span> ecoinvent 3.9.1 + Scimplify proprietary factory data</div>
+        <div class="flex gap-2"><span class="text-teal">Boundary:</span> Raw material extraction → factory gate (excl. logistics)</div>
+      </div>
+    </div>
+
+    <!-- Verification -->
+    <div class="flex items-center gap-2 mb-4 p-2 rounded-lg bg-teal/10 border border-teal/20">
+      <div class="w-6 h-6 rounded-full bg-teal flex items-center justify-center text-[11px] text-white font-bold">✓</div>
+      <div>
+        <div class="text-xs font-medium text-teal">Verification Status: Self-Declared (Phase 1)</div>
+        <div class="text-[10px] text-gray-500">Third-party audit scheduled Q3 2026 · TÜV SÜD</div>
+      </div>
+    </div>
+
+    <!-- Certificate ID -->
+    <div class="text-center text-[10px] text-gray-600 border-t border-white/10 pt-3 mb-3">
+      Certificate ID: GS-2026-PYM-00142 · Generated by Scimplify GreenScore™ Engine v2.1
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="flex gap-2">
+      <button class="flex-1 bg-teal/20 hover:bg-teal/30 text-teal text-xs font-medium py-2 rounded-lg transition flex items-center justify-center gap-1">📄 Export PDF</button>
+      <button class="flex-1 bg-indigo/20 hover:bg-indigo/30 text-indigo text-xs font-medium py-2 rounded-lg transition flex items-center justify-center gap-1">🔗 Share Link</button>
+    </div>
+  </div>
+</div>
+
+<!-- Portfolio Dashboard -->
+<div x-show="gTab==='portfolio'" x-cloak>
+  <div class="glass rounded-xl p-5 mb-4">
+    <div class="flex flex-wrap items-center justify-between mb-4">
+      <h3 class="font-semibold text-sm">Portfolio Carbon Dashboard</h3>
+      <div class="flex gap-4 text-xs">
+        <div class="text-center"><div class="text-gray-500">Your Avg</div><div class="text-teal font-bold text-lg">3.1</div><div class="text-gray-600">kg CO₂/kg</div></div>
+        <div class="text-center"><div class="text-gray-500">Industry Avg</div><div class="text-amber font-bold text-lg">5.4</div><div class="text-gray-600">kg CO₂/kg</div></div>
+        <div class="text-center"><div class="text-gray-500">vs Industry</div><div class="text-teal font-bold text-lg">-43%</div><div class="text-gray-600">below avg</div></div>
+      </div>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="w-full text-xs">
+        <thead><tr class="text-gray-500 border-b border-white/10"><th class="text-left py-2">Product</th><th class="text-center py-2">Grade</th><th class="text-right py-2">CO₂/kg</th><th class="text-center py-2">Trend</th><th class="text-right py-2">Annual tons</th><th class="text-right py-2">Total CO₂</th></tr></thead>
+        <tbody>
+          <template x-for="p in portfolio" :key="p.name">
+            <tr class="border-b border-white/5">
+              <td class="py-2 font-medium" x-text="p.name"></td>
+              <td class="text-center"><span class="px-1.5 py-0.5 rounded text-[10px] font-bold" :class="p.grade==='A+'?'bg-teal/20 text-teal':p.grade==='A'?'bg-teal/20 text-teal':p.grade==='B+'?'bg-amber/20 text-amber':'bg-red-400/20 text-red-400'" x-text="p.grade"></span></td>
+              <td class="text-right" x-text="p.co2"></td>
+              <td class="text-center" x-text="p.trend==='up'?'📈':p.trend==='down'?'📉':'➡️'"></td>
+              <td class="text-right text-gray-400" x-text="p.tons"></td>
+              <td class="text-right font-medium" x-text="(p.co2*p.tons).toFixed(0)+' t'"></td>
+            </tr>
+          </template>
+        </tbody>
+      </table>
+    </div>
+    <div class="mt-4 pt-3 border-t border-white/10 flex justify-between items-center">
+      <div class="text-xs text-gray-500">Total portfolio: <span class="text-white font-medium" x-text="portfolio.reduce((s,p)=>s+p.co2*p.tons,0).toFixed(0)+' tons CO₂e/year'"></span></div>
+      <button class="text-xs bg-teal/20 text-teal px-3 py-1 rounded-lg hover:bg-teal/30 transition">📊 Export Report</button>
     </div>
   </div>
 </div>
@@ -1756,51 +2056,120 @@ function ionsApp(){
 
 function chemGraphApp(){
   const nodes=[
-    {id:'m1',label:'Anand Chemtex',x:15,y:25,color:'#6366f1',type:'mfr'},
-    {id:'m2',label:'Navi Organics',x:10,y:60,color:'#6366f1',type:'mfr'},
-    {id:'m3',label:'Gujarat Fluoro',x:25,y:80,color:'#6366f1',type:'mfr'},
-    {id:'m4',label:'Deccan Fine',x:40,y:15,color:'#6366f1',type:'mfr'},
-    {id:'m5',label:'Sree Krishna',x:5,y:40,color:'#6366f1',type:'mfr'},
-    {id:'p1',label:'Pymetrozine',x:45,y:50,color:'#f97316',type:'prod'},
-    {id:'p2',label:'Fexofenadine',x:55,y:25,color:'#f97316',type:'prod'},
-    {id:'p3',label:'TiO₂',x:35,y:65,color:'#f97316',type:'prod'},
-    {id:'p4',label:'Salicylic Acid',x:60,y:70,color:'#f97316',type:'prod'},
-    {id:'c1',label:'EU Pharma Co',x:75,y:20,color:'#22c55e',type:'cust'},
-    {id:'c2',label:'US Agri Corp',x:85,y:50,color:'#22c55e',type:'cust'},
-    {id:'c3',label:'JP Cosmetics',x:70,y:75,color:'#22c55e',type:'cust'},
+    {id:'m1',label:'Anand Chemtex',x:8,y:20,color:'#6366f1',type:'mfr',detail:{location:'Vadodara, Gujarat',certs:['FDA','ISO 9001','REACH'],capacity:'200 MT/yr',reactions:['Hydrogenation','Grignard','Friedel-Crafts']}},
+    {id:'m2',label:'Navi Organics',x:6,y:45,color:'#6366f1',type:'mfr',detail:{location:'Hyderabad, Telangana',certs:['GMP','REACH'],capacity:'175 MT/yr',reactions:['Hydrogenation','Grignard']}},
+    {id:'m3',label:'Gujarat Fluoro',x:12,y:70,color:'#6366f1',type:'mfr',detail:{location:'Ahmedabad, Gujarat',certs:['ISO 14001','ISO 9001'],capacity:'250 MT/yr',reactions:['Fluorination','Hydrogenation']}},
+    {id:'m4',label:'Deccan Fine',x:22,y:10,color:'#6366f1',type:'mfr',detail:{location:'Pune, Maharashtra',certs:['CGMP','ISO 9001'],capacity:'150 MT/yr',reactions:['Oxidation','Esterification']}},
+    {id:'m5',label:'Sree Krishna',x:4,y:85,color:'#6366f1',type:'mfr',detail:{location:'Vizag, Andhra Pradesh',certs:['ISO 9001'],capacity:'121 MT/yr',reactions:['Hydrogenation','Condensation']}},
+    {id:'m6',label:'Surya Life Sci',x:18,y:42,color:'#6366f1',type:'mfr',detail:{location:'Mumbai, Maharashtra',certs:['FDA','HALAL','GMP'],capacity:'300 MT/yr',reactions:['Amidation','Hydrogenation','Suzuki coupling']}},
+    {id:'m7',label:'Kaivin Chem',x:14,y:55,color:'#6366f1',type:'mfr',detail:{location:'Ankleshwar, Gujarat',certs:['ISO 9001'],capacity:'90 MT/yr',reactions:['Chlorination','Nitration']}},
+    {id:'m8',label:'Raj Pharma',x:24,y:88,color:'#6366f1',type:'mfr',detail:{location:'Jaipur, Rajasthan',certs:['GMP','WHO-GMP'],capacity:'110 MT/yr',reactions:['Reduction','Acetylation']}},
+    {id:'p1',label:'Pymetrozine',x:38,y:30,color:'#f97316',type:'prod',detail:{cas:'123312-89-0',price:'$42–51/kg',suppliers:['Anand Chemtex','Navi Organics','Gujarat Fluoro','Sree Krishna']}},
+    {id:'p2',label:'Fexofenadine',x:42,y:15,color:'#f97316',type:'prod',detail:{cas:'153439-40-8',price:'$4,200–4,800/kg',suppliers:['Anand Chemtex','Deccan Fine','Surya Life Sci']}},
+    {id:'p3',label:'TiO₂',x:32,y:55,color:'#f97316',type:'prod',detail:{cas:'13463-67-7',price:'$480–520/kg',suppliers:['Gujarat Fluoro','Kaivin Chem']}},
+    {id:'p4',label:'Salicylic Acid',x:44,y:65,color:'#f97316',type:'prod',detail:{cas:'69-72-7',price:'$600–700/kg',suppliers:['Navi Organics','Deccan Fine','Raj Pharma']}},
+    {id:'p5',label:'Citric Acid',x:36,y:82,color:'#f97316',type:'prod',detail:{cas:'77-92-9',price:'$150–200/kg',suppliers:['Sree Krishna','Raj Pharma','Surya Life Sci']}},
+    {id:'p6',label:'Zinc Stearate',x:48,y:48,color:'#f97316',type:'prod',detail:{cas:'557-05-1',price:'$300–380/kg',suppliers:['Kaivin Chem','Gujarat Fluoro']}},
+    {id:'c1',label:'EU Pharma Co',x:68,y:12,color:'#22c55e',type:'cust',detail:{region:'Frankfurt, Germany',volume:'$2.4M/yr',products:['Pymetrozine','Fexofenadine']}},
+    {id:'c2',label:'US Agri Corp',x:78,y:35,color:'#22c55e',type:'cust',detail:{region:'Iowa, USA',volume:'$1.8M/yr',products:['Pymetrozine','TiO₂','Citric Acid']}},
+    {id:'c3',label:'JP Cosmetics',x:72,y:70,color:'#22c55e',type:'cust',detail:{region:'Osaka, Japan',volume:'$950K/yr',products:['Salicylic Acid','Fexofenadine','Zinc Stearate']}},
+    {id:'c4',label:'BR Nutri Ltd',x:82,y:58,color:'#22c55e',type:'cust',detail:{region:'São Paulo, Brazil',volume:'$1.1M/yr',products:['Citric Acid','TiO₂']}},
+    {id:'c5',label:'IN Coatings',x:65,y:88,color:'#22c55e',type:'cust',detail:{region:'Chennai, India',volume:'$600K/yr',products:['TiO₂','Zinc Stearate']}},
+    {id:'c6',label:'KR BioTech',x:88,y:18,color:'#22c55e',type:'cust',detail:{region:'Seoul, South Korea',volume:'$1.5M/yr',products:['Fexofenadine','Pymetrozine']}},
   ];
   const links=[
-    ['m1','p1'],['m1','p2'],['m2','p1'],['m2','p4'],['m3','p3'],['m3','p1'],['m4','p2'],['m4','p4'],['m5','p1'],
-    ['p1','c1'],['p1','c2'],['p2','c1'],['p3','c2'],['p4','c3'],['p2','c3']
+    ['m1','p1'],['m1','p2'],['m2','p1'],['m2','p4'],['m3','p3'],['m3','p1'],['m4','p2'],['m4','p4'],['m5','p1'],['m5','p5'],
+    ['m6','p2'],['m6','p5'],['m7','p3'],['m7','p6'],['m8','p4'],['m8','p5'],['m3','p6'],
+    ['p1','c1'],['p1','c2'],['p1','c6'],['p2','c1'],['p2','c3'],['p2','c6'],['p3','c2'],['p3','c4'],['p3','c5'],
+    ['p4','c3'],['p5','c2'],['p5','c4'],['p6','c3'],['p6','c5']
   ];
   const lineData=links.map((l,i)=>{
     const a=nodes.find(n=>n.id===l[0]),b=nodes.find(n=>n.id===l[1]);
-    return{id:i,x1:a.x+'%',y1:a.y+'%',x2:b.x+'%',y2:b.y+'%',from:l[0],to:l[1],highlighted:false,dimmed:false}
+    return{id:i,x1:a.x+'%',y1:a.y+'%',x2:b.x+'%',y2:b.y+'%',from:l[0],to:l[1],highlighted:false,dimmed:false,animated:false}
   });
   return{
     graphNodes:nodes.map(n=>({...n,highlighted:false,dimmed:false})),
     graphLines:lineData,activeQuery:'',queryTitle:'',queryResult:'',
+    searchTerm:'',selectedNode:'',detailPanel:false,detailTitle:'',detailContent:'',
+    tooltipVisible:false,tooltipX:0,tooltipY:0,tooltipContent:'',
+    _hoverLock:false,
+    get visibleNodeCount(){return this.graphNodes.filter(n=>!n.dimmed).length},
+    get visibleLineCount(){return this.graphLines.filter(l=>!l.dimmed).length},
+    _resetGraph(){this.graphNodes.forEach(n=>{n.highlighted=false;n.dimmed=false});this.graphLines.forEach(l=>{l.highlighted=false;l.dimmed=false;l.animated=false})},
+    _highlightConnected(nid,animate){
+      const connected=new Set([nid]);
+      const affLines=this.graphLines.filter(l=>l.from===nid||l.to===nid);
+      affLines.forEach(l=>{l.highlighted=true;if(animate)l.animated=true;connected.add(l.from);connected.add(l.to)});
+      this.graphNodes.forEach(n=>{if(connected.has(n.id))n.highlighted=true;else n.dimmed=true});
+      this.graphLines.forEach(l=>{if(!l.highlighted)l.dimmed=true});
+    },
+    hoverNode(nid){
+      if(this._hoverLock)return;
+      this._resetGraph();
+      this._highlightConnected(nid,false);
+      const nd=this.graphNodes.find(n=>n.id===nid);
+      this.tooltipX=nd.x;this.tooltipY=nd.y;this.tooltipVisible=true;
+      const t=nd.type==='mfr'?'Manufacturer':nd.type==='prod'?'Product':'Customer';
+      const conns=this.graphLines.filter(l=>l.from===nid||l.to===nid).length;
+      this.tooltipContent='<span style="color:'+nd.color+'">'+t+'</span> · '+conns+' connections';
+    },
+    unhoverNode(){
+      if(this._hoverLock)return;
+      this.tooltipVisible=false;
+      if(!this.activeQuery&&!this.searchTerm)this._resetGraph();
+      else if(this.searchTerm)this.applySearch();
+    },
+    clickNode(nid){
+      this.selectedNode=nid;this._hoverLock=true;this.tooltipVisible=false;
+      this._resetGraph();this._highlightConnected(nid,false);
+      const nd=this.graphNodes.find(n=>n.id===nid);
+      this.detailTitle=(nd.type==='mfr'?'🔵 ':nd.type==='prod'?'🟠 ':'🟢 ')+nd.label;
+      const d=nd.detail;
+      if(nd.type==='mfr')this.detailContent='<div><span class="text-gray-400">Location:</span> '+d.location+'</div><div><span class="text-gray-400">Certs:</span> '+d.certs.join(', ')+'</div><div><span class="text-gray-400">Capacity:</span> '+d.capacity+'</div><div><span class="text-gray-400">Reactions:</span> '+d.reactions.join(', ')+'</div>';
+      else if(nd.type==='prod')this.detailContent='<div><span class="text-gray-400">CAS:</span> '+d.cas+'</div><div><span class="text-gray-400">Price Range:</span> '+d.price+'</div><div><span class="text-gray-400">Suppliers:</span> '+d.suppliers.join(', ')+'</div>';
+      else this.detailContent='<div><span class="text-gray-400">Region:</span> '+d.region+'</div><div><span class="text-gray-400">Order Volume:</span> '+d.volume+'</div><div><span class="text-gray-400">Products:</span> '+d.products.join(', ')+'</div>';
+      this.detailPanel=true;
+    },
+    closeDetail(){this.detailPanel=false;this.selectedNode='';this._hoverLock=false;this._resetGraph();if(this.searchTerm)this.applySearch()},
+    applySearch(){
+      this._resetGraph();this.activeQuery='';this.queryResult='';this.closeDetail();this._hoverLock=false;
+      const s=this.searchTerm.toLowerCase().trim();
+      if(!s)return;
+      const match=this.graphNodes.find(n=>n.label.toLowerCase().includes(s));
+      if(match)this._highlightConnected(match.id,false);
+      else this.graphNodes.forEach(n=>n.dimmed=true);
+    },
     runQuery(q){
-      this.activeQuery=q;
-      // Reset
-      this.graphNodes.forEach(n=>{n.highlighted=false;n.dimmed=false});
-      this.graphLines.forEach(l=>{l.highlighted=false;l.dimmed=false});
+      this.activeQuery=q;this.searchTerm='';this.closeDetail();this._hoverLock=false;
+      this._resetGraph();
+      const anim=true;
       if(q==='risk'){
         this.queryTitle='⚠️ Supply Risk: Anand Chemtex Offline';
-        this.graphNodes.forEach(n=>{if(n.id==='m1')n.highlighted=true;});
-        const affected=this.graphLines.filter(l=>l.from==='m1'||l.to==='m1');
-        affected.forEach(l=>l.highlighted=true);
-        this.graphNodes.forEach(n=>{if(!affected.some(l=>l.from===n.id||l.to===n.id)&&n.id!=='m1')n.dimmed=true});
-        this.queryResult='<div class="text-xs space-y-2"><div class="text-red-400 font-medium">2 products directly affected: Pymetrozine, Fexofenadine</div><div class="text-gray-400">Alternative manufacturers:</div><div>• Navi Organics (Hyderabad) — Hydrogenation, Grignard capable</div><div>• Gujarat Fluorochemicals — Hydrogenation capable, 250 MT capacity</div><div class="text-amber mt-2">⚠️ 3 customer orders at risk if not rerouted within 2 weeks</div></div>';
+        this._highlightConnected('m1',anim);
+        this.queryResult='<div class="text-xs space-y-2"><div class="text-red-400 font-medium">2 products directly affected: Pymetrozine, Fexofenadine</div><div class="text-gray-400">Alternative manufacturers:</div><div>• Navi Organics (Hyderabad) — Hydrogenation, Grignard capable</div><div>• Gujarat Fluorochemicals — Hydrogenation capable, 250 MT capacity</div><div>• Surya Life Sci (Mumbai) — Fexofenadine via Suzuki coupling</div><div class="text-amber mt-2">⚠️ 4 customer orders at risk if not rerouted within 2 weeks</div></div>';
       } else if(q==='cost'){
         this.queryTitle='💰 Cost Benchmark: Pymetrozine';
-        this.queryResult='<table class="w-full text-xs"><thead><tr class="text-gray-500"><th class="text-left pb-1">Manufacturer</th><th class="text-right pb-1">Price/kg</th><th class="text-right pb-1">Capacity</th></tr></thead><tbody><tr class="border-t border-white/5"><td class="py-1">Anand Chemtex</td><td class="text-right text-teal">$42</td><td class="text-right">200 MT</td></tr><tr class="border-t border-white/5"><td class="py-1">Navi Organics</td><td class="text-right">$45</td><td class="text-right">175 MT</td></tr><tr class="border-t border-white/5"><td class="py-1">Gujarat Fluoro</td><td class="text-right">$48</td><td class="text-right">250 MT</td></tr><tr class="border-t border-white/5"><td class="py-1">Sree Krishna</td><td class="text-right">$51</td><td class="text-right">121 MT</td></tr></tbody></table>';
+        this._highlightConnected('p1',anim);
+        this.queryResult='<table class="w-full text-xs"><thead><tr class="text-gray-500"><th class="text-left pb-1">Manufacturer</th><th class="text-right pb-1">Price/kg</th><th class="text-right pb-1">Capacity</th></tr></thead><tbody><tr class="border-t border-white/5"><td class="py-1">Anand Chemtex</td><td class="text-right text-teal">$42</td><td class="text-right">200 MT</td></tr><tr class="border-t border-white/5"><td class="py-1">Navi Organics</td><td class="text-right">$45</td><td class="text-right">175 MT</td></tr><tr class="border-t border-white/5"><td class="py-1">Gujarat Fluoro</td><td class="text-right">$48</td><td class="text-right">250 MT</td></tr><tr class="border-t border-white/5"><td class="py-1">Sree Krishna</td><td class="text-right text-red-400">$51</td><td class="text-right">121 MT</td></tr></tbody></table>';
       } else if(q==='capacity'){
         this.queryTitle='🏭 Idle Hydrogenation Capacity';
-        this.queryResult='<div class="text-xs space-y-2"><div class="flex justify-between py-1 border-b border-white/5"><span>Anand Chemtex</span><span class="text-teal">60 MT idle</span></div><div class="flex justify-between py-1 border-b border-white/5"><span>Navi Organics</span><span class="text-teal">40 MT idle</span></div><div class="flex justify-between py-1 border-b border-white/5"><span>Gujarat Fluorochemicals</span><span class="text-amber">15 MT idle</span></div><div class="mt-2 text-gray-400">3 pending orders could utilize this capacity (est. ₹2.1Cr revenue)</div></div>';
-      } else {
+        ['m1','m2','m3','m5','m6'].forEach(id=>{this.graphNodes.find(n=>n.id===id).highlighted=true});
+        this.graphNodes.forEach(n=>{if(!n.highlighted)n.dimmed=true});
+        this.queryResult='<div class="text-xs space-y-2"><div class="flex justify-between py-1 border-b border-white/5"><span>Surya Life Sci</span><span class="text-teal">80 MT idle</span></div><div class="flex justify-between py-1 border-b border-white/5"><span>Anand Chemtex</span><span class="text-teal">60 MT idle</span></div><div class="flex justify-between py-1 border-b border-white/5"><span>Navi Organics</span><span class="text-teal">40 MT idle</span></div><div class="flex justify-between py-1 border-b border-white/5"><span>Gujarat Fluoro</span><span class="text-amber">15 MT idle</span></div><div class="flex justify-between py-1 border-b border-white/5"><span>Sree Krishna</span><span class="text-amber">10 MT idle</span></div><div class="mt-2 text-gray-400">5 pending orders could utilize this capacity (est. ₹3.2Cr revenue)</div></div>';
+      } else if(q==='china'){
         this.queryTitle='🔄 China+1 Opportunities (>70% China Dependency)';
-        this.queryResult='<div class="text-xs space-y-2"><div class="flex justify-between py-1 border-b border-white/5"><span>Pymetrozine</span><span class="text-red-400">82% China</span><span class="text-teal">3 Indian alternatives</span></div><div class="flex justify-between py-1 border-b border-white/5"><span>Fexofenadine Intermediate</span><span class="text-red-400">76% China</span><span class="text-teal">2 Indian alternatives</span></div><div class="flex justify-between py-1 border-b border-white/5"><span>Specialty Fluorine</span><span class="text-amber">71% China</span><span class="text-teal">1 Indian alternative</span></div><div class="mt-2 text-gray-400">Estimated switching revenue opportunity: $2.4M over 18 months</div></div>';
+        ['p1','p2','p6'].forEach(id=>{const n=this.graphNodes.find(x=>x.id===id);n.highlighted=true});
+        this.graphNodes.forEach(n=>{if(!n.highlighted)n.dimmed=true});
+        this.queryResult='<div class="text-xs space-y-2"><div class="flex justify-between py-1 border-b border-white/5"><span>Pymetrozine</span><span class="text-red-400">82% China</span><span class="text-teal">4 Indian alternatives</span></div><div class="flex justify-between py-1 border-b border-white/5"><span>Fexofenadine Intermediate</span><span class="text-red-400">76% China</span><span class="text-teal">3 Indian alternatives</span></div><div class="flex justify-between py-1 border-b border-white/5"><span>Zinc Stearate</span><span class="text-amber">71% China</span><span class="text-teal">2 Indian alternatives</span></div><div class="mt-2 text-gray-400">Estimated switching revenue opportunity: $3.1M over 18 months</div></div>';
+      } else if(q==='crosssell'){
+        this.queryTitle='🔄 Cross-Sell: EU Pharma Co also needs...';
+        this._highlightConnected('c1',anim);
+        this.queryResult='<div class="text-xs space-y-2"><div class="text-gray-400">EU Pharma Co currently buys: Pymetrozine, Fexofenadine</div><div class="font-medium text-teal mt-1">Recommended cross-sell opportunities:</div><div class="flex justify-between py-1 border-b border-white/5"><span>Salicylic Acid</span><span class="text-gray-400">via Deccan Fine</span><span class="text-teal">$180K potential</span></div><div class="flex justify-between py-1 border-b border-white/5"><span>Citric Acid</span><span class="text-gray-400">via Surya Life Sci</span><span class="text-teal">$95K potential</span></div><div class="flex justify-between py-1 border-b border-white/5"><span>TiO₂</span><span class="text-gray-400">via Gujarat Fluoro</span><span class="text-teal">$120K potential</span></div><div class="mt-2 text-gray-400">Based on similar customer purchase patterns (87% confidence)</div></div>';
+      } else if(q==='anomaly'){
+        this.queryTitle='📊 Price Anomaly: Above-Market Pricing Detected';
+        ['m5','m7','m8'].forEach(id=>{const n=this.graphNodes.find(x=>x.id===id);n.highlighted=true});
+        this.graphNodes.forEach(n=>{if(!n.highlighted)n.dimmed=true});
+        this.queryResult='<div class="text-xs space-y-2"><div class="text-red-400 font-medium">3 pricing anomalies detected in last 30 days</div><table class="w-full mt-1"><thead><tr class="text-gray-500"><th class="text-left pb-1">Product</th><th class="text-left pb-1">Supplier</th><th class="text-right pb-1">Quoted</th><th class="text-right pb-1">Market Avg</th><th class="text-right pb-1">Δ</th></tr></thead><tbody><tr class="border-t border-white/5"><td class="py-1">Pymetrozine</td><td>Sree Krishna</td><td class="text-right">$51</td><td class="text-right text-gray-400">$45</td><td class="text-right text-red-400">+13%</td></tr><tr class="border-t border-white/5"><td class="py-1">TiO₂</td><td>Kaivin Chem</td><td class="text-right">$580</td><td class="text-right text-gray-400">$500</td><td class="text-right text-red-400">+16%</td></tr><tr class="border-t border-white/5"><td class="py-1">Salicylic Acid</td><td>Raj Pharma</td><td class="text-right">$740</td><td class="text-right text-gray-400">$650</td><td class="text-right text-red-400">+14%</td></tr></tbody></table><div class="mt-2 text-gray-400">💡 Negotiate or switch to alternative suppliers to save ~$85K/yr</div></div>';
       }
     }
   }
