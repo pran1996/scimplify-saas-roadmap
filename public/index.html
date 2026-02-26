@@ -1388,97 +1388,178 @@ body{background:#0f0d2e;font-family:'Inter',sans-serif;color:#e2e8f0}
 
 <!-- Cart indicator -->
 <div x-show="cart.length>0" class="fixed top-16 right-4 z-30">
-  <button @click="showCart=!showCart" class="bg-indigo text-white px-3 py-1.5 rounded-lg text-xs font-medium shadow-lg">🛒 <span x-text="cart.length"></span> items</button>
+  <button @click="view='cart'" class="bg-indigo text-white px-3 py-1.5 rounded-lg text-xs font-medium shadow-lg">🛒 <span x-text="cart.length"></span> items</button>
 </div>
 
-<div x-show="!showDetail && !showCart && !showQuote">
-<!-- Search & Filters -->
+<!-- Compare bar -->
+<div x-show="compareList.length>0" class="fixed bottom-4 left-1/2 -translate-x-1/2 z-30 glass rounded-xl px-4 py-2 flex items-center gap-3 shadow-xl border border-indigo/30">
+  <span class="text-xs text-gray-400">Compare (<span x-text="compareList.length"></span>/3)</span>
+  <template x-for="c in compareList" :key="c.id"><span class="text-xs bg-indigo/20 text-indigo px-2 py-0.5 rounded" x-text="c.name.split(' ')[0]"></span></template>
+  <button @click="view='compare'" class="bg-indigo text-white px-3 py-1 rounded text-xs" x-show="compareList.length>=2">Compare →</button>
+  <button @click="compareList=[]" class="text-red-400 text-xs">Clear</button>
+</div>
+
+<!-- Navigation Tabs -->
+<div class="flex gap-2 mb-4">
+  <button @click="view='catalog'" class="px-3 py-1.5 rounded-lg text-xs font-medium transition" :class="view==='catalog'?'bg-indigo text-white':'bg-white/5 text-gray-400 hover:text-white'">📦 Catalog</button>
+  <button @click="view='orders'" class="px-3 py-1.5 rounded-lg text-xs font-medium transition" :class="view==='orders'?'bg-indigo text-white':'bg-white/5 text-gray-400 hover:text-white'">📋 My Orders <span class="bg-teal/20 text-teal px-1.5 rounded-full text-[10px] ml-1" x-text="orderHistory.length"></span></button>
+  <button @click="view='cart'" x-show="cart.length>0" class="px-3 py-1.5 rounded-lg text-xs font-medium transition" :class="view==='cart'?'bg-indigo text-white':'bg-white/5 text-gray-400 hover:text-white'">🛒 Cart (<span x-text="cart.length"></span>)</button>
+</div>
+
+<!-- ===== CATALOG VIEW ===== -->
+<div x-show="view==='catalog'" x-cloak>
+
+<!-- Quick Reorder Section -->
+<div x-show="orderHistory.length>0" class="mb-6">
+  <h3 class="text-sm font-semibold text-gray-400 mb-2">⚡ Quick Reorder</h3>
+  <div class="grid md:grid-cols-3 gap-3">
+    <template x-for="o in orderHistory.slice(0,3)" :key="o.id">
+      <div class="glass rounded-lg p-3 flex justify-between items-center">
+        <div>
+          <div class="text-xs font-medium" x-text="o.items.map(i=>i.name.split(' ')[0]).join(', ')"></div>
+          <div class="text-[10px] text-gray-500" x-text="o.date+' · ₹'+o.total.toLocaleString()"></div>
+        </div>
+        <button @click="reorder(o)" class="bg-teal/20 hover:bg-teal/40 text-teal px-2 py-1 rounded text-[10px] font-medium transition">Reorder</button>
+      </div>
+    </template>
+  </div>
+</div>
+
+<!-- Search & Advanced Filters -->
 <div class="flex flex-wrap gap-2 mb-4">
   <input x-model="search" class="bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-sm outline-none focus:border-indigo flex-1 min-w-[200px]" placeholder="Search products...">
   <select x-model="filterPurity" class="bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-xs outline-none">
     <option value="">All Purity</option><option value="99">≥99%</option><option value="98">≥98%</option>
   </select>
+  <select x-model="filterIndustry" class="bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-xs outline-none">
+    <option value="">All Industries</option><option value="Pharma">Pharma</option><option value="Agro">Agro</option><option value="F&F">F&F</option><option value="Cosmetics">Cosmetics</option>
+  </select>
+  <select x-model="filterDelivery" class="bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-xs outline-none">
+    <option value="">All Delivery</option><option value="express">Express</option><option value="standard">Standard</option>
+  </select>
+  <select x-model="filterGreen" class="bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-xs outline-none">
+    <option value="">All GreenScore</option><option value="A+">A+</option><option value="A">A or better</option><option value="B">B or better</option>
+  </select>
 </div>
+
 <!-- Product Grid -->
 <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
   <template x-for="p in filteredProducts" :key="p.id">
-    <div class="glass rounded-xl p-4 glass-hover transition">
-      <div @click="showDetail=p" class="cursor-pointer">
+    <div class="glass rounded-xl p-4 glass-hover transition relative">
+      <!-- GreenScore Badge -->
+      <div x-show="p.greenScore" class="absolute top-3 right-3">
+        <span class="text-[10px] px-1.5 py-0.5 rounded-full font-bold" :class="p.greenScore==='A+'?'bg-emerald-500/20 text-emerald-400':p.greenScore==='A'?'bg-teal/20 text-teal':'bg-yellow-500/20 text-yellow-400'" x-text="'🌿 '+p.greenScore"></span>
+      </div>
+      <div @click="view='detail';showDetail=p" class="cursor-pointer">
         <h3 class="font-semibold text-sm mb-1" x-text="p.name"></h3>
         <div class="text-[10px] text-gray-500 mb-2" x-text="'CAS: '+p.cas"></div>
-        <div class="flex justify-between items-end mb-3">
+        <div class="flex justify-between items-end mb-2">
           <div><div class="text-xs text-gray-400">Purity</div><div class="font-semibold text-sm" x-text="p.purity+'%'"></div></div>
           <div class="text-right"><div class="text-xs text-gray-400">Price/kg</div><div class="font-semibold text-sm text-teal" x-text="'₹'+p.price"></div></div>
+        </div>
+        <!-- Stock & Delivery -->
+        <div class="flex justify-between items-center mb-2">
+          <span class="text-[10px] px-1.5 py-0.5 rounded-full" :class="p.stock==='In Stock'?'bg-emerald-500/20 text-emerald-400':p.stock==='Limited'?'bg-yellow-500/20 text-yellow-400':'bg-orange-500/20 text-orange-400'" x-text="p.stock"></span>
+          <span class="text-[10px] text-gray-500" x-text="'🚚 '+p.deliveryEst"></span>
         </div>
         <div class="text-[10px] text-gray-500 mb-2" x-text="'Min order: '+p.minOrder+' kg'"></div>
         <div class="flex flex-wrap gap-1 mb-3">
           <template x-for="c in p.certs"><span class="text-[10px] px-1.5 py-0.5 rounded bg-teal/10 text-teal" x-text="c"></span></template>
         </div>
       </div>
-      <button @click="addToCart(p)" class="w-full bg-indigo/20 hover:bg-indigo/40 text-indigo py-1.5 rounded-lg text-xs font-medium transition">Add to Cart</button>
+      <div class="flex gap-2">
+        <button @click="addToCart(p)" class="flex-1 bg-indigo/20 hover:bg-indigo/40 text-indigo py-1.5 rounded-lg text-xs font-medium transition">Add to Cart</button>
+        <button @click="toggleCompare(p)" class="px-2 py-1.5 rounded-lg text-xs transition" :class="compareList.find(c=>c.id===p.id)?'bg-indigo text-white':'bg-white/5 text-gray-400 hover:text-white'">⚖️</button>
+      </div>
     </div>
   </template>
 </div>
 </div>
 
-<!-- Product Detail -->
-<div x-show="showDetail" x-cloak class="fade-in">
-  <button @click="showDetail=null" class="text-xs text-gray-400 hover:text-white mb-4">← Back to Catalog</button>
+<!-- ===== PRODUCT DETAIL ===== -->
+<div x-show="view==='detail'" x-cloak class="fade-in">
+  <button @click="view='catalog';showDetail=null" class="text-xs text-gray-400 hover:text-white mb-4">← Back to Catalog</button>
   <template x-if="showDetail">
   <div class="glass rounded-xl p-6">
-    <h3 class="text-lg font-bold mb-1" x-text="showDetail.name"></h3>
+    <div class="flex justify-between items-start mb-1">
+      <h3 class="text-lg font-bold" x-text="showDetail.name"></h3>
+      <div class="flex gap-2 items-center">
+        <span x-show="showDetail.greenScore" class="text-xs px-2 py-0.5 rounded-full font-bold" :class="showDetail.greenScore==='A+'?'bg-emerald-500/20 text-emerald-400':showDetail.greenScore==='A'?'bg-teal/20 text-teal':'bg-yellow-500/20 text-yellow-400'" x-text="'🌿 '+showDetail.greenScore"></span>
+        <span class="text-[10px] px-2 py-0.5 rounded-full" :class="showDetail.stock==='In Stock'?'bg-emerald-500/20 text-emerald-400':showDetail.stock==='Limited'?'bg-yellow-500/20 text-yellow-400':'bg-orange-500/20 text-orange-400'" x-text="showDetail.stock"></span>
+      </div>
+    </div>
     <div class="text-xs text-gray-400 mb-4" x-text="'CAS: '+showDetail.cas"></div>
     <div class="grid md:grid-cols-2 gap-6">
       <div class="space-y-3 text-sm">
         <div><span class="text-gray-400">Purity:</span> <span x-text="showDetail.purity+'%'"></span></div>
         <div><span class="text-gray-400">Molecular Weight:</span> <span x-text="showDetail.mw||'N/A'"></span></div>
-        <div><span class="text-gray-400">Delivery:</span> 5-7 business days</div>
+        <div><span class="text-gray-400">Delivery:</span> <span x-text="showDetail.deliveryEst"></span></div>
+        <div><span class="text-gray-400">Industry:</span> <span x-text="showDetail.industry.join(', ')"></span></div>
         <div><span class="text-gray-400">Manufacturer:</span> Verified Facility (Anonymized)</div>
         <div class="flex flex-wrap gap-1"><template x-for="c in showDetail.certs"><span class="text-xs px-2 py-0.5 rounded bg-teal/10 text-teal" x-text="c"></span></template></div>
       </div>
       <div>
-        <div class="text-xs font-medium text-gray-400 mb-2">Pack Sizes</div>
+        <div class="text-xs font-medium text-gray-400 mb-2">Pack Sizes & Volume Pricing</div>
         <div class="space-y-2">
           <div class="flex justify-between text-sm glass rounded-lg px-3 py-2"><span>25 kg</span><span class="text-teal" x-text="'₹'+(showDetail.price*1.1).toFixed(0)+'/kg'"></span></div>
           <div class="flex justify-between text-sm glass rounded-lg px-3 py-2"><span>100 kg</span><span class="text-teal" x-text="'₹'+showDetail.price+'/kg'"></span></div>
-          <div class="flex justify-between text-sm glass rounded-lg px-3 py-2"><span>500 kg</span><span class="text-teal" x-text="'₹'+(showDetail.price*0.92).toFixed(0)+'/kg'"></span></div>
+          <div class="flex justify-between text-sm glass rounded-lg px-3 py-2"><span>500 kg <span class="text-[10px] text-emerald-400 ml-1">-8%</span></span><span class="text-teal" x-text="'₹'+(showDetail.price*0.92).toFixed(0)+'/kg'"></span></div>
+          <div class="flex justify-between text-sm glass rounded-lg px-3 py-2"><span>1000 kg <span class="text-[10px] text-emerald-400 ml-1">-15%</span></span><span class="text-teal" x-text="'₹'+(showDetail.price*0.85).toFixed(0)+'/kg'"></span></div>
         </div>
-        <button @click="addToCart(showDetail);showDetail=null" class="mt-4 w-full bg-indigo hover:bg-indigo/80 text-white py-2 rounded-lg text-sm font-medium transition">Add to Cart</button>
+        <!-- Quantity Selector -->
+        <div class="mt-4 glass rounded-lg p-3">
+          <div class="text-xs text-gray-400 mb-2">Quantity (kg)</div>
+          <div class="flex items-center gap-3">
+            <button @click="if(detailQty>showDetail.minOrder)detailQty-=showDetail.minOrder" class="w-8 h-8 rounded bg-white/10 hover:bg-white/20 text-lg transition">−</button>
+            <input type="number" x-model.number="detailQty" class="w-20 bg-white/5 border border-white/10 rounded px-2 py-1 text-sm text-center outline-none">
+            <button @click="detailQty+=showDetail.minOrder" class="w-8 h-8 rounded bg-white/10 hover:bg-white/20 text-lg transition">+</button>
+            <span class="text-sm text-teal font-semibold ml-auto" x-text="'₹'+(getVolPrice(showDetail,detailQty)*detailQty).toLocaleString()"></span>
+          </div>
+          <div class="text-[10px] text-gray-500 mt-1" x-text="'Unit price: ₹'+getVolPrice(showDetail,detailQty)+'/kg'+(detailQty>=500?' (volume discount!)':'')"></div>
+        </div>
+        <button @click="addToCartQty(showDetail,detailQty);view='catalog';showDetail=null" class="mt-4 w-full bg-indigo hover:bg-indigo/80 text-white py-2 rounded-lg text-sm font-medium transition">Add to Cart</button>
       </div>
     </div>
   </div>
   </template>
 </div>
 
-<!-- Cart -->
-<div x-show="showCart" x-cloak class="fade-in">
-  <button @click="showCart=false" class="text-xs text-gray-400 hover:text-white mb-4">← Back</button>
+<!-- ===== CART ===== -->
+<div x-show="view==='cart'" x-cloak class="fade-in">
+  <button @click="view='catalog'" class="text-xs text-gray-400 hover:text-white mb-4">← Back</button>
   <div class="glass rounded-xl p-6">
     <h3 class="font-semibold mb-4">Your Cart</h3>
     <template x-for="(item,i) in cart" :key="i">
-      <div class="flex justify-between items-center py-2 border-b border-white/5 text-sm">
-        <span x-text="item.name"></span>
+      <div class="flex justify-between items-center py-3 border-b border-white/5 text-sm">
+        <span x-text="item.name" class="flex-1"></span>
         <div class="flex items-center gap-3">
-          <span class="text-gray-400" x-text="item.qty+' kg'"></span>
-          <span class="text-teal" x-text="'₹'+(item.price*item.qty).toLocaleString()"></span>
+          <div class="flex items-center gap-1">
+            <button @click="if(item.qty>item.minOrder){item.qty-=item.minOrder;item.price=getVolPrice(products.find(p=>p.name===item.name),item.qty)}" class="w-6 h-6 rounded bg-white/10 hover:bg-white/20 text-xs transition">−</button>
+            <span class="text-gray-400 w-14 text-center text-xs" x-text="item.qty+' kg'"></span>
+            <button @click="item.qty+=item.minOrder;item.price=getVolPrice(products.find(p=>p.name===item.name),item.qty)" class="w-6 h-6 rounded bg-white/10 hover:bg-white/20 text-xs transition">+</button>
+          </div>
+          <span class="text-teal w-24 text-right" x-text="'₹'+(item.price*item.qty).toLocaleString()"></span>
           <button @click="cart.splice(i,1)" class="text-red-400 text-xs">✗</button>
         </div>
       </div>
     </template>
-    <div class="flex justify-between items-center mt-4 pt-4 border-t border-white/10">
-      <span class="font-semibold">Total</span>
-      <span class="text-lg font-bold text-teal" x-text="'₹'+cartTotal().toLocaleString()"></span>
+    <div x-show="cart.length===0" class="text-center text-gray-500 text-sm py-8">Cart is empty</div>
+    <div x-show="cart.length>0">
+      <div class="flex justify-between items-center mt-4 pt-4 border-t border-white/10">
+        <span class="font-semibold">Total</span>
+        <span class="text-lg font-bold text-teal" x-text="'₹'+cartTotal().toLocaleString()"></span>
+      </div>
+      <button @click="view='quote';quoteId='SCM-'+Math.floor(Math.random()*9000+1000)" class="mt-4 w-full bg-indigo hover:bg-indigo/80 text-white py-2 rounded-lg text-sm font-medium transition">Get Instant Quote →</button>
     </div>
-    <button @click="showCart=false;showQuote=true" class="mt-4 w-full bg-indigo hover:bg-indigo/80 text-white py-2 rounded-lg text-sm font-medium transition">Get Instant Quote →</button>
   </div>
 </div>
 
-<!-- Quote -->
-<div x-show="showQuote" x-cloak class="fade-in">
-  <button @click="showQuote=false" class="text-xs text-gray-400 hover:text-white mb-4">← Back</button>
+<!-- ===== QUOTE ===== -->
+<div x-show="view==='quote'" x-cloak class="fade-in">
+  <button @click="view='cart'" class="text-xs text-gray-400 hover:text-white mb-4">← Back to Cart</button>
   <div class="glass rounded-xl p-6 border-l-4 border-teal glow-teal">
     <h3 class="font-bold text-lg mb-1">Quote Summary</h3>
-    <div class="text-xs text-gray-400 mb-4">Quote #SCM-<span x-text="Math.floor(Math.random()*9000+1000)"></span></div>
+    <div class="text-xs text-gray-400 mb-4">Quote #<span x-text="quoteId"></span></div>
     <template x-for="item in cart" :key="item.name">
       <div class="flex justify-between text-sm py-1 border-b border-white/5">
         <span x-text="item.name+' × '+item.qty+' kg'"></span>
@@ -1491,8 +1572,109 @@ body{background:#0f0d2e;font-family:'Inter',sans-serif;color:#e2e8f0}
       <div><span class="text-gray-400 block">Payment</span><span>Net 30</span></div>
       <div><span class="text-gray-400 block">Valid For</span><span>7 days</span></div>
     </div>
+    <button @click="placeOrder()" class="mt-4 w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2 rounded-lg text-sm font-medium transition">✓ Place Order</button>
   </div>
 </div>
+
+<!-- ===== ORDER TRACKING ===== -->
+<div x-show="view==='tracking'" x-cloak class="fade-in">
+  <button @click="view='orders'" class="text-xs text-gray-400 hover:text-white mb-4">← Back to Orders</button>
+  <template x-if="trackingOrder">
+  <div class="glass rounded-xl p-6 border-l-4 border-emerald-500">
+    <div class="flex justify-between items-start mb-4">
+      <div>
+        <h3 class="font-bold text-lg">Order Confirmed! 🎉</h3>
+        <div class="text-xs text-gray-400" x-text="'Order #'+trackingOrder.id+' · '+trackingOrder.date"></div>
+      </div>
+      <span class="text-xs px-2 py-1 rounded-full" :class="trackingOrder.status==='Delivered'?'bg-emerald-500/20 text-emerald-400':trackingOrder.status==='In Transit'?'bg-blue-500/20 text-blue-400':'bg-yellow-500/20 text-yellow-400'" x-text="trackingOrder.status"></span>
+    </div>
+    <!-- Tracking Steps -->
+    <div class="relative mt-6 mb-6">
+      <div class="flex justify-between">
+        <template x-for="(step,i) in trackingSteps" :key="i">
+          <div class="flex flex-col items-center flex-1">
+            <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold mb-2 transition-all" :class="i<=trackingOrder.trackStep?'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30':'bg-white/10 text-gray-500'" x-text="i<=trackingOrder.trackStep?'✓':(i+1)"></div>
+            <div class="text-[10px] text-center" :class="i<=trackingOrder.trackStep?'text-emerald-400':'text-gray-500'" x-text="step.label"></div>
+            <div class="text-[9px] text-gray-600 mt-0.5" x-text="step.date"></div>
+          </div>
+        </template>
+      </div>
+      <div class="absolute top-4 left-[8%] right-[8%] h-0.5 bg-white/10 -z-10">
+        <div class="h-full bg-emerald-500 transition-all" :style="'width:'+((trackingOrder.trackStep)/(trackingSteps.length-1)*100)+'%'"></div>
+      </div>
+    </div>
+    <!-- Order Items -->
+    <div class="mt-4 border-t border-white/10 pt-4">
+      <template x-for="item in trackingOrder.items" :key="item.name">
+        <div class="flex justify-between text-sm py-1"><span x-text="item.name+' × '+item.qty+' kg'"></span><span class="text-teal" x-text="'₹'+(item.price*item.qty).toLocaleString()"></span></div>
+      </template>
+      <div class="flex justify-between font-bold mt-2 pt-2 border-t border-white/10"><span>Total</span><span class="text-teal" x-text="'₹'+trackingOrder.total.toLocaleString()"></span></div>
+    </div>
+  </div>
+  </template>
+</div>
+
+<!-- ===== MY ORDERS ===== -->
+<div x-show="view==='orders'" x-cloak class="fade-in">
+  <button @click="view='catalog'" class="text-xs text-gray-400 hover:text-white mb-4">← Back to Catalog</button>
+  <h3 class="font-semibold mb-4">My Orders</h3>
+  <div x-show="orderHistory.length===0" class="glass rounded-xl p-8 text-center text-gray-500 text-sm">No orders yet. Start shopping!</div>
+  <div class="space-y-3">
+    <template x-for="order in orderHistory" :key="order.id">
+      <div class="glass rounded-xl p-4">
+        <div class="flex justify-between items-start mb-2">
+          <div>
+            <div class="text-sm font-medium" x-text="'Order #'+order.id"></div>
+            <div class="text-[10px] text-gray-500" x-text="order.date"></div>
+          </div>
+          <span class="text-[10px] px-2 py-0.5 rounded-full" :class="order.status==='Delivered'?'bg-emerald-500/20 text-emerald-400':order.status==='In Transit'?'bg-blue-500/20 text-blue-400':'bg-yellow-500/20 text-yellow-400'" x-text="order.status"></span>
+        </div>
+        <div class="text-xs text-gray-400 mb-2">
+          <template x-for="item in order.items" :key="item.name"><span class="mr-2" x-text="item.name+' ('+item.qty+'kg)'"></span></template>
+        </div>
+        <div class="flex justify-between items-center">
+          <span class="text-sm font-semibold text-teal" x-text="'₹'+order.total.toLocaleString()"></span>
+          <div class="flex gap-2">
+            <button @click="trackingOrder=order;view='tracking'" class="bg-white/5 hover:bg-white/10 text-gray-300 px-3 py-1 rounded text-[10px] font-medium transition">📍 Track</button>
+            <button @click="reorder(order)" class="bg-teal/20 hover:bg-teal/40 text-teal px-3 py-1 rounded text-[10px] font-medium transition">🔄 Reorder</button>
+          </div>
+        </div>
+      </div>
+    </template>
+  </div>
+</div>
+
+<!-- ===== PRODUCT COMPARISON ===== -->
+<div x-show="view==='compare'" x-cloak class="fade-in">
+  <button @click="view='catalog'" class="text-xs text-gray-400 hover:text-white mb-4">← Back to Catalog</button>
+  <h3 class="font-semibold mb-4">Product Comparison</h3>
+  <div class="glass rounded-xl p-4 overflow-x-auto">
+    <table class="w-full text-sm">
+      <thead>
+        <tr class="border-b border-white/10">
+          <th class="text-left py-2 text-xs text-gray-400 font-medium">Attribute</th>
+          <template x-for="c in compareList" :key="c.id"><th class="text-center py-2 text-xs font-medium" x-text="c.name"></th></template>
+        </tr>
+      </thead>
+      <tbody class="text-xs">
+        <tr class="border-b border-white/5"><td class="py-2 text-gray-400">Purity</td><template x-for="c in compareList" :key="'p'+c.id"><td class="text-center py-2" x-text="c.purity+'%'"></td></template></tr>
+        <tr class="border-b border-white/5"><td class="py-2 text-gray-400">Price/kg</td><template x-for="c in compareList" :key="'pr'+c.id"><td class="text-center py-2 text-teal" x-text="'₹'+c.price"></td></template></tr>
+        <tr class="border-b border-white/5"><td class="py-2 text-gray-400">Min Order</td><template x-for="c in compareList" :key="'m'+c.id"><td class="text-center py-2" x-text="c.minOrder+' kg'"></td></template></tr>
+        <tr class="border-b border-white/5"><td class="py-2 text-gray-400">Stock</td><template x-for="c in compareList" :key="'s'+c.id"><td class="text-center py-2"><span :class="c.stock==='In Stock'?'text-emerald-400':c.stock==='Limited'?'text-yellow-400':'text-orange-400'" x-text="c.stock"></span></td></template></tr>
+        <tr class="border-b border-white/5"><td class="py-2 text-gray-400">Delivery</td><template x-for="c in compareList" :key="'d'+c.id"><td class="text-center py-2" x-text="c.deliveryEst"></td></template></tr>
+        <tr class="border-b border-white/5"><td class="py-2 text-gray-400">GreenScore</td><template x-for="c in compareList" :key="'g'+c.id"><td class="text-center py-2"><span :class="c.greenScore==='A+'?'text-emerald-400':c.greenScore==='A'?'text-teal':'text-yellow-400'" x-text="c.greenScore||'N/A'"></span></td></template></tr>
+        <tr class="border-b border-white/5"><td class="py-2 text-gray-400">Certifications</td><template x-for="c in compareList" :key="'ce'+c.id"><td class="text-center py-2" x-text="c.certs.join(', ')"></td></template></tr>
+        <tr><td class="py-2 text-gray-400">Industry</td><template x-for="c in compareList" :key="'i'+c.id"><td class="text-center py-2" x-text="c.industry.join(', ')"></td></template></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="flex gap-2 mt-4">
+    <template x-for="c in compareList" :key="'btn'+c.id">
+      <button @click="addToCart(c)" class="flex-1 bg-indigo/20 hover:bg-indigo/40 text-indigo py-2 rounded-lg text-xs font-medium transition" x-text="'Add '+c.name.split(' ')[0]+' to Cart'"></button>
+    </template>
+  </div>
+</div>
+
 </div>
 
 <!-- ====== PRODUCT 6: GreenScore ====== -->
@@ -1817,25 +1999,42 @@ body{background:#0f0d2e;font-family:'Inter',sans-serif;color:#e2e8f0}
 <div x-show="gTab==='cbam'" x-cloak>
   <div class="glass rounded-xl p-6">
     <h3 class="font-semibold text-sm mb-4">CBAM Impact Calculator</h3>
-    <div class="grid md:grid-cols-2 gap-4 mb-4">
+    <div class="grid md:grid-cols-3 gap-4 mb-4">
       <div><label class="text-xs text-gray-400 block mb-1">Import Volume (tons)</label><input x-model.number="cbamTons" type="number" class="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo" placeholder="100"></div>
-      <div><label class="text-xs text-gray-400 block mb-1">Destination</label><select class="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo"><option>European Union</option></select></div>
+      <div>
+        <label class="text-xs text-gray-400 block mb-1">Destination Country</label>
+        <div class="flex flex-wrap gap-1.5">
+          <template x-for="c in cbamCountries" :key="c.code">
+            <button @click="cbamCountry=c.code" :class="cbamCountry===c.code?'bg-indigo/30 border-indigo text-white':'bg-white/5 border-white/10 text-gray-400'" class="border rounded-lg px-2 py-1 text-xs transition flex items-center gap-1">
+              <span x-text="c.flag"></span><span x-text="c.name"></span>
+            </button>
+          </template>
+        </div>
+      </div>
+      <div class="flex items-end">
+        <div class="glass rounded-lg p-2 w-full text-center">
+          <div class="text-[10px] text-gray-500">Carbon Price</div>
+          <div class="text-lg font-bold text-indigo" x-text="'€'+currentCarbonPrice()+'/tCO₂'"></div>
+          <div class="text-[10px] text-gray-500" x-text="cbamCountries.find(c=>c.code===cbamCountry)?.name+' rate'"></div>
+        </div>
+      </div>
     </div>
     <div x-show="cbamTons>0" class="grid md:grid-cols-2 gap-4">
       <div class="glass rounded-lg p-4 border-l-2 border-amber">
         <div class="text-xs text-gray-400 mb-1">Traditional Route</div>
-        <div class="text-xl font-bold text-amber" x-text="'€'+(cbamTons*5.8*75).toLocaleString()"></div>
-        <div class="text-xs text-gray-500">@ 5.8 tCO₂/ton × €75/tCO₂</div>
+        <div class="text-xl font-bold text-amber" x-text="'€'+(cbamTons*5.8*currentCarbonPrice()).toLocaleString()"></div>
+        <div class="text-xs text-gray-500" x-text="'@ 5.8 tCO₂/ton × €'+currentCarbonPrice()+'/tCO₂'"></div>
       </div>
       <div class="glass rounded-lg p-4 border-l-2 border-teal">
         <div class="text-xs text-gray-400 mb-1">Scimplify Optimized</div>
-        <div class="text-xl font-bold text-teal" x-text="'€'+(cbamTons*2.1*75).toLocaleString()"></div>
-        <div class="text-xs text-gray-500">@ 2.1 tCO₂/ton × €75/tCO₂</div>
+        <div class="text-xl font-bold text-teal" x-text="'€'+(cbamTons*2.1*currentCarbonPrice()).toLocaleString()"></div>
+        <div class="text-xs text-gray-500" x-text="'@ 2.1 tCO₂/ton × €'+currentCarbonPrice()+'/tCO₂'"></div>
       </div>
     </div>
     <div x-show="cbamTons>0" class="mt-4 text-center">
       <div class="text-sm text-gray-400">Potential Savings</div>
-      <div class="text-2xl font-bold text-teal" x-text="'€'+(cbamTons*(5.8-2.1)*75).toLocaleString()"></div>
+      <div class="text-2xl font-bold text-teal" x-text="'€'+(cbamTons*(5.8-2.1)*currentCarbonPrice()).toLocaleString()"></div>
+      <div class="text-xs text-gray-500 mt-1" x-text="'Importing to '+cbamCountries.find(c=>c.code===cbamCountry)?.name+' at €'+currentCarbonPrice()+'/tCO₂'"></div>
     </div>
   </div>
 </div>
@@ -2197,36 +2396,103 @@ function complianceApp(){return{
 
 function atomsApp(){
   const prods=[
-    {id:1,name:'Magnesium Hydroxide',cas:'1309-42-8',purity:99,price:420,minOrder:25,certs:['ISO 9001','GMP'],mw:'58.32'},
-    {id:2,name:'Pymetrozine',cas:'123312-89-0',purity:98,price:3200,minOrder:5,certs:['FDA','GMP','REACH'],mw:'217.23'},
-    {id:3,name:'Fexofenadine HCl',cas:'153439-40-8',purity:99.5,price:4800,minOrder:1,certs:['FDA','CGMP','ISO 9001'],mw:'538.12'},
-    {id:4,name:'Sodium Fluoride',cas:'7681-49-4',purity:99,price:280,minOrder:50,certs:['ISO 9001'],mw:'41.99'},
-    {id:5,name:'Zinc Stearate',cas:'557-05-1',purity:98,price:350,minOrder:25,certs:['ISO 9001','GMP'],mw:'632.33'},
-    {id:6,name:'Titanium Dioxide',cas:'13463-67-7',purity:99,price:520,minOrder:50,certs:['ISO 9001','ISO 14001','REACH'],mw:'79.87'},
-    {id:7,name:'Citric Acid Anhydrous',cas:'77-92-9',purity:99.5,price:180,minOrder:100,certs:['FDA','GMP','HALAL'],mw:'192.12'},
-    {id:8,name:'Salicylic Acid',cas:'69-72-7',purity:99,price:650,minOrder:10,certs:['FDA','GMP','ISO 9001'],mw:'138.12'},
+    {id:1,name:'Magnesium Hydroxide',cas:'1309-42-8',purity:99,price:420,minOrder:25,certs:['ISO 9001','GMP'],mw:'58.32',stock:'In Stock',deliveryEst:'Ships in 3-5 days',deliverySpeed:'express',greenScore:'A+',industry:['Pharma','Cosmetics']},
+    {id:2,name:'Pymetrozine',cas:'123312-89-0',purity:98,price:3200,minOrder:5,certs:['FDA','GMP','REACH'],mw:'217.23',stock:'In Stock',deliveryEst:'Ships in 5-7 days',deliverySpeed:'standard',greenScore:'B',industry:['Agro']},
+    {id:3,name:'Fexofenadine HCl',cas:'153439-40-8',purity:99.5,price:4800,minOrder:1,certs:['FDA','CGMP','ISO 9001'],mw:'538.12',stock:'Limited',deliveryEst:'Ships in 5-7 days',deliverySpeed:'standard',greenScore:'A',industry:['Pharma']},
+    {id:4,name:'Sodium Fluoride',cas:'7681-49-4',purity:99,price:280,minOrder:50,certs:['ISO 9001'],mw:'41.99',stock:'In Stock',deliveryEst:'Ships in 3-5 days',deliverySpeed:'express',greenScore:null,industry:['Pharma','Cosmetics']},
+    {id:5,name:'Zinc Stearate',cas:'557-05-1',purity:98,price:350,minOrder:25,certs:['ISO 9001','GMP'],mw:'632.33',stock:'In Stock',deliveryEst:'Ships in 5-7 days',deliverySpeed:'standard',greenScore:'A',industry:['Cosmetics','F&F']},
+    {id:6,name:'Titanium Dioxide',cas:'13463-67-7',purity:99,price:520,minOrder:50,certs:['ISO 9001','ISO 14001','REACH'],mw:'79.87',stock:'Made to Order',deliveryEst:'Ships in 10-14 days',deliverySpeed:'standard',greenScore:'A+',industry:['Cosmetics','Pharma']},
+    {id:7,name:'Citric Acid Anhydrous',cas:'77-92-9',purity:99.5,price:180,minOrder:100,certs:['FDA','GMP','HALAL'],mw:'192.12',stock:'In Stock',deliveryEst:'Ships in 2-3 days',deliverySpeed:'express',greenScore:'A+',industry:['Pharma','F&F','Cosmetics']},
+    {id:8,name:'Salicylic Acid',cas:'69-72-7',purity:99,price:650,minOrder:10,certs:['FDA','GMP','ISO 9001'],mw:'138.12',stock:'Limited',deliveryEst:'Ships in 5-7 days',deliverySpeed:'standard',greenScore:'A',industry:['Pharma','Cosmetics']},
   ];
+  const greenRank={'A+':3,'A':2,'B':1};
   return{
-    products:prods,search:'',filterPurity:'',showDetail:null,showCart:false,showQuote:false,cart:[],
+    products:prods,search:'',filterPurity:'',filterIndustry:'',filterDelivery:'',filterGreen:'',
+    view:'catalog',showDetail:null,cart:[],quoteId:'',detailQty:25,
+    compareList:[],
+    trackingOrder:null,
+    trackingSteps:[
+      {label:'Order Placed',date:'Day 1'},{label:'Payment Confirmed',date:'Day 1'},
+      {label:'Manufacturing',date:'Day 2-3'},{label:'Quality Check',date:'Day 4'},
+      {label:'Dispatched',date:'Day 5'},{label:'Delivered',date:'Day 7'}
+    ],
+    orderHistory:[
+      {id:'SCM-4821',date:'18 Feb 2026',status:'Delivered',trackStep:5,total:142000,items:[{name:'Citric Acid Anhydrous',qty:500,price:180,minOrder:100},{name:'Magnesium Hydroxide',qty:100,price:420,minOrder:25}]},
+      {id:'SCM-4956',date:'22 Feb 2026',status:'In Transit',trackStep:4,total:48000,items:[{name:'Fexofenadine HCl',qty:10,price:4800,minOrder:1}]},
+      {id:'SCM-5012',date:'25 Feb 2026',status:'Processing',trackStep:2,total:32000,items:[{name:'Pymetrozine',qty:10,price:3200,minOrder:5}]},
+    ],
     get filteredProducts(){return this.products.filter(p=>{
       if(this.search&&!p.name.toLowerCase().includes(this.search.toLowerCase()))return false;
       if(this.filterPurity&&p.purity<parseFloat(this.filterPurity))return false;
+      if(this.filterIndustry&&!p.industry.includes(this.filterIndustry))return false;
+      if(this.filterDelivery&&p.deliverySpeed!==this.filterDelivery)return false;
+      if(this.filterGreen){const min=greenRank[this.filterGreen]||0;if(!p.greenScore||(greenRank[p.greenScore]||0)<min)return false;}
       return true;
     })},
-    addToCart(p){if(!this.cart.find(c=>c.name===p.name))this.cart.push({name:p.name,price:p.price,qty:p.minOrder})},
-    cartTotal(){return this.cart.reduce((s,c)=>s+c.price*c.qty,0)}
+    getVolPrice(p,qty){if(qty>=1000)return Math.round(p.price*0.85);if(qty>=500)return Math.round(p.price*0.92);if(qty>=100)return p.price;return Math.round(p.price*1.1)},
+    addToCart(p){if(!this.cart.find(c=>c.name===p.name))this.cart.push({name:p.name,price:p.price,qty:p.minOrder,minOrder:p.minOrder})},
+    addToCartQty(p,qty){const existing=this.cart.find(c=>c.name===p.name);if(existing){existing.qty=qty;existing.price=this.getVolPrice(p,qty)}else{this.cart.push({name:p.name,price:this.getVolPrice(p,qty),qty:qty,minOrder:p.minOrder})}},
+    cartTotal(){return this.cart.reduce((s,c)=>s+c.price*c.qty,0)},
+    toggleCompare(p){const idx=this.compareList.findIndex(c=>c.id===p.id);if(idx>=0)this.compareList.splice(idx,1);else if(this.compareList.length<3)this.compareList.push(p)},
+    reorder(order){order.items.forEach(item=>{if(!this.cart.find(c=>c.name===item.name))this.cart.push({...item})});this.view='cart'},
+    placeOrder(){const order={id:this.quoteId,date:new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}),status:'Processing',trackStep:1,total:this.cartTotal(),items:this.cart.map(c=>({...c}))};this.orderHistory.unshift(order);this.trackingOrder=order;this.cart=[];this.view='tracking'}
   }
 }
 
 function greenApp(){return{
-  gTab:'compare',cbamTons:100,
+  gTab:'compare',cbamTons:100,cbamCountry:'DE',
+  selectedProduct:'Pymetrozine',
+  productData:{
+    'Pymetrozine':{trad:{grade:'B',steps:8,energy:45,water:120,waste:3.2,co2:5.8},opt:{grade:'A+',steps:5,energy:22,water:45,waste:0.8,co2:2.1},iters:[{label:'V1 (Baseline)',co2:5.8},{label:'V2 (Catalyst)',co2:4.2},{label:'V3 (Solvent)',co2:3.1},{label:'V4 (Optimized)',co2:2.1}]},
+    'Fexofenadine':{trad:{grade:'C+',steps:11,energy:62,water:180,waste:4.5,co2:7.2},opt:{grade:'A',steps:7,energy:30,water:65,waste:1.2,co2:3.0},iters:[{label:'V1 (Baseline)',co2:7.2},{label:'V2 (Route)',co2:5.4},{label:'V3 (Optimized)',co2:3.0}]},
+    'Salicylic Acid':{trad:{grade:'B+',steps:4,energy:28,water:80,waste:2.1,co2:3.8},opt:{grade:'A+',steps:3,energy:15,water:30,waste:0.5,co2:1.4},iters:[{label:'V1 (Baseline)',co2:3.8},{label:'V2 (Energy)',co2:2.6},{label:'V3 (Optimized)',co2:1.4}]},
+    'TiO₂':{trad:{grade:'C',steps:6,energy:85,water:200,waste:5.8,co2:9.1},opt:{grade:'B+',steps:5,energy:52,water:110,waste:2.4,co2:4.8},iters:[{label:'V1 (Baseline)',co2:9.1},{label:'V2 (Process)',co2:7.0},{label:'V3 (Energy)',co2:5.6},{label:'V4 (Optimized)',co2:4.8}]},
+  },
   routes:[
     {name:'Traditional Route',grade:'B',steps:8,energy:45,water:120,waste:3.2,co2:5.8},
     {name:'Scimplify Optimized',grade:'A+',steps:5,energy:22,water:45,waste:0.8,co2:2.1},
   ],
+  currentIterations:[{label:'V1 (Baseline)',co2:5.8},{label:'V2 (Catalyst)',co2:4.2},{label:'V3 (Solvent)',co2:3.1},{label:'V4 (Optimized)',co2:2.1}],
+  builder:{steps:5,energy:'mixed',location:'tamilnadu'},
+  cbamCountries:[
+    {code:'DE',name:'Germany',flag:'🇩🇪',price:75},
+    {code:'FR',name:'France',flag:'🇫🇷',price:70},
+    {code:'NL',name:'Netherlands',flag:'🇳🇱',price:78},
+    {code:'IT',name:'Italy',flag:'🇮🇹',price:68},
+    {code:'BE',name:'Belgium',flag:'🇧🇪',price:73},
+  ],
+  portfolio:[
+    {name:'Pymetrozine',grade:'A+',co2:2.1,trend:'down',tons:120},
+    {name:'Fexofenadine',grade:'A',co2:3.0,trend:'down',tons:85},
+    {name:'Salicylic Acid',grade:'A+',co2:1.4,trend:'down',tons:200},
+    {name:'TiO₂',grade:'B+',co2:4.8,trend:'up',tons:300},
+    {name:'Citric Acid',grade:'A',co2:2.6,trend:'stable',tons:450},
+    {name:'Magnesium Hydroxide',grade:'A',co2:2.2,trend:'down',tons:180},
+    {name:'Zinc Stearate',grade:'B+',co2:4.1,trend:'stable',tons:90},
+    {name:'Sodium Fluoride',grade:'A+',co2:1.8,trend:'down',tons:150},
+  ],
   metricLabels:{steps:'Steps',energy:'Energy',water:'Water',waste:'Waste',co2:'CO₂'},
   metricUnits:{steps:'steps',energy:'kWh/kg',water:'L/kg',waste:'kg/kg',co2:'kg CO₂e/kg'},
-  maxMetric(m){return Math.max(...this.routes.map(r=>r[m]))}
+  maxMetric(m){return Math.max(...this.routes.map(r=>r[m]))},
+  updateRoutes(){
+    const d=this.productData[this.selectedProduct];
+    this.routes=[
+      {name:'Traditional Route',...d.trad},
+      {name:'Scimplify Optimized',...d.opt},
+    ];
+    this.currentIterations=d.iters;
+  },
+  builderScore(){
+    const base=1.2;
+    const stepsCost=(this.builder.steps-3)*0.4;
+    const energyCost=this.builder.energy==='grid'?1.8:this.builder.energy==='mixed'?0.9:0.2;
+    const locCost=this.builder.location==='gujarat'?0.6:this.builder.location==='tamilnadu'?0.3:0.5;
+    return base+stepsCost+energyCost+locCost;
+  },
+  currentCarbonPrice(){
+    const c=this.cbamCountries.find(c=>c.code===this.cbamCountry);
+    return c?c.price:75;
+  }
 }}
 </script>
 </body>
