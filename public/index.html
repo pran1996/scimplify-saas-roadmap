@@ -682,6 +682,63 @@ body{background:#0f0d2e;font-family:'Inter',sans-serif;color:#e2e8f0}
 <h2 class="text-2xl font-bold mb-2 text-center">Interactive Revenue & Roadmap</h2>
 <p class="text-xs text-gray-500 text-center mb-6">Adjust assumptions per product. Drag timeline. Watch revenue update in real-time.</p>
 
+<!-- Cost Assumptions Panel -->
+<div class="glass rounded-xl p-4 mb-4">
+  <div class="flex items-center justify-between mb-3 cursor-pointer" @click="showCostConfig=!showCostConfig">
+    <h3 class="text-sm font-semibold">💰 Team & Cost Assumptions</h3>
+    <span class="text-[10px] text-gray-400" x-text="showCostConfig?'▲ Collapse':'▼ Expand — Eng: ₹'+engCostL+'L/mo · PM: ₹'+pmCostL+'L/mo · Infra: ₹'+infraCostL+'L/mo'"></span>
+  </div>
+  <div x-show="showCostConfig" x-collapse>
+    <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
+      <div>
+        <label class="text-[10px] text-gray-400 block mb-1">Engineer Cost (₹L/month)</label>
+        <div class="flex items-center gap-2">
+          <input type="range" x-model.number="engCostL" min="0.5" max="4" step="0.25" @input="recalc()" class="flex-1 h-1 accent-indigo">
+          <span class="text-sm font-medium w-10 text-right" x-text="'₹'+engCostL+'L'"></span>
+        </div>
+        <div class="text-[9px] text-gray-600 mt-0.5">Fully loaded: salary + benefits + tools</div>
+      </div>
+      <div>
+        <label class="text-[10px] text-gray-400 block mb-1">PM Cost (₹L/month)</label>
+        <div class="flex items-center gap-2">
+          <input type="range" x-model.number="pmCostL" min="0.5" max="4" step="0.25" @input="recalc()" class="flex-1 h-1 accent-indigo">
+          <span class="text-sm font-medium w-10 text-right" x-text="'₹'+pmCostL+'L'"></span>
+        </div>
+        <div class="text-[9px] text-gray-600 mt-0.5">Product manager / project lead</div>
+      </div>
+      <div>
+        <label class="text-[10px] text-gray-400 block mb-1">Infra + Cloud (₹L/month)</label>
+        <div class="flex items-center gap-2">
+          <input type="range" x-model.number="infraCostL" min="0" max="2" step="0.1" @input="recalc()" class="flex-1 h-1 accent-indigo">
+          <span class="text-sm font-medium w-10 text-right" x-text="'₹'+infraCostL+'L'"></span>
+        </div>
+        <div class="text-[9px] text-gray-600 mt-0.5">Servers, APIs, third-party services</div>
+      </div>
+    </div>
+    <!-- Per-product team size -->
+    <div class="text-[10px] text-gray-400 font-medium mb-2">Team Size per Product</div>
+    <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
+      <template x-for="p in products" :key="'team-'+p.id">
+        <div class="glass rounded-lg p-2 flex items-center gap-2" :class="p.enabled?'':'opacity-30'">
+          <span class="text-[10px] w-16 truncate" x-text="p.icon+' '+p.shortName"></span>
+          <div class="flex items-center gap-1 flex-1">
+            <button @click="p.engineers=Math.max(1,p.engineers-1);recalc()" class="w-4 h-4 rounded bg-white/5 hover:bg-white/10 text-gray-400 text-[10px] transition">−</button>
+            <span class="text-[10px] font-medium w-6 text-center" x-text="p.engineers"></span>
+            <button @click="p.engineers=Math.min(8,p.engineers+1);recalc()" class="w-4 h-4 rounded bg-white/5 hover:bg-white/10 text-gray-400 text-[10px] transition">+</button>
+            <span class="text-[9px] text-gray-500">eng</span>
+          </div>
+          <div class="flex items-center gap-1">
+            <span class="text-[9px] text-gray-500">PM</span>
+            <button @click="p.pmFraction=p.pmFraction===1?0.5:p.pmFraction===0.5?0.25:1;recalc()" class="text-[10px] px-1 py-0.5 rounded bg-white/5 hover:bg-white/10 text-gray-400 transition" x-text="p.pmFraction===1?'Full':p.pmFraction===0.5?'Half':'25%'"></button>
+          </div>
+          <div class="text-[10px] font-medium text-indigo w-10 text-right" x-text="'₹'+p.investmentL.toFixed(0)+'L'"></div>
+        </div>
+      </template>
+    </div>
+    <div class="mt-2 text-[9px] text-gray-600">Investment = (engineers × eng cost + PM fraction × PM cost + infra) × build duration (months)</div>
+  </div>
+</div>
+
 <!-- Product Assumptions Table -->
 <div class="glass rounded-xl p-5 mb-6 overflow-x-auto">
   <div class="min-w-[700px]">
@@ -2381,13 +2438,17 @@ function app(){return{
 }}
 
 function revenueModel(){return{
+  showCostConfig:false,
+  engCostL:1.5,   // ₹L/month per engineer (fully loaded)
+  pmCostL:2,      // ₹L/month per PM
+  infraCostL:0.5, // ₹L/month infra+cloud
   products:[
     {
       id:'ions', icon:'📋', shortName:'IONS Hub', tier:'Must Build', color:'tier-must',
       enabled:true, startMonth:1, duration:6,
       assumption:15, assumptionMin:5, assumptionMax:40, assumptionStep:1,
       assumptionLabel:'Projects/scientist/yr', assumptionUnit:'',
-      investmentL:30, // lakhs
+      engineers:2, pmFraction:0.5, investmentL:0,
       rev12:0, rev24:0,
       revenueLogic:'Revenue = additional projects enabled × avg project value (₹25L). Scientists handle 3-5x more projects. Not direct SaaS — capacity unlock on core business.',
       calcRev(month){
@@ -2402,7 +2463,7 @@ function revenueModel(){return{
       enabled:true, startMonth:2, duration:7,
       assumption:80, assumptionMin:20, assumptionMax:300, assumptionStep:10,
       assumptionLabel:'Orders/month', assumptionUnit:'',
-      investmentL:50,
+      engineers:3, pmFraction:1, investmentL:0,
       rev12:0, rev24:0,
       revenueLogic:'Revenue = monthly orders × avg order value (₹2L) × take-rate (3%). Starts with bulk reorders from existing customers, grows with new buyer acquisition.',
       calcRev(month){
@@ -2417,7 +2478,7 @@ function revenueModel(){return{
       enabled:true, startMonth:7, duration:6,
       assumption:5, assumptionMin:0, assumptionMax:20, assumptionStep:1,
       assumptionLabel:'Extra deals/quarter', assumptionUnit:'',
-      investmentL:80,
+      engineers:4, pmFraction:1, investmentL:0,
       rev12:0, rev24:0,
       revenueLogic:'Phase 1: Internal BD engine. Revenue = additional deals surfaced via cross-sell, supply risk alerts, China+1 detection × avg deal value (₹30L). Not SaaS — core business uplift.',
       calcRev(month){
@@ -2432,7 +2493,7 @@ function revenueModel(){return{
       enabled:true, startMonth:8, duration:5,
       assumption:50, assumptionMin:10, assumptionMax:150, assumptionStep:5,
       assumptionLabel:'Paying facilities', assumptionUnit:'',
-      investmentL:60,
+      engineers:3, pmFraction:0.5, investmentL:0,
       rev12:0, rev24:0,
       revenueLogic:'Revenue = paying facilities × avg ₹6K/mo (cert tracking + SDS). Free gap analysis onboards supply → paid tier upsell. Clearest external SaaS revenue.',
       calcRev(month){
@@ -2447,7 +2508,7 @@ function revenueModel(){return{
       enabled:true, startMonth:10, duration:6,
       assumption:30, assumptionMin:5, assumptionMax:100, assumptionStep:5,
       assumptionLabel:'Carbon reports/yr', assumptionUnit:'',
-      investmentL:40,
+      engineers:2, pmFraction:0.25, investmentL:0,
       rev12:0, rev24:0,
       revenueLogic:'Revenue = bundled free with China+1 projects (drives deal value) + standalone carbon reports post-CBAM (₹1.5L each). Regulatory tailwind from 2027.',
       calcRev(month){
@@ -2462,7 +2523,7 @@ function revenueModel(){return{
       enabled:false, startMonth:12, duration:6,
       assumption:10, assumptionMin:2, assumptionMax:30, assumptionStep:1,
       assumptionLabel:'China+1 reports/yr', assumptionUnit:'',
-      investmentL:35,
+      engineers:2, pmFraction:0.25, investmentL:0,
       rev12:0, rev24:0,
       revenueLogic:'Revenue = China+1 assessment reports × ₹3L each (productized consulting). Internal ops acceleration is bonus but not monetized. Subscription model only at 2000+ manufacturers.',
       calcRev(month){
@@ -2477,6 +2538,8 @@ function revenueModel(){return{
   recalc(){
     this.totalRev6=0; this.totalRev12=0; this.totalRev24=0; this.totalInvestment=0; this.enabledCount=0; this.maxRev24=0;
     this.products.forEach(p=>{
+      // Compute investment from team cost variables
+      p.investmentL = (p.engineers * this.engCostL + p.pmFraction * this.pmCostL + this.infraCostL) * p.duration;
       if(p.enabled){
         p.rev12 = p.calcRev(12);
         p.rev24 = p.calcRev(24);
