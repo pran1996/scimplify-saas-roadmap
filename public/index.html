@@ -39,6 +39,40 @@ body{background:#0f0d2e;font-family:'Inter',sans-serif;color:#e2e8f0}
 .tier-must{background:linear-gradient(135deg,#6366f1,#818cf8)}.tier-next{background:linear-gradient(135deg,#14b8a6,#2dd4bf)}.tier-traction{background:linear-gradient(135deg,#f59e0b,#fbbf24)}
 .score-bar{height:6px;border-radius:3px;transition:width .8s ease}
 .matching-anim{animation:matchPulse 1.5s ease infinite}@keyframes matchPulse{0%{box-shadow:0 0 0 0 rgba(99,102,241,.4)}70%{box-shadow:0 0 0 20px rgba(99,102,241,0)}100%{box-shadow:0 0 0 0 rgba(99,102,241,0)}}
+
+/* ===== MOBILE RESPONSIVE ===== */
+@media(max-width:767px){
+  /* Nav compact */
+  nav .max-w-7xl{padding-left:0.75rem;padding-right:0.75rem}
+  nav .gap-6{gap:0.5rem}
+  nav .text-lg{font-size:0.875rem}
+  nav .text-sm.text-gray-400{font-size:0.7rem}
+  /* Hero tighter */
+  section h1.text-4xl{font-size:1.75rem;line-height:2rem}
+  /* Reduce section padding */
+  .pb-16{padding-bottom:2.5rem}
+  .py-20{padding-top:3rem;padding-bottom:3rem}
+  /* Product cards: full width stacking */
+  .glass.rounded-xl p{overflow-wrap:break-word}
+  /* Step flow items */
+  .w-7{width:1.5rem;height:1.5rem;min-width:1.5rem}
+  /* Gantt / revenue interactive - ensure scroll hint */
+  .overflow-x-auto{-webkit-overflow-scrolling:touch}
+  /* Fix compare bar on mobile */
+  .fixed.bottom-4{bottom:4.5rem;max-width:90vw;font-size:0.75rem}
+  /* Products mode: more room above bottom bar */
+  main.pb-20{padding-bottom:5rem}
+}
+@media(max-width:480px){
+  section h1.text-4xl{font-size:1.5rem;line-height:1.75rem}
+  .text-2xl{font-size:1.125rem}
+  .grid.gap-6{gap:1rem}
+  .grid.gap-4{gap:0.75rem}
+  .grid.gap-5{gap:0.75rem}
+  .glass.rounded-xl{border-radius:0.75rem}
+  /* Stat cards smaller */
+  .text-2xl.font-bold.text-indigo{font-size:1.25rem}
+}
 </style>
 </head>
 <body class="min-h-screen">
@@ -2375,8 +2409,26 @@ function chemGraphApp(){
 }
 
 function complianceApp(){return{
-  cTab:'certs',sdsPreview:false,gapFacility:'anand',
+  cTab:'certs',sdsPreview:false,sdsDownloaded:null,gapFacility:'anand',
   sdsForm:{name:'',cas:'',comp:'',hazard:'Irritant'},
+  renewCert:null,renewStep:1,renewDate:'2025-06-15',
+  alertImpact:null,
+  remediationStarted:false,remediationPlan:[],
+  onboardStep:1,onboardForm:{name:'',location:'',certs:[],segments:[]},onboardGaps:[],
+  allCertTypes:['FDA','ISO 9001','ISO 14001','REACH','CGMP','GMP','HALAL','KOSHER'],
+  buyerSegments:[
+    {name:'US Pharma',required:['FDA','CGMP','ISO 9001']},
+    {name:'EU Chemicals',required:['REACH','ISO 14001','ISO 9001']},
+    {name:'Japan Pharma',required:['GMP','ISO 9001','ISO 14001']},
+    {name:'Middle East Food',required:['HALAL','ISO 9001','GMP']},
+    {name:'India Domestic',required:['ISO 9001','GMP']},
+    {name:'US Agrochem',required:['FDA','ISO 14001','REACH']},
+  ],
+  alerts:[
+    {text:'REACH Annex XIV updated — 3 products affected. Review required by March 2025.',color:'border-amber',dismissed:false,assigned:false,impacts:['Pymetrozine — EU registration affected','Sodium Fluoride — requires updated dossier','Titanium Dioxide — restricted use classification pending']},
+    {text:'FDA registration renewal due in 45 days for Anand Chemtex facility.',color:'border-red-400',dismissed:false,assigned:false,impacts:['Anand Chemtex — Vadodara facility','5 active product registrations at risk','Fexofenadine HCl export to US blocked if expired']},
+    {text:'New GMP guidelines published — voluntary compliance window: 6 months.',color:'border-indigo',dismissed:false,assigned:false,impacts:['All GMP-certified facilities need gap review','Navi Organics — minor documentation update','Sree Krishna — process validation update recommended']},
+  ],
   certData:[
     {id:1,facility:'Anand Chemtex',type:'FDA',issued:'2023-06-15',expires:'2026-06-15',status:'Valid'},
     {id:2,facility:'Anand Chemtex',type:'ISO 9001',issued:'2022-01-10',expires:'2025-01-10',status:'Expired'},
@@ -2391,7 +2443,46 @@ function complianceApp(){return{
     anand:[{cert:'FDA',has:true},{cert:'ISO 9001',has:true},{cert:'ISO 14001',has:false,fix:'~3 months, audit required'},{cert:'REACH',has:true},{cert:'CGMP',has:false,fix:'~6 months, process upgrade needed'},{cert:'HALAL',has:false,fix:'~2 months, certification body visit'}],
     deccan:[{cert:'FDA',has:false,fix:'~6 months, facility upgrade needed'},{cert:'ISO 9001',has:true},{cert:'ISO 14001',has:true},{cert:'REACH',has:false,fix:'~4 months, registration pending'},{cert:'CGMP',has:true},{cert:'HALAL',has:false,fix:'~2 months'}],
     kaivin:[{cert:'FDA',has:false,fix:'~8 months, major upgrade'},{cert:'ISO 9001',has:true},{cert:'ISO 14001',has:false,fix:'~4 months'},{cert:'REACH',has:false,fix:'~5 months'},{cert:'CGMP',has:false,fix:'~6 months'},{cert:'HALAL',has:false,fix:'~2 months'}],
-  }
+  },
+  startRenewal(c){this.renewCert=c;this.renewStep=1;this.renewDate='2025-06-15'},
+  completeRenewal(){
+    let c=this.certData.find(x=>x.id===this.renewCert.id);
+    if(c){c.status='Valid';c._renewed=true;c.issued=new Date().toISOString().split('T')[0];c.expires=new Date(Date.now()+3*365*86400000).toISOString().split('T')[0]}
+    this.renewCert=null;this.renewStep=1;
+  },
+  showAlertImpact(alert){this.alertImpact={title:alert.text,impacts:alert.impacts}},
+  startRemediation(){
+    this.remediationStarted=true;
+    this.remediationPlan=(this.gapData[this.gapFacility]||[]).filter(g=>!g.has).map(g=>({cert:g.cert,timeline:g.fix,stage:0}));
+  },
+  advanceRemediation(i){if(this.remediationPlan[i].stage<3)this.remediationPlan[i].stage++},
+  generateOnboardGap(){
+    let needed=new Set();
+    this.buyerSegments.filter(s=>this.onboardForm.segments.includes(s.name)).forEach(s=>s.required.forEach(c=>needed.add(c)));
+    let timings={FDA:'~6 months',ISO9001:'~3 months','ISO 9001':'~3 months','ISO 14001':'~4 months',REACH:'~5 months',CGMP:'~6 months',GMP:'~3 months',HALAL:'~2 months',KOSHER:'~2 months'};
+    this.onboardGaps=[...needed].map(c=>({cert:c,has:this.onboardForm.certs.includes(c),est:timings[c]||'~3 months'}));
+  },
+  sdsSections(){
+    let n=this.sdsForm.name||'[Product Name]',cas=this.sdsForm.cas||'[CAS Number]',h=this.sdsForm.hazard,comp=this.sdsForm.comp||'Active ingredient';
+    return[
+      {title:'Identification',content:'Product: '+n+'\nCAS: '+cas+'\nRecommended Use: Industrial chemical manufacturing\nSupplier: Scimplify Platform\nEmergency: +91-XXX-XXXX (24h)'},
+      {title:'Hazard Identification',content:'Classification (GHS): '+h+'\nSignal Word: '+(h==='Toxic'?'Danger':'Warning')+'\nHazard Statements: H302 — Harmful if swallowed\nPrecautionary: P264, P270, P301+P312'},
+      {title:'Composition / Information on Ingredients',content:comp+'\nCAS Number: '+cas+'\nMolecular Formula: See technical specifications\nImpurities: ≤0.5% (conforms to pharmacopeial standards)'},
+      {title:'First-Aid Measures',content:'Inhalation: Move to fresh air. Seek medical attention if symptoms persist.\nSkin Contact: Wash with soap and water for 15 min.\nEye Contact: Rinse with water for 15 min. Consult ophthalmologist.\nIngestion: Rinse mouth. Do NOT induce vomiting. Seek medical help.'},
+      {title:'Fire-Fighting Measures',content:'Suitable Extinguishing Media: Water spray, foam, dry chemical, CO₂\nSpecific Hazards: May emit toxic fumes under fire conditions\nProtective Equipment: Self-contained breathing apparatus (SCBA)'},
+      {title:'Accidental Release Measures',content:'Personal Precautions: Wear PPE. Avoid dust generation.\nEnvironmental: Prevent entry into drains/waterways.\nCleanup: Sweep up, place in suitable container for disposal.'},
+      {title:'Handling and Storage',content:'Handling: Avoid contact with skin/eyes. Use in well-ventilated area.\nStorage: Store in cool, dry place. Keep container tightly closed.\nTemperature: 15–25°C recommended'},
+      {title:'Exposure Controls / PPE',content:'OEL (TWA): 5 mg/m³\nEngineering Controls: Local exhaust ventilation\nPPE — Eyes: Safety goggles\nPPE — Skin: Chemical-resistant gloves\nPPE — Respiratory: Dust mask (P2 filter)'},
+      {title:'Physical & Chemical Properties',content:'Appearance: White to off-white powder\npH: 6.5–7.5 (1% solution)\nMelting Point: See CoA\nSolubility (Water): Slightly soluble\nFlash Point: >200°C'},
+      {title:'Stability and Reactivity',content:'Stability: Stable under recommended storage conditions\nIncompatible Materials: Strong oxidizers, strong acids\nHazardous Decomposition: CO, CO₂, NOx under thermal decomposition'},
+      {title:'Toxicological Information',content:'Acute Toxicity (Oral LD50): >2000 mg/kg (rat)\nSkin Irritation: Category 2\nEye Irritation: Category 2A\nCarcinogenicity: Not classified (IARC, NTP)'},
+      {title:'Ecological Information',content:'Aquatic Toxicity (LC50 Fish): >100 mg/L (96h)\nBiodegradability: Readily biodegradable\nBioaccumulation: Low potential (log Kow <1)'},
+      {title:'Disposal Considerations',content:'Dispose in accordance with local/national regulations.\nWaste Code: Refer to local authority for classification.\nDo not discharge into drains or environment.'},
+      {title:'Transport Information',content:'UN Number: Not regulated for transport\nADR/RID: Not classified as dangerous goods\nIMDG/IATA: Not restricted'},
+      {title:'Regulatory Information',content:'REACH Status: '+(h==='Environmental Hazard'?'Pre-registered':'Registered')+'\nTSCA (US): Listed\nDSL (Canada): Listed\nREACH SVHC: Not currently listed'},
+      {title:'Other Information',content:'Revision Date: '+new Date().toLocaleDateString()+'\nVersion: 1.0\nPrepared by: ComplianceOS — Scimplify\nDisclaimers: Data based on current knowledge. User must evaluate suitability.'},
+    ];
+  },
 }}
 
 function atomsApp(){
