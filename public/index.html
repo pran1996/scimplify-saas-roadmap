@@ -595,63 +595,158 @@ body{background:#0f0d2e;font-family:'Inter',sans-serif;color:#e2e8f0}
 </div>
 </section>
 
-<!-- Revenue Projections -->
-<section class="max-w-5xl mx-auto px-4 pb-16" x-data="{scenario:'base'}">
-<h2 class="text-2xl font-bold mb-2 text-center">Revenue Projections</h2>
-<p class="text-xs text-gray-500 text-center mb-6">Includes productized services revenue</p>
-<div class="flex justify-center gap-2 mb-6">
-  <template x-for="s in ['bear','base','bull']">
-    <button @click="scenario=s" :class="scenario===s?'bg-indigo text-white':'bg-white/5 text-gray-400'" class="px-4 py-1.5 rounded-lg text-sm font-medium capitalize transition" x-text="s"></button>
-  </template>
-</div>
-<div class="glass rounded-xl p-6">
-  <div class="grid grid-cols-3 gap-6 text-center">
-    <div>
-      <div class="text-xs text-gray-400 mb-1">Month 6</div>
-      <div class="text-xl font-bold" x-text="scenario==='bear'?'₹0.5-1Cr':scenario==='base'?'₹2-4Cr':'₹3-6Cr'"></div>
-    </div>
-    <div>
-      <div class="text-xs text-gray-400 mb-1">Month 12</div>
-      <div class="text-xl font-bold" x-text="scenario==='bear'?'₹2-4Cr':scenario==='base'?'₹8-15Cr':'₹12-22Cr'"></div>
-    </div>
-    <div>
-      <div class="text-xs text-gray-400 mb-1">Month 24</div>
-      <div class="text-2xl font-bold bg-gradient-to-r from-indigo to-teal bg-clip-text text-transparent" x-text="scenario==='bear'?'₹4-7Cr':scenario==='base'?'₹20-36Cr':'₹30-50Cr'"></div>
-    </div>
-  </div>
-</div>
-</section>
+<!-- Interactive Revenue & Roadmap -->
+<section class="max-w-6xl mx-auto px-4 pb-16" x-data="revenueModel()" x-init="recalc()">
+<h2 class="text-2xl font-bold mb-2 text-center">Interactive Revenue & Roadmap</h2>
+<p class="text-xs text-gray-500 text-center mb-6">Adjust assumptions per product. Drag timeline. Watch revenue update in real-time.</p>
 
-<!-- Timeline Gantt -->
-<section class="max-w-5xl mx-auto px-4 pb-16">
-<h2 class="text-2xl font-bold mb-6 text-center">18-Month Timeline</h2>
-<div class="glass rounded-xl p-6 overflow-x-auto">
-  <div class="min-w-[600px]">
-    <div class="flex text-xs text-gray-500 mb-4">
-      <div class="w-36 shrink-0"></div>
-      <div class="flex-1 grid grid-cols-6 text-center">
-        <span>M1-3</span><span>M4-6</span><span>M7-9</span><span>M10-12</span><span>M13-15</span><span>M16-18</span>
-      </div>
+<!-- Product Assumptions Table -->
+<div class="glass rounded-xl p-5 mb-6 overflow-x-auto">
+  <div class="min-w-[700px]">
+    <div class="grid grid-cols-12 gap-2 text-[10px] text-gray-500 font-medium mb-3 px-1">
+      <div class="col-span-2">Product</div>
+      <div class="col-span-2 text-center">Start Month</div>
+      <div class="col-span-2 text-center">Build Duration</div>
+      <div class="col-span-2 text-center">Key Assumption</div>
+      <div class="col-span-2 text-center">Monthly Rev (M12)</div>
+      <div class="col-span-2 text-center">Monthly Rev (M24)</div>
     </div>
-    <template x-for="g in ganttData" :key="g.name">
-      <div class="flex items-center mb-3">
-        <div class="w-36 shrink-0 text-xs font-medium truncate" x-text="g.name"></div>
-        <div class="flex-1 relative h-6">
-          <div class="gantt-bar absolute" :class="g.color" :style="'left:'+g.start+'%;width:'+g.width+'%'"></div>
+    <template x-for="p in products" :key="p.id">
+      <div class="grid grid-cols-12 gap-2 items-center mb-3 glass rounded-lg p-2" :class="p.enabled?'':'opacity-40'">
+        <!-- Name + Toggle -->
+        <div class="col-span-2 flex items-center gap-2">
+          <input type="checkbox" x-model="p.enabled" @change="recalc()" class="accent-indigo w-3.5 h-3.5 shrink-0">
+          <div>
+            <div class="text-xs font-medium" x-text="p.icon+' '+p.shortName"></div>
+            <div class="text-[9px] text-gray-500" x-text="p.tier"></div>
+          </div>
+        </div>
+        <!-- Start Month -->
+        <div class="col-span-2 text-center">
+          <div class="flex items-center justify-center gap-1">
+            <button @click="p.startMonth=Math.max(1,p.startMonth-1);recalc()" class="w-5 h-5 rounded bg-white/5 hover:bg-white/10 text-gray-400 text-xs transition">−</button>
+            <span class="text-sm font-medium w-8 text-center" x-text="'M'+p.startMonth"></span>
+            <button @click="p.startMonth=Math.min(18,p.startMonth+1);recalc()" class="w-5 h-5 rounded bg-white/5 hover:bg-white/10 text-gray-400 text-xs transition">+</button>
+          </div>
+        </div>
+        <!-- Duration -->
+        <div class="col-span-2 text-center">
+          <div class="flex items-center justify-center gap-1">
+            <button @click="p.duration=Math.max(2,p.duration-1);recalc()" class="w-5 h-5 rounded bg-white/5 hover:bg-white/10 text-gray-400 text-xs transition">−</button>
+            <span class="text-sm font-medium w-10 text-center" x-text="p.duration+' mo'"></span>
+            <button @click="p.duration=Math.min(12,p.duration+1);recalc()" class="w-5 h-5 rounded bg-white/5 hover:bg-white/10 text-gray-400 text-xs transition">+</button>
+          </div>
+        </div>
+        <!-- Key Assumption (slider) -->
+        <div class="col-span-2 px-1">
+          <input type="range" :min="p.assumptionMin" :max="p.assumptionMax" :step="p.assumptionStep" x-model.number="p.assumption" @input="recalc()" class="w-full h-1 accent-indigo">
+          <div class="text-[10px] text-gray-400 text-center mt-0.5" x-text="p.assumptionLabel+': '+p.assumption+p.assumptionUnit"></div>
+        </div>
+        <!-- M12 Revenue -->
+        <div class="col-span-2 text-center">
+          <div class="text-sm font-semibold" :class="p.rev12>0?'text-indigo':'text-gray-600'" x-text="p.rev12>0?'₹'+formatLakhs(p.rev12):'—'"></div>
+        </div>
+        <!-- M24 Revenue -->
+        <div class="col-span-2 text-center">
+          <div class="text-sm font-semibold" :class="p.rev24>0?'text-teal':'text-gray-600'" x-text="p.rev24>0?'₹'+formatLakhs(p.rev24):'—'"></div>
         </div>
       </div>
     </template>
   </div>
 </div>
-</section>
 
-<!-- Investment -->
-<section class="max-w-3xl mx-auto px-4 pb-16 text-center">
-<div class="glass rounded-xl p-8 glow">
-  <h2 class="text-2xl font-bold mb-2">Investment Required</h2>
-  <div class="text-3xl font-bold bg-gradient-to-r from-indigo to-teal bg-clip-text text-transparent mb-2">₹2.5 — 3.6 Cr</div>
-  <p class="text-gray-400 text-sm">Over 18 months — engineering, infrastructure, go-to-market</p>
+<!-- Interactive Gantt -->
+<div class="glass rounded-xl p-5 mb-6">
+  <h3 class="text-sm font-semibold mb-4">Timeline <span class="text-[10px] text-gray-500 font-normal ml-2">Use +/- buttons above to adjust start & duration</span></h3>
+  <div class="overflow-x-auto">
+    <div class="min-w-[600px]">
+      <div class="flex text-[10px] text-gray-500 mb-3">
+        <div class="w-32 shrink-0"></div>
+        <div class="flex-1 grid grid-cols-6 text-center">
+          <span>M1-3</span><span>M4-6</span><span>M7-9</span><span>M10-12</span><span>M13-15</span><span>M16-18</span>
+        </div>
+      </div>
+      <template x-for="p in products.filter(p=>p.enabled)" :key="p.id">
+        <div class="flex items-center mb-2">
+          <div class="w-32 shrink-0 text-[11px] font-medium truncate" x-text="p.icon+' '+p.shortName"></div>
+          <div class="flex-1 relative h-7">
+            <!-- Background grid -->
+            <div class="absolute inset-0 grid grid-cols-6">
+              <template x-for="i in 6"><div class="border-r border-white/5"></div></template>
+            </div>
+            <!-- Bar -->
+            <div class="gantt-bar absolute top-1 flex items-center px-2" :class="p.color" :style="'left:'+((p.startMonth-1)/18*100)+'%;width:'+(p.duration/18*100)+'%'">
+              <span class="text-[9px] text-white/80 truncate" x-text="'M'+p.startMonth+'-M'+(p.startMonth+p.duration-1)"></span>
+            </div>
+            <!-- Revenue start marker -->
+            <div x-show="p.enabled && (p.startMonth+p.duration-1)<=18" class="absolute top-0 w-0.5 h-7 bg-teal/50" :style="'left:'+((p.startMonth+p.duration-1)/18*100)+'%'"></div>
+          </div>
+        </div>
+      </template>
+      <!-- Legend -->
+      <div class="flex gap-4 mt-3 text-[10px] text-gray-500">
+        <span class="flex items-center gap-1"><span class="w-3 h-3 rounded tier-must inline-block"></span> Must Build</span>
+        <span class="flex items-center gap-1"><span class="w-3 h-3 rounded tier-next inline-block"></span> Build Next</span>
+        <span class="flex items-center gap-1"><span class="w-3 h-3 rounded tier-traction inline-block"></span> Build on Traction</span>
+        <span class="flex items-center gap-1"><span class="w-1 h-3 bg-teal/50 inline-block"></span> Revenue starts</span>
+      </div>
+    </div>
+  </div>
 </div>
+
+<!-- Revenue Summary Cards -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+  <div class="glass rounded-xl p-4 text-center">
+    <div class="text-xs text-gray-400 mb-1">Month 6 ARR</div>
+    <div class="text-xl font-bold text-indigo" x-text="'₹'+formatLakhs(totalRev6*12)"></div>
+    <div class="text-[10px] text-gray-500" x-text="'₹'+formatLakhs(totalRev6)+'/mo'"></div>
+  </div>
+  <div class="glass rounded-xl p-4 text-center">
+    <div class="text-xs text-gray-400 mb-1">Month 12 ARR</div>
+    <div class="text-xl font-bold text-indigo" x-text="'₹'+formatLakhs(totalRev12*12)"></div>
+    <div class="text-[10px] text-gray-500" x-text="'₹'+formatLakhs(totalRev12)+'/mo'"></div>
+  </div>
+  <div class="glass rounded-xl p-4 text-center">
+    <div class="text-xs text-gray-400 mb-1">Month 24 ARR</div>
+    <div class="text-2xl font-bold bg-gradient-to-r from-indigo to-teal bg-clip-text text-transparent" x-text="'₹'+formatLakhs(totalRev24*12)"></div>
+    <div class="text-[10px] text-gray-500" x-text="'₹'+formatLakhs(totalRev24)+'/mo'"></div>
+  </div>
+  <div class="glass rounded-xl p-4 text-center">
+    <div class="text-xs text-gray-400 mb-1">Total Investment</div>
+    <div class="text-xl font-bold bg-gradient-to-r from-indigo to-teal bg-clip-text text-transparent" x-text="'₹'+formatLakhs(totalInvestment)"></div>
+    <div class="text-[10px] text-gray-500" x-text="enabledCount+' products'"></div>
+  </div>
+</div>
+
+<!-- Per-Product Revenue Breakdown -->
+<div class="glass rounded-xl p-5 mb-6">
+  <h3 class="text-sm font-semibold mb-3">Revenue Breakdown by Product</h3>
+  <div class="space-y-2">
+    <template x-for="p in products.filter(p=>p.enabled)" :key="p.id">
+      <div class="flex items-center gap-3">
+        <div class="w-28 shrink-0 text-[11px] font-medium truncate" x-text="p.icon+' '+p.shortName"></div>
+        <div class="flex-1 relative h-5 bg-white/5 rounded-full overflow-hidden">
+          <div class="h-full rounded-full transition-all duration-500" :class="p.color" :style="'width:'+Math.min(100,(p.rev24/Math.max(1,maxRev24))*100)+'%'"></div>
+        </div>
+        <div class="w-20 text-right text-xs font-medium" x-text="p.rev24>0?'₹'+formatLakhs(p.rev24)+'/mo':'—'"></div>
+      </div>
+    </template>
+  </div>
+</div>
+
+<!-- Revenue Model Explanation -->
+<div class="glass rounded-xl p-5">
+  <h3 class="text-sm font-semibold mb-3">Assumption Details</h3>
+  <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
+    <template x-for="p in products" :key="p.id">
+      <div class="glass rounded-lg p-3 text-[11px]" :class="p.enabled?'':'opacity-30'">
+        <div class="font-medium text-xs mb-1" x-text="p.icon+' '+p.shortName"></div>
+        <div class="text-gray-400" x-text="p.revenueLogic"></div>
+      </div>
+    </template>
+  </div>
+</div>
+
 </section>
 
 <!-- Closing -->
@@ -1351,15 +1446,127 @@ function app(){return{
     {id:6,icon:'🌱',name:'GreenScore',shortName:'GreenScore',tagline:'Carbon scoring, route comparison, CBAM readiness',revenue:'₹1-3Cr/yr',icp:'EU buyers, ESG teams',analogy:'EcoVadis for synthesis routes',tier:'Build on Traction'},
     {id:1,icon:'🔍',name:'RFQ Intelligence + China+1',shortName:'RFQ Intel',tagline:'AI-powered manufacturer matching and China+1 switching',revenue:'₹3-8Cr/yr',icp:'Chemical buyers, procurement heads',analogy:'Alibaba RFQ + AI matching',tier:'Build on Traction'},
   ],
-  ganttData:[
-    {name:'IONS Project Hub',start:0,width:50,color:'tier-must'},
-    {name:'ATOMS Commerce',start:8,width:55,color:'tier-must'},
-    {name:'ChemGraph',start:33,width:45,color:'tier-next'},
-    {name:'ComplianceOS',start:42,width:40,color:'tier-next'},
-    {name:'GreenScore',start:58,width:42,color:'tier-traction'},
-    {name:'RFQ Intelligence',start:58,width:42,color:'tier-traction'},
-  ],
   init(){}
+}}
+
+function revenueModel(){return{
+  products:[
+    {
+      id:'ions', icon:'📋', shortName:'IONS Hub', tier:'Must Build', color:'tier-must',
+      enabled:true, startMonth:1, duration:6,
+      assumption:15, assumptionMin:5, assumptionMax:40, assumptionStep:1,
+      assumptionLabel:'Projects/scientist/yr', assumptionUnit:'',
+      investmentL:30, // lakhs
+      rev12:0, rev24:0,
+      revenueLogic:'Revenue = additional projects enabled × avg project value (₹25L). Scientists handle 3-5x more projects. Not direct SaaS — capacity unlock on core business.',
+      calcRev(month){
+        if(month < this.startMonth+this.duration) return 0;
+        const monthsLive = month - (this.startMonth+this.duration);
+        const extraProjects = Math.min(this.assumption, 5 + monthsLive*0.5) - 5; // projects above baseline 5
+        return Math.max(0, extraProjects * 25 / 12); // ₹25L per project, monthly
+      }
+    },
+    {
+      id:'atoms', icon:'🛒', shortName:'ATOMS Commerce', tier:'Must Build', color:'tier-must',
+      enabled:true, startMonth:2, duration:7,
+      assumption:80, assumptionMin:20, assumptionMax:300, assumptionStep:10,
+      assumptionLabel:'Orders/month', assumptionUnit:'',
+      investmentL:50,
+      rev12:0, rev24:0,
+      revenueLogic:'Revenue = monthly orders × avg order value (₹2L) × take-rate (3%). Starts with bulk reorders from existing customers, grows with new buyer acquisition.',
+      calcRev(month){
+        if(month < this.startMonth+this.duration) return 0;
+        const monthsLive = month - (this.startMonth+this.duration);
+        const orders = Math.min(this.assumption, 20 + monthsLive*8);
+        return orders * 2 * 0.03; // orders × ₹2L AOV × 3% take-rate = lakhs/mo
+      }
+    },
+    {
+      id:'chemgraph', icon:'🕸️', shortName:'ChemGraph', tier:'Build Next', color:'tier-next',
+      enabled:true, startMonth:7, duration:6,
+      assumption:5, assumptionMin:0, assumptionMax:20, assumptionStep:1,
+      assumptionLabel:'Extra deals/quarter', assumptionUnit:'',
+      investmentL:80,
+      rev12:0, rev24:0,
+      revenueLogic:'Phase 1: Internal BD engine. Revenue = additional deals surfaced via cross-sell, supply risk alerts, China+1 detection × avg deal value (₹30L). Not SaaS — core business uplift.',
+      calcRev(month){
+        if(month < this.startMonth+this.duration) return 0;
+        const monthsLive = month - (this.startMonth+this.duration);
+        const dealsPerMonth = Math.min(this.assumption, 1 + monthsLive*0.3) / 3;
+        return dealsPerMonth * 30; // deals/mo × ₹30L per deal
+      }
+    },
+    {
+      id:'compliance', icon:'🛡️', shortName:'ComplianceOS', tier:'Build Next', color:'tier-next',
+      enabled:true, startMonth:8, duration:5,
+      assumption:50, assumptionMin:10, assumptionMax:150, assumptionStep:5,
+      assumptionLabel:'Paying facilities', assumptionUnit:'',
+      investmentL:60,
+      rev12:0, rev24:0,
+      revenueLogic:'Revenue = paying facilities × avg ₹6K/mo (cert tracking + SDS). Free gap analysis onboards supply → paid tier upsell. Clearest external SaaS revenue.',
+      calcRev(month){
+        if(month < this.startMonth+this.duration) return 0;
+        const monthsLive = month - (this.startMonth+this.duration);
+        const facilities = Math.min(this.assumption, 5 + monthsLive*3);
+        return facilities * 0.06; // facilities × ₹6K/mo = lakhs/mo
+      }
+    },
+    {
+      id:'green', icon:'🌱', shortName:'GreenScore', tier:'Build on Traction', color:'tier-traction',
+      enabled:true, startMonth:10, duration:6,
+      assumption:30, assumptionMin:5, assumptionMax:100, assumptionStep:5,
+      assumptionLabel:'Carbon reports/yr', assumptionUnit:'',
+      investmentL:40,
+      rev12:0, rev24:0,
+      revenueLogic:'Revenue = bundled free with China+1 projects (drives deal value) + standalone carbon reports post-CBAM (₹1.5L each). Regulatory tailwind from 2027.',
+      calcRev(month){
+        if(month < this.startMonth+this.duration) return 0;
+        const monthsLive = month - (this.startMonth+this.duration);
+        const reportsPerMonth = Math.min(this.assumption, 2 + monthsLive*1.5) / 12;
+        return reportsPerMonth * 1.5; // reports/mo × ₹1.5L each
+      }
+    },
+    {
+      id:'rfq', icon:'🔍', shortName:'RFQ Intel', tier:'Build on Traction', color:'tier-traction',
+      enabled:false, startMonth:12, duration:6,
+      assumption:10, assumptionMin:2, assumptionMax:30, assumptionStep:1,
+      assumptionLabel:'China+1 reports/yr', assumptionUnit:'',
+      investmentL:35,
+      rev12:0, rev24:0,
+      revenueLogic:'Revenue = China+1 assessment reports × ₹3L each (productized consulting). Internal ops acceleration is bonus but not monetized. Subscription model only at 2000+ manufacturers.',
+      calcRev(month){
+        if(month < this.startMonth+this.duration) return 0;
+        const monthsLive = month - (this.startMonth+this.duration);
+        const reportsPerMonth = Math.min(this.assumption, 1 + monthsLive*0.5) / 12;
+        return reportsPerMonth * 3; // reports/mo × ₹3L each
+      }
+    },
+  ],
+  totalRev6:0, totalRev12:0, totalRev24:0, totalInvestment:0, enabledCount:0, maxRev24:0,
+  recalc(){
+    this.totalRev6=0; this.totalRev12=0; this.totalRev24=0; this.totalInvestment=0; this.enabledCount=0; this.maxRev24=0;
+    this.products.forEach(p=>{
+      if(p.enabled){
+        p.rev12 = p.calcRev(12);
+        p.rev24 = p.calcRev(24);
+        const rev6 = p.calcRev(6);
+        this.totalRev6 += rev6;
+        this.totalRev12 += p.rev12;
+        this.totalRev24 += p.rev24;
+        this.totalInvestment += p.investmentL;
+        this.enabledCount++;
+        if(p.rev24 > this.maxRev24) this.maxRev24 = p.rev24;
+      } else {
+        p.rev12=0; p.rev24=0;
+      }
+    });
+  },
+  formatLakhs(v){
+    if(v>=100) return (v/100).toFixed(1)+'Cr';
+    if(v>=1) return v.toFixed(1)+'L';
+    if(v>0) return (v*100).toFixed(0)+'K';
+    return '0';
+  }
 }}
 
 function rfqApp(){return{
