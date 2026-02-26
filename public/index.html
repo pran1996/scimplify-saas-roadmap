@@ -75,7 +75,9 @@ body{background:#0f0d2e;font-family:'Inter',sans-serif;color:#e2e8f0}
 }
 </style>
 </head>
-<body class="min-h-screen">
+<body class="min-h-screen" x-data="{toast:'',toastTimer:null}" @show-toast.window="toast=$event.detail;clearTimeout(toastTimer);toastTimer=setTimeout(()=>toast='',2500)">
+<!-- Toast -->
+<div x-show="toast" x-cloak x-transition class="fixed top-20 left-1/2 -translate-x-1/2 z-[60] bg-indigo/90 text-white text-sm px-4 py-2 rounded-lg shadow-xl backdrop-blur" x-text="toast"></div>
 
 <!-- NAV -->
 <nav class="fixed top-0 w-full z-50 glass border-b border-white/10" style="background:rgba(15,13,46,0.9)">
@@ -194,7 +196,7 @@ body{background:#0f0d2e;font-family:'Inter',sans-serif;color:#e2e8f0}
           <div class="w-7 h-7 shrink-0 rounded-full bg-green-500/20 flex items-center justify-center text-xs font-bold text-green-400">3b</div>
           <div>
             <div class="font-semibold text-sm">🌱 GreenScore</div>
-            <div class="text-xs text-gray-400 mt-1">The Pymetrozine route's carbon footprint: 2.1 kg CO₂/kg (vs 5.8 from China). This score appears on the ATOMS product listing. EU buyer saves €19.5K in CBAM fees per 100-ton order.</div>
+            <div class="text-xs text-gray-400 mt-1">The Pymetrozine route's carbon footprint: 2.1 kg CO₂/kg (vs 5.8 from China). This score appears on the ATOMS product listing. EU buyer saves €27K in CBAM fees per 100-ton order.</div>
             <div class="text-[10px] text-teal mt-1">📊 Carbon data makes the listing more competitive. More EU orders follow.</div>
           </div>
         </div>
@@ -900,8 +902,8 @@ body{background:#0f0d2e;font-family:'Inter',sans-serif;color:#e2e8f0}
             <div class="text-gray-300" x-text="m.detail.trackRecord"></div>
           </div>
           <div class="flex gap-2">
-            <button @click.stop class="px-4 py-2 bg-indigo hover:bg-indigo/80 text-white rounded-lg text-xs font-medium transition">📩 Request Quote</button>
-            <button @click.stop class="px-4 py-2 bg-white/5 hover:bg-white/10 text-gray-300 rounded-lg text-xs font-medium transition border border-white/10">📋 View Full Profile</button>
+            <button @click.stop="$dispatch('show-toast','Demo — would open quote request flow')" class="px-4 py-2 bg-indigo hover:bg-indigo/80 text-white rounded-lg text-xs font-medium transition">📩 Request Quote</button>
+            <button @click.stop="$dispatch('show-toast','Demo — would open full manufacturer profile')" class="px-4 py-2 bg-white/5 hover:bg-white/10 text-gray-300 rounded-lg text-xs font-medium transition border border-white/10">📋 View Full Profile</button>
           </div>
         </div>
         <div x-show="!m.expanded" class="text-[10px] text-gray-500 mt-2 text-center">Click to expand details ↓</div>
@@ -922,8 +924,8 @@ body{background:#0f0d2e;font-family:'Inter',sans-serif;color:#e2e8f0}
   <!-- Timeline Visualization -->
   <div class="glass rounded-xl p-4">
     <div class="text-sm font-medium mb-3">📅 Project Timeline</div>
-    <div class="relative">
-      <div class="flex items-center gap-0">
+    <div class="relative overflow-x-auto">
+      <div class="flex items-center gap-0 min-w-[400px]">
         <template x-for="(step,si) in timelineSteps" :key="si">
           <div class="flex-1 flex flex-col items-center relative">
             <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm z-10" :class="si===0?'bg-indigo/30 text-indigo':si===timelineSteps.length-1?'bg-teal/30 text-teal':'bg-white/10 text-gray-400'" x-text="step.icon"></div>
@@ -1291,7 +1293,7 @@ body{background:#0f0d2e;font-family:'Inter',sans-serif;color:#e2e8f0}
           </div>
         </template>
       </div>
-      <button class="mt-3 text-xs text-indigo hover:text-indigo/80 transition">+ Upload Document (simulated)</button>
+      <button @click="$dispatch('show-toast','Demo — document upload simulated')" class="mt-3 text-xs text-indigo hover:text-indigo/80 transition">+ Upload Document</button>
     </div>
 
     <!-- Iterations Tab -->
@@ -1353,6 +1355,10 @@ body{background:#0f0d2e;font-family:'Inter',sans-serif;color:#e2e8f0}
 </div>
 
 <!-- Query Buttons -->
+<div class="flex justify-between items-center mb-2">
+  <div class="text-xs text-gray-500">Intelligence Queries</div>
+  <button x-show="activeQuery||searchTerm" @click="activeQuery='';searchTerm='';queryResult='';_resetGraph();closeDetail()" class="text-[10px] text-gray-400 hover:text-white px-2 py-0.5 rounded bg-white/5 hover:bg-white/10 transition">✕ Reset View</button>
+</div>
 <div class="grid grid-cols-2 md:grid-cols-3 gap-2 mb-4">
   <button @click="runQuery('risk')" :class="activeQuery==='risk'?'border-indigo bg-indigo/10':''" class="glass rounded-lg px-3 py-2 text-xs text-left glass-hover transition border border-transparent">⚠️ Supply Risk:<br><span class="text-gray-400">Anand Chemtex offline</span></button>
   <button @click="runQuery('cost')" :class="activeQuery==='cost'?'border-indigo bg-indigo/10':''" class="glass rounded-lg px-3 py-2 text-xs text-left glass-hover transition border border-transparent">💰 Cost Benchmark:<br><span class="text-gray-400">Pymetrozine</span></button>
@@ -1461,7 +1467,7 @@ body{background:#0f0d2e;font-family:'Inter',sans-serif;color:#e2e8f0}
         <div class="mb-2" x-text="alert.text"></div>
         <div class="flex gap-2">
           <button @click="showAlertImpact(alert)" class="px-2 py-0.5 rounded bg-white/5 hover:bg-white/10 text-[10px] transition">📊 Review Impact</button>
-          <button @click="alert.assigned=true" class="px-2 py-0.5 rounded bg-white/5 hover:bg-white/10 text-[10px] transition" :class="alert.assigned?'text-teal':''" x-text="alert.assigned?'✓ Assigned':'👥 Assign to Team'"></button>
+          <button @click="alert.assigned=true" class="px-2 py-0.5 rounded bg-white/5 hover:bg-white/10 text-[10px] transition" :class="alert.assigned?'text-teal':''" x-text="alert.assigned?'✓ Assigned to Compliance Team':'👥 Assign to Team'"></button>
           <button @click="alert.dismissed=true" class="px-2 py-0.5 rounded bg-white/5 hover:bg-white/10 text-[10px] text-gray-500 transition">Dismiss</button>
         </div>
       </div>
@@ -1502,10 +1508,10 @@ body{background:#0f0d2e;font-family:'Inter',sans-serif;color:#e2e8f0}
         </template>
       </div>
       <div class="mt-4 pt-4 border-t border-white/10 flex flex-wrap gap-2 items-center">
-        <button @click="sdsDownloaded='pdf'" class="bg-indigo/20 text-indigo px-4 py-1.5 rounded-lg text-xs font-medium hover:bg-indigo/30 transition">
+        <button @click="sdsDownloaded='pdf';$dispatch('show-toast','PDF generated (demo)')" class="bg-indigo/20 text-indigo px-4 py-1.5 rounded-lg text-xs font-medium hover:bg-indigo/30 transition">
           <span x-text="sdsDownloaded==='pdf'?'✓ Downloaded':'📥 Download PDF'"></span>
         </button>
-        <button @click="sdsDownloaded='eu'" class="bg-amber/20 text-amber px-4 py-1.5 rounded-lg text-xs font-medium hover:bg-amber/30 transition">
+        <button @click="sdsDownloaded='eu';$dispatch('show-toast','EU format exported (demo)')" class="bg-amber/20 text-amber px-4 py-1.5 rounded-lg text-xs font-medium hover:bg-amber/30 transition">
           <span x-text="sdsDownloaded==='eu'?'✓ Exported':'🇪🇺 Export EU Format'"></span>
         </button>
         <span class="text-[10px] text-gray-500 ml-auto">Generated by ComplianceOS • Scimplify • <span x-text="new Date().toLocaleDateString()"></span></span>
@@ -1593,7 +1599,7 @@ body{background:#0f0d2e;font-family:'Inter',sans-serif;color:#e2e8f0}
     </div>
     <!-- Step 3 -->
     <div x-show="onboardStep===3" class="fade-in">
-      <label class="text-xs text-gray-400 block mb-2">Target Buyer Segments</label>
+      <label class="text-xs text-gray-400 block mb-2">Target Buyer Segments <span class="text-amber" x-show="onboardForm.segments.length===0">(select at least one)</span></label>
       <div class="grid grid-cols-2 gap-2 mb-4">
         <template x-for="seg in buyerSegments" :key="seg.name">
           <label class="flex items-center gap-2 glass rounded-lg px-3 py-2 cursor-pointer hover:bg-white/5 transition">
@@ -1604,7 +1610,7 @@ body{background:#0f0d2e;font-family:'Inter',sans-serif;color:#e2e8f0}
       </div>
       <div class="flex gap-2">
         <button @click="onboardStep=2" class="bg-white/5 hover:bg-white/10 px-4 py-2 rounded-lg text-xs transition">← Back</button>
-        <button @click="onboardStep=4;generateOnboardGap()" class="bg-indigo hover:bg-indigo/80 text-white px-6 py-2 rounded-lg text-xs font-medium transition">Generate Gap Report →</button>
+        <button @click="if(onboardForm.segments.length>0){onboardStep=4;generateOnboardGap()}else{$dispatch('show-toast','Please select at least one buyer segment')}" class="bg-indigo hover:bg-indigo/80 text-white px-6 py-2 rounded-lg text-xs font-medium transition" :class="onboardForm.segments.length===0?'opacity-60':''">Generate Gap Report →</button>
       </div>
     </div>
     <!-- Step 4: Report -->
@@ -1721,7 +1727,7 @@ body{background:#0f0d2e;font-family:'Inter',sans-serif;color:#e2e8f0}
         </div>
       </div>
       <div class="flex gap-2">
-        <button @click="addToCart(p)" class="flex-1 bg-indigo/20 hover:bg-indigo/40 text-indigo py-1.5 rounded-lg text-xs font-medium transition">Add to Cart</button>
+        <button @click="p.stock==='Made to Order'?$dispatch('show-toast','Demo — would open custom quote request'):addToCart(p)" class="flex-1 py-1.5 rounded-lg text-xs font-medium transition" :class="p.stock==='Made to Order'?'bg-amber/20 hover:bg-amber/40 text-amber':'bg-indigo/20 hover:bg-indigo/40 text-indigo'" x-text="p.stock==='Made to Order'?'Request Quote':'Add to Cart'"></button>
         <button @click="toggleCompare(p)" class="px-2 py-1.5 rounded-lg text-xs transition" :class="compareList.find(c=>c.id===p.id)?'bg-indigo text-white':'bg-white/5 text-gray-400 hover:text-white'">⚖️</button>
       </div>
     </div>
@@ -2034,15 +2040,15 @@ body{background:#0f0d2e;font-family:'Inter',sans-serif;color:#e2e8f0}
       <div class="w-14 h-14 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-[9px] text-gray-500 text-center leading-tight">QR<br>Code</div>
     </div>
     <div class="border-b border-white/10 mb-4 pb-2">
-      <div class="text-lg font-bold">Pymetrozine</div>
-      <div class="text-[11px] text-gray-500">CAS 123312-89-0 · MW 217.23 g/mol</div>
+      <div class="text-lg font-bold" x-text="selectedProduct"></div>
+      <div class="text-[11px] text-gray-500" x-text="certCAS[selectedProduct]||'CAS N/A'"></div>
     </div>
 
     <!-- Metrics -->
     <div class="grid grid-cols-2 gap-4 text-sm mb-4">
-      <div><span class="text-gray-400 text-xs block">Synthesis Route</span>Scimplify Optimized (5-step)</div>
-      <div><span class="text-gray-400 text-xs block">GreenScore Grade</span><span class="text-teal font-bold text-lg">A+</span></div>
-      <div><span class="text-gray-400 text-xs block">Carbon Footprint</span><span class="font-semibold">2.1 kg CO₂e / kg</span></div>
+      <div><span class="text-gray-400 text-xs block">Synthesis Route</span>Scimplify Optimized (<span x-text="productData[selectedProduct]?.opt.steps||5"></span>-step)</div>
+      <div><span class="text-gray-400 text-xs block">GreenScore Grade</span><span class="font-bold text-lg" :class="productData[selectedProduct]?.opt.grade==='A+'?'text-teal':'text-teal'" x-text="productData[selectedProduct]?.opt.grade||'A+'"></span></div>
+      <div><span class="text-gray-400 text-xs block">Carbon Footprint</span><span class="font-semibold" x-text="(productData[selectedProduct]?.opt.co2||2.1)+' kg CO₂e / kg'"></span></div>
       <div><span class="text-gray-400 text-xs block">Scope</span>Cradle-to-gate</div>
       <div><span class="text-gray-400 text-xs block">Issue Date</span><span x-text="new Date().toLocaleDateString()"></span></div>
       <div><span class="text-gray-400 text-xs block">Valid Until</span><span x-text="new Date(Date.now()+365*86400000).toLocaleDateString()"></span></div>
@@ -2073,8 +2079,8 @@ body{background:#0f0d2e;font-family:'Inter',sans-serif;color:#e2e8f0}
 
     <!-- Action Buttons -->
     <div class="flex gap-2">
-      <button class="flex-1 bg-teal/20 hover:bg-teal/30 text-teal text-xs font-medium py-2 rounded-lg transition flex items-center justify-center gap-1">📄 Export PDF</button>
-      <button class="flex-1 bg-indigo/20 hover:bg-indigo/30 text-indigo text-xs font-medium py-2 rounded-lg transition flex items-center justify-center gap-1">🔗 Share Link</button>
+      <button @click="$dispatch('show-toast','Certificate PDF exported (demo)')" class="flex-1 bg-teal/20 hover:bg-teal/30 text-teal text-xs font-medium py-2 rounded-lg transition flex items-center justify-center gap-1">📄 Export PDF</button>
+      <button @click="$dispatch('show-toast','Shareable link copied (demo)')" class="flex-1 bg-indigo/20 hover:bg-indigo/30 text-indigo text-xs font-medium py-2 rounded-lg transition flex items-center justify-center gap-1">🔗 Share Link</button>
     </div>
   </div>
 </div>
@@ -2109,7 +2115,7 @@ body{background:#0f0d2e;font-family:'Inter',sans-serif;color:#e2e8f0}
     </div>
     <div class="mt-4 pt-3 border-t border-white/10 flex justify-between items-center">
       <div class="text-xs text-gray-500">Total portfolio: <span class="text-white font-medium" x-text="portfolio.reduce((s,p)=>s+p.co2*p.tons,0).toFixed(0)+' tons CO₂e/year'"></span></div>
-      <button class="text-xs bg-teal/20 text-teal px-3 py-1 rounded-lg hover:bg-teal/30 transition">📊 Export Report</button>
+      <button @click="$dispatch('show-toast','Portfolio report exported (demo)')" class="text-xs bg-teal/20 text-teal px-3 py-1 rounded-lg hover:bg-teal/30 transition">📊 Export Report</button>
     </div>
   </div>
 </div>
@@ -2182,24 +2188,24 @@ body{background:#0f0d2e;font-family:'Inter',sans-serif;color:#e2e8f0}
 
   <!-- The CBAM Savings Example -->
   <div class="glass rounded-xl p-5">
-    <h3 class="font-semibold text-sm mb-3 text-indigo">💰 Why Buyers Care: The €21K Example</h3>
+    <h3 class="font-semibold text-sm mb-3 text-indigo">💰 Why Buyers Care: The €27K Example</h3>
     <div class="text-xs text-gray-400 mb-3">At €75/ton CO₂ under CBAM, carbon footprint directly hits the buyer's cost:</div>
     <div class="grid md:grid-cols-3 gap-4 text-center">
       <div class="glass rounded-lg p-3">
         <div class="text-xs text-gray-500 mb-1">Supplier A</div>
         <div class="text-lg font-bold text-amber">5.8 kg CO₂/kg</div>
         <div class="text-xs text-gray-500 mt-1">CBAM cost on 100 tons:</div>
-        <div class="font-semibold text-amber">€43,500</div>
+        <div class="font-semibold text-amber">€42,340</div>
       </div>
       <div class="glass rounded-lg p-3">
         <div class="text-xs text-gray-500 mb-1">Supplier B (Scimplify)</div>
-        <div class="text-lg font-bold text-teal">3.2 kg CO₂/kg</div>
+        <div class="text-lg font-bold text-teal">2.1 kg CO₂/kg</div>
         <div class="text-xs text-gray-500 mt-1">CBAM cost on 100 tons:</div>
-        <div class="font-semibold text-teal">€24,000</div>
+        <div class="font-semibold text-teal">€15,330</div>
       </div>
       <div class="glass rounded-lg p-3 border border-teal/30">
         <div class="text-xs text-gray-500 mb-1">Buyer Saves</div>
-        <div class="text-2xl font-bold text-teal">€19,500</div>
+        <div class="text-2xl font-bold text-teal">€27,010</div>
         <div class="text-xs text-gray-500 mt-1">per 100-ton order</div>
         <div class="text-[10px] text-teal">Just by choosing lower-carbon supplier</div>
       </div>
@@ -2268,7 +2274,7 @@ body{background:#0f0d2e;font-family:'Inter',sans-serif;color:#e2e8f0}
         <div class="glass rounded-lg p-2 w-full text-center">
           <div class="text-[10px] text-gray-500">Carbon Price</div>
           <div class="text-lg font-bold text-indigo" x-text="'€'+currentCarbonPrice()+'/tCO₂'"></div>
-          <div class="text-[10px] text-gray-500" x-text="cbamCountries.find(c=>c.code===cbamCountry)?.name+' rate'"></div>
+          <div class="text-[10px] text-gray-500">EU ETS rate (all CBAM countries)</div>
         </div>
       </div>
     </div>
@@ -2504,11 +2510,11 @@ function rfqApp(){return{
 
 function ionsApp(){
   const milestones=['Discovery','Feasibility','Lab Scale','Pilot','Tech Transfer','Qualification','Production'];
-  function makeMilestones(activeIdx){return milestones.map((m,i)=>({name:m,status:i<activeIdx?'done':i===activeIdx?'active':'pending',date:i<activeIdx?'2024-'+(i+1).toString().padStart(2,'0'):'—'}))}
+  function makeMilestones(activeIdx){return milestones.map((m,i)=>({name:m,status:i<activeIdx?'done':i===activeIdx?'active':'pending',date:i<activeIdx?'2025-'+(i+7).toString().padStart(2,'0'):'—'}))}
   function makeDocs(type){
-    const base=[{icon:'📄',name:'Project Brief.pdf',size:'245 KB',date:'Jan 5, 2024',type:'Brief'},{icon:'🧪',name:'Synthesis Route.pdf',size:'1.2 MB',date:'Jan 12, 2024',type:'SOP'}];
-    if(type>1) base.push({icon:'📊',name:'Analytical Report.xlsx',size:'890 KB',date:'Feb 8, 2024',type:'Report'});
-    if(type>2) base.push({icon:'📋',name:'Recipe v3.pdf',size:'430 KB',date:'Mar 1, 2024',type:'Recipe'},{icon:'✅',name:'Customer Specs.pdf',size:'310 KB',date:'Jan 2, 2024',type:'Specs'});
+    const base=[{icon:'📄',name:'Project Brief.pdf',size:'245 KB',date:'Sep 5, 2025',type:'Brief'},{icon:'🧪',name:'Synthesis Route.pdf',size:'1.2 MB',date:'Sep 12, 2025',type:'SOP'}];
+    if(type>1) base.push({icon:'📊',name:'Analytical Report.xlsx',size:'890 KB',date:'Oct 8, 2025',type:'Report'});
+    if(type>2) base.push({icon:'📋',name:'Recipe v3.pdf',size:'430 KB',date:'Nov 1, 2025',type:'Recipe'},{icon:'✅',name:'Customer Specs.pdf',size:'310 KB',date:'Sep 2, 2025',type:'Specs'});
     return base;
   }
   return{
@@ -2521,10 +2527,10 @@ function ionsApp(){
     ],
     scientists:[{name:'Dr. Ravi',count:8},{name:'Dr. Prem',count:6},{name:'Dr. Kumar',count:4}],
     ionsProjects:[
-      {id:1,name:'Pymetrozine Route Optimization',stage:'Tech Transfer',complete:70,scientist:'Dr. Ravi',milestones:makeMilestones(4),samples:[{id:'S-001',sent:'Jan 15',status:'Approved',flash:''},{id:'S-002',sent:'Feb 20',status:'Approved',flash:''},{id:'S-003',sent:'Mar 10',status:'Pending',flash:''}],iterations:['V1: Purity 95% — rejected by client','V2: Modified catalyst, temp 180°C — 97.5%','V3: Optimized temp to 165°C — 98.2% ✓ Approved'],activity:[{date:'Jan 10',text:'Project created from Route Optimization template',type:'info'},{date:'Jan 15',text:'Sample S-001 shipped to customer',type:'shipped'},{date:'Jan 28',text:'Sample S-001 received by customer',type:'received'},{date:'Feb 5',text:'S-001 approved — purity 98.2%',type:'approved'},{date:'Feb 20',text:'Sample S-002 shipped',type:'shipped'},{date:'Mar 1',text:'S-002 approved',type:'approved'},{date:'Mar 10',text:'Sample S-003 shipped — awaiting feedback',type:'shipped'}],documents:makeDocs(3)},
-      {id:2,name:'Custom Musk — Sciolide Variant',stage:'Sample Testing',complete:45,scientist:'Dr. Prem',milestones:makeMilestones(2),samples:[{id:'S-010',sent:'Feb 1',status:'Pending',flash:''},{id:'S-011',sent:'Mar 5',status:'Rejected',flash:''}],iterations:['V1: Initial synthesis — odor profile mismatch','V2: Adjusted side chain — 85% match, iterating'],activity:[{date:'Jan 5',text:'Project created from Custom Molecule template',type:'info'},{date:'Feb 1',text:'Sample S-010 shipped',type:'shipped'},{date:'Feb 15',text:'S-010 pending customer review',type:'info'},{date:'Mar 5',text:'Sample S-011 shipped',type:'shipped'},{date:'Mar 18',text:'S-011 rejected — odor profile 85%, need >95%',type:'rejected'}],documents:makeDocs(2)},
-      {id:3,name:'Fexo Chloro Alternative Route',stage:'Lab Validation',complete:30,scientist:'Dr. Kumar',milestones:makeMilestones(2),samples:[{id:'S-020',sent:'Mar 1',status:'Pending',flash:''}],iterations:['V1: Chlorination route A — yield 62%, needs improvement'],activity:[{date:'Feb 10',text:'Project created from Route Optimization template',type:'info'},{date:'Feb 20',text:'Feasibility study complete',type:'approved'},{date:'Mar 1',text:'Sample S-020 shipped for testing',type:'shipped'}],documents:makeDocs(1)},
-      {id:4,name:'CBAM Compliance — EU Buyer',stage:'Complete ✓',complete:100,scientist:'Dr. Ravi',milestones:makeMilestones(7),samples:[{id:'S-030',sent:'Dec 1',status:'Approved',flash:''},{id:'S-031',sent:'Jan 10',status:'Approved',flash:''}],iterations:['V1: Full LCA completed','V2: Documentation reviewed — approved by EU buyer ✓'],activity:[{date:'Nov 1',text:'Project created from China+1 Switch template',type:'info'},{date:'Nov 20',text:'LCA assessment completed',type:'approved'},{date:'Dec 1',text:'Sample S-030 shipped',type:'shipped'},{date:'Dec 15',text:'S-030 approved by EU buyer',type:'approved'},{date:'Jan 10',text:'Final sample S-031 shipped',type:'shipped'},{date:'Jan 25',text:'S-031 approved — project complete ✓',type:'approved'}],documents:makeDocs(3)},
+      {id:1,name:'Pymetrozine Route Optimization',stage:'Tech Transfer',complete:70,scientist:'Dr. Ravi',milestones:makeMilestones(4),samples:[{id:'S-001',sent:'Sep 15',status:'Approved',flash:''},{id:'S-002',sent:'Oct 20',status:'Approved',flash:''},{id:'S-003',sent:'Nov 10',status:'Pending',flash:''}],iterations:['V1: Purity 95% — rejected by client','V2: Modified catalyst, temp 180°C — 97.5%','V3: Optimized temp to 165°C — 98.2% ✓ Approved'],activity:[{date:'Sep 10',text:'Project created from Route Optimization template',type:'info'},{date:'Sep 15',text:'Sample S-001 shipped to customer',type:'shipped'},{date:'Sep 28',text:'Sample S-001 received by customer',type:'received'},{date:'Oct 5',text:'S-001 approved — purity 98.2%',type:'approved'},{date:'Oct 20',text:'Sample S-002 shipped',type:'shipped'},{date:'Nov 1',text:'S-002 approved',type:'approved'},{date:'Nov 10',text:'Sample S-003 shipped — awaiting feedback',type:'shipped'}],documents:makeDocs(3)},
+      {id:2,name:'Custom Musk — Sciolide Variant',stage:'Sample Testing',complete:45,scientist:'Dr. Prem',milestones:makeMilestones(2),samples:[{id:'S-010',sent:'Dec 1',status:'Pending',flash:''},{id:'S-011',sent:'Jan 5',status:'Rejected',flash:''}],iterations:['V1: Initial synthesis — odor profile mismatch','V2: Adjusted side chain — 85% match, iterating'],activity:[{date:'Nov 5',text:'Project created from Custom Molecule template',type:'info'},{date:'Dec 1',text:'Sample S-010 shipped',type:'shipped'},{date:'Dec 15',text:'S-010 pending customer review',type:'info'},{date:'Jan 5',text:'Sample S-011 shipped',type:'shipped'},{date:'Jan 18',text:'S-011 rejected — odor profile 85%, need >95%',type:'rejected'}],documents:makeDocs(2)},
+      {id:3,name:'Fexo Chloro Alternative Route',stage:'Lab Validation',complete:30,scientist:'Dr. Kumar',milestones:makeMilestones(2),samples:[{id:'S-020',sent:'Jan 15',status:'Pending',flash:''}],iterations:['V1: Chlorination route A — yield 62%, needs improvement'],activity:[{date:'Dec 10',text:'Project created from Route Optimization template',type:'info'},{date:'Jan 2',text:'Feasibility study complete',type:'approved'},{date:'Jan 15',text:'Sample S-020 shipped for testing',type:'shipped'}],documents:makeDocs(1)},
+      {id:4,name:'CBAM Compliance — EU Buyer',stage:'Complete ✓',complete:100,scientist:'Dr. Ravi',milestones:makeMilestones(7),samples:[{id:'S-030',sent:'Aug 1',status:'Approved',flash:''},{id:'S-031',sent:'Sep 10',status:'Approved',flash:''}],iterations:['V1: Full LCA completed','V2: Documentation reviewed — approved by EU buyer ✓'],activity:[{date:'Jul 1',text:'Project created from China+1 Switch template',type:'info'},{date:'Jul 20',text:'LCA assessment completed',type:'approved'},{date:'Aug 1',text:'Sample S-030 shipped',type:'shipped'},{date:'Aug 15',text:'S-030 approved by EU buyer',type:'approved'},{date:'Sep 10',text:'Final sample S-031 shipped',type:'shipped'},{date:'Sep 25',text:'S-031 approved — project complete ✓',type:'approved'}],documents:makeDocs(3)},
     ],
     get avgCompletion(){return Math.round(this.ionsProjects.reduce((s,p)=>s+p.complete,0)/this.ionsProjects.length)},
     get pendingSamples(){return this.ionsProjects.reduce((s,p)=>s+p.samples.filter(x=>x.status==='Pending').length,0)},
@@ -2534,7 +2540,7 @@ function ionsApp(){
     createProject(){
       const p={
         id:Date.now(),name:this.newProject.molecule+' — '+this.newProject.template,
-        stage:'Discovery',complete:5,scientist:this.scientists[Math.floor(Math.random()*this.scientists.length)].name,
+        stage:'Discovery',complete:5,scientist:this.scientists.reduce((a,b)=>a.count<=b.count?a:b).name,
         milestones:makeMilestones(0),
         samples:[],
         iterations:['Project created — '+this.newProject.template+' template'],
@@ -2729,22 +2735,30 @@ function complianceApp(){return{
   },
   sdsSections(){
     let n=this.sdsForm.name||'[Product Name]',cas=this.sdsForm.cas||'[CAS Number]',h=this.sdsForm.hazard,comp=this.sdsForm.comp||'Active ingredient';
+    const hd={
+      Toxic:{signal:'Danger',hstat:'H300 — Fatal if swallowed\nH310 — Fatal in contact with skin\nH330 — Fatal if inhaled',prec:'P260, P264, P284, P301+P310, P302+P350',fa:'Inhalation: Remove to fresh air IMMEDIATELY. Call poison center. Give artificial respiration if not breathing.\nSkin: Remove contaminated clothing. Rinse skin with water for 20+ min. Call poison center.\nEye: Rinse cautiously with water for 20 min. Remove contact lenses. Get emergency medical help.\nIngestion: Rinse mouth. Do NOT induce vomiting. Call poison center IMMEDIATELY.',ld50:'Acute Toxicity (Oral LD50): 50–200 mg/kg (rat) — Category 3\nSkin Irritation: Category 1 — Causes severe skin burns\nEye: Category 1 — Causes serious eye damage\nCarcinogenicity: Under review (IARC Group 2B)',flash:'>200°C',transport:'UN Number: UN 2811\nProper Shipping Name: Toxic solid, organic, n.o.s.\nClass: 6.1, Packing Group II\nADR/IMDG: Regulated — requires hazard labels'},
+      Flammable:{signal:'Danger',hstat:'H225 — Highly flammable liquid and vapour\nH319 — Causes serious eye irritation',prec:'P210, P233, P240, P241, P242, P280',fa:'Inhalation: Move to fresh air. If breathing is difficult, give oxygen.\nSkin: Wash with soap and water. Remove contaminated clothing.\nEye: Rinse with water for 15 min.\nIngestion: Rinse mouth. Do NOT induce vomiting if liquid — aspiration hazard.',ld50:'Acute Toxicity (Oral LD50): >2000 mg/kg (rat)\nSkin Irritation: Category 2\nEye Irritation: Category 2A\nCarcinogenicity: Not classified (IARC, NTP)',flash:'23–60°C (varies by formulation)',transport:'UN Number: UN 1993\nProper Shipping Name: Flammable liquid, n.o.s.\nClass: 3, Packing Group II\nADR/IMDG: Regulated — flammable labels required'},
+      Corrosive:{signal:'Danger',hstat:'H314 — Causes severe skin burns and eye damage\nH290 — May be corrosive to metals',prec:'P260, P264, P280, P301+P330+P331, P303+P361+P353, P305+P351+P338',fa:'Inhalation: Move to fresh air. If breathing is difficult, give oxygen. Seek medical attention.\nSkin: IMMEDIATELY flush with water for 20+ min. Remove contaminated clothing. Seek medical attention.\nEye: Rinse cautiously with water for 30 min. Remove contact lenses. Get emergency medical help.\nIngestion: Rinse mouth. Do NOT induce vomiting. Drink water. Seek IMMEDIATE medical help.',ld50:'Acute Toxicity (Oral LD50): 200–500 mg/kg (rat) — Category 4\nSkin Corrosion: Category 1A — Causes severe burns in ≤3 min\nEye: Category 1 — Irreversible eye damage\nCarcinogenicity: Not classified',flash:'>200°C (non-flammable)',transport:'UN Number: UN 3260\nProper Shipping Name: Corrosive solid, acidic, organic, n.o.s.\nClass: 8, Packing Group II\nADR/IMDG: Regulated — corrosive labels required'},
+      'Environmental Hazard':{signal:'Warning',hstat:'H400 — Very toxic to aquatic life\nH410 — Very toxic to aquatic life with long lasting effects',prec:'P273, P391, P501',fa:'Inhalation: Move to fresh air. Seek medical attention if symptoms persist.\nSkin: Wash with soap and water for 15 min.\nEye: Rinse with water for 15 min.\nIngestion: Rinse mouth. Seek medical advice.',ld50:'Acute Toxicity (Oral LD50): >2000 mg/kg (rat)\nSkin Irritation: Category 3 — Mild\nEye Irritation: Category 2B\nCarcinogenicity: Not classified\nAquatic toxicity is the primary concern.',flash:'>200°C',transport:'UN Number: UN 3077\nProper Shipping Name: Environmentally hazardous substance, solid, n.o.s.\nClass: 9, Packing Group III\nIMDG: Marine pollutant marking required'},
+      Irritant:{signal:'Warning',hstat:'H302 — Harmful if swallowed\nH315 — Causes skin irritation\nH319 — Causes serious eye irritation',prec:'P264, P270, P280, P301+P312, P302+P352',fa:'Inhalation: Move to fresh air. Seek medical attention if symptoms persist.\nSkin: Wash with soap and water for 15 min.\nEye: Rinse with water for 15 min. Consult ophthalmologist if irritation persists.\nIngestion: Rinse mouth. Do NOT induce vomiting. Seek medical help.',ld50:'Acute Toxicity (Oral LD50): >2000 mg/kg (rat)\nSkin Irritation: Category 2\nEye Irritation: Category 2A\nCarcinogenicity: Not classified (IARC, NTP)',flash:'>200°C',transport:'UN Number: Not regulated for transport\nADR/RID: Not classified as dangerous goods\nIMDG/IATA: Not restricted'}
+    };
+    const d=hd[h]||hd.Irritant;
     return[
       {title:'Identification',content:'Product: '+n+'\nCAS: '+cas+'\nRecommended Use: Industrial chemical manufacturing\nSupplier: Scimplify Platform\nEmergency: +91-XXX-XXXX (24h)'},
-      {title:'Hazard Identification',content:'Classification (GHS): '+h+'\nSignal Word: '+(h==='Toxic'?'Danger':'Warning')+'\nHazard Statements: H302 — Harmful if swallowed\nPrecautionary: P264, P270, P301+P312'},
+      {title:'Hazard Identification',content:'Classification (GHS): '+h+'\nSignal Word: '+d.signal+'\nHazard Statements: '+d.hstat+'\nPrecautionary: '+d.prec},
       {title:'Composition / Information on Ingredients',content:comp+'\nCAS Number: '+cas+'\nMolecular Formula: See technical specifications\nImpurities: ≤0.5% (conforms to pharmacopeial standards)'},
-      {title:'First-Aid Measures',content:'Inhalation: Move to fresh air. Seek medical attention if symptoms persist.\nSkin Contact: Wash with soap and water for 15 min.\nEye Contact: Rinse with water for 15 min. Consult ophthalmologist.\nIngestion: Rinse mouth. Do NOT induce vomiting. Seek medical help.'},
-      {title:'Fire-Fighting Measures',content:'Suitable Extinguishing Media: Water spray, foam, dry chemical, CO₂\nSpecific Hazards: May emit toxic fumes under fire conditions\nProtective Equipment: Self-contained breathing apparatus (SCBA)'},
-      {title:'Accidental Release Measures',content:'Personal Precautions: Wear PPE. Avoid dust generation.\nEnvironmental: Prevent entry into drains/waterways.\nCleanup: Sweep up, place in suitable container for disposal.'},
-      {title:'Handling and Storage',content:'Handling: Avoid contact with skin/eyes. Use in well-ventilated area.\nStorage: Store in cool, dry place. Keep container tightly closed.\nTemperature: 15–25°C recommended'},
-      {title:'Exposure Controls / PPE',content:'OEL (TWA): 5 mg/m³\nEngineering Controls: Local exhaust ventilation\nPPE — Eyes: Safety goggles\nPPE — Skin: Chemical-resistant gloves\nPPE — Respiratory: Dust mask (P2 filter)'},
-      {title:'Physical & Chemical Properties',content:'Appearance: White to off-white powder\npH: 6.5–7.5 (1% solution)\nMelting Point: See CoA\nSolubility (Water): Slightly soluble\nFlash Point: >200°C'},
-      {title:'Stability and Reactivity',content:'Stability: Stable under recommended storage conditions\nIncompatible Materials: Strong oxidizers, strong acids\nHazardous Decomposition: CO, CO₂, NOx under thermal decomposition'},
-      {title:'Toxicological Information',content:'Acute Toxicity (Oral LD50): >2000 mg/kg (rat)\nSkin Irritation: Category 2\nEye Irritation: Category 2A\nCarcinogenicity: Not classified (IARC, NTP)'},
-      {title:'Ecological Information',content:'Aquatic Toxicity (LC50 Fish): >100 mg/L (96h)\nBiodegradability: Readily biodegradable\nBioaccumulation: Low potential (log Kow <1)'},
-      {title:'Disposal Considerations',content:'Dispose in accordance with local/national regulations.\nWaste Code: Refer to local authority for classification.\nDo not discharge into drains or environment.'},
-      {title:'Transport Information',content:'UN Number: Not regulated for transport\nADR/RID: Not classified as dangerous goods\nIMDG/IATA: Not restricted'},
-      {title:'Regulatory Information',content:'REACH Status: '+(h==='Environmental Hazard'?'Pre-registered':'Registered')+'\nTSCA (US): Listed\nDSL (Canada): Listed\nREACH SVHC: Not currently listed'},
+      {title:'First-Aid Measures',content:d.fa},
+      {title:'Fire-Fighting Measures',content:'Suitable Extinguishing Media: '+(h==='Flammable'?'Foam, dry chemical, CO₂. Do NOT use water jet.':'Water spray, foam, dry chemical, CO₂')+'\nSpecific Hazards: '+(h==='Toxic'?'Toxic fumes may form under fire. Use SCBA.':h==='Flammable'?'Highly flammable. Vapours may form explosive mixture with air. Flashback possible.':'May emit toxic fumes under fire conditions')+'\nProtective Equipment: Self-contained breathing apparatus (SCBA)'},
+      {title:'Accidental Release Measures',content:'Personal Precautions: '+(h==='Toxic'?'Evacuate area. Wear full protective suit + SCBA. Avoid all contact.':h==='Corrosive'?'Wear acid-resistant PPE. Neutralize with soda ash before cleanup.':'Wear PPE. Avoid dust generation.')+'\nEnvironmental: Prevent entry into drains/waterways.'+(h==='Environmental Hazard'?' CRITICAL — toxic to aquatic life. Contain spill immediately.':'')+'\nCleanup: '+(h==='Flammable'?'Eliminate ignition sources. Absorb with inert material. Place in sealed container.':'Sweep up, place in suitable container for disposal.')},
+      {title:'Handling and Storage',content:'Handling: '+(h==='Toxic'?'Handle under fume hood. Avoid all skin/eye contact. Wash thoroughly after handling.':h==='Flammable'?'Keep away from heat, sparks, open flames. Ground/bond container. Use explosion-proof equipment.':h==='Corrosive'?'Avoid contact with skin/eyes. Use in well-ventilated area. Do not breathe vapours.':'Avoid contact with skin/eyes. Use in well-ventilated area.')+'\nStorage: '+(h==='Flammable'?'Store in cool, well-ventilated place away from ignition sources. Keep container tightly closed.':h==='Corrosive'?'Store in corrosion-resistant container. Separate from metals and bases.':'Store in cool, dry place. Keep container tightly closed.')+'\nTemperature: '+(h==='Flammable'?'Below 30°C, away from heat sources':'15–25°C recommended')},
+      {title:'Exposure Controls / PPE',content:'OEL (TWA): '+(h==='Toxic'?'0.1 mg/m³ (highly toxic — minimize exposure)':'5 mg/m³')+'\nEngineering Controls: '+(h==='Toxic'||h==='Corrosive'?'Enclosed system with local exhaust ventilation':'Local exhaust ventilation')+'\nPPE — Eyes: '+(h==='Corrosive'?'Face shield + chemical splash goggles':'Safety goggles')+'\nPPE — Skin: '+(h==='Toxic'?'Chemical-resistant suit + double gloves':h==='Corrosive'?'Acid-resistant gloves + apron':'Chemical-resistant gloves')+'\nPPE — Respiratory: '+(h==='Toxic'?'Full-face respirator with organic vapor cartridge (OV/P100)':'Dust mask (P2 filter)')},
+      {title:'Physical & Chemical Properties',content:'Appearance: '+(h==='Flammable'?'Clear to pale yellow liquid':'White to off-white powder')+'\npH: '+(h==='Corrosive'?'<2 (strongly acidic)':'6.5–7.5 (1% solution)')+'\nMelting Point: See CoA\nSolubility (Water): '+(h==='Flammable'?'Immiscible':'Slightly soluble')+'\nFlash Point: '+d.flash},
+      {title:'Stability and Reactivity',content:'Stability: '+(h==='Flammable'?'Stable but highly flammable. Keep from heat/sparks.':'Stable under recommended storage conditions')+'\nIncompatible Materials: '+(h==='Corrosive'?'Metals, bases, water (exothermic reaction)':h==='Flammable'?'Oxidizers, open flames, sparks':'Strong oxidizers, strong acids')+'\nHazardous Decomposition: '+(h==='Toxic'?'HCN, CO, CO₂, NOx — HIGHLY TOXIC fumes':'CO, CO₂, NOx under thermal decomposition')},
+      {title:'Toxicological Information',content:d.ld50},
+      {title:'Ecological Information',content:'Aquatic Toxicity (LC50 Fish): '+(h==='Environmental Hazard'?'0.1–1.0 mg/L (96h) — VERY TOXIC':'>100 mg/L (96h)')+'\nBiodegradability: '+(h==='Environmental Hazard'?'Not readily biodegradable — persistent in environment':'Readily biodegradable')+'\nBioaccumulation: '+(h==='Environmental Hazard'?'High potential (log Kow >3) — may accumulate in food chain':'Low potential (log Kow <1)')},
+      {title:'Disposal Considerations',content:'Dispose in accordance with local/national regulations.\nWaste Code: '+(h==='Toxic'?'Hazardous waste — requires licensed hazardous waste facility':h==='Environmental Hazard'?'Hazardous waste — do NOT release to environment under any circumstances':'Refer to local authority for classification.')+'\nDo not discharge into drains or environment.'},
+      {title:'Transport Information',content:d.transport},
+      {title:'Regulatory Information',content:'REACH Status: '+(h==='Environmental Hazard'?'Pre-registered — SVHC candidate under review':'Registered')+'\nTSCA (US): Listed\nDSL (Canada): Listed\nREACH SVHC: '+(h==='Toxic'?'Under evaluation — potential Annex XIV inclusion':'Not currently listed')},
       {title:'Other Information',content:'Revision Date: '+new Date().toLocaleDateString()+'\nVersion: 1.0\nPrepared by: ComplianceOS — Scimplify\nDisclaimers: Data based on current knowledge. User must evaluate suitability.'},
     ];
   },
@@ -2789,7 +2803,7 @@ function atomsApp(){
     addToCart(p){if(!this.cart.find(c=>c.name===p.name))this.cart.push({name:p.name,price:p.price,qty:p.minOrder,minOrder:p.minOrder})},
     addToCartQty(p,qty){const existing=this.cart.find(c=>c.name===p.name);if(existing){existing.qty=qty;existing.price=this.getVolPrice(p,qty)}else{this.cart.push({name:p.name,price:this.getVolPrice(p,qty),qty:qty,minOrder:p.minOrder})}},
     cartTotal(){return this.cart.reduce((s,c)=>s+c.price*c.qty,0)},
-    toggleCompare(p){const idx=this.compareList.findIndex(c=>c.id===p.id);if(idx>=0)this.compareList.splice(idx,1);else if(this.compareList.length<3)this.compareList.push(p)},
+    toggleCompare(p){const idx=this.compareList.findIndex(c=>c.id===p.id);if(idx>=0)this.compareList.splice(idx,1);else if(this.compareList.length<3)this.compareList.push(p);else window.dispatchEvent(new CustomEvent('show-toast',{detail:'Compare limited to 3 products'}))},
     reorder(order){order.items.forEach(item=>{if(!this.cart.find(c=>c.name===item.name))this.cart.push({...item})});this.view='cart'},
     placeOrder(){const order={id:this.quoteId,date:new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}),status:'Processing',trackStep:1,total:this.cartTotal(),items:this.cart.map(c=>({...c}))};this.orderHistory.unshift(order);this.trackingOrder=order;this.cart=[];this.view='tracking'}
   }
@@ -2798,6 +2812,7 @@ function atomsApp(){
 function greenApp(){return{
   gTab:'compare',cbamTons:100,cbamCountry:'DE',
   selectedProduct:'Pymetrozine',
+  certCAS:{'Pymetrozine':'CAS 123312-89-0 · MW 217.23 g/mol','Fexofenadine':'CAS 153439-40-8 · MW 538.12 g/mol','Salicylic Acid':'CAS 69-72-7 · MW 138.12 g/mol','TiO₂':'CAS 13463-67-7 · MW 79.87 g/mol'},
   productData:{
     'Pymetrozine':{trad:{grade:'B',steps:8,energy:45,water:120,waste:3.2,co2:5.8},opt:{grade:'A+',steps:5,energy:22,water:45,waste:0.8,co2:2.1},iters:[{label:'V1 (Baseline)',co2:5.8},{label:'V2 (Catalyst)',co2:4.2},{label:'V3 (Solvent)',co2:3.1},{label:'V4 (Optimized)',co2:2.1}]},
     'Fexofenadine':{trad:{grade:'C+',steps:11,energy:62,water:180,waste:4.5,co2:7.2},opt:{grade:'A',steps:7,energy:30,water:65,waste:1.2,co2:3.0},iters:[{label:'V1 (Baseline)',co2:7.2},{label:'V2 (Route)',co2:5.4},{label:'V3 (Optimized)',co2:3.0}]},
@@ -2811,10 +2826,10 @@ function greenApp(){return{
   currentIterations:[{label:'V1 (Baseline)',co2:5.8},{label:'V2 (Catalyst)',co2:4.2},{label:'V3 (Solvent)',co2:3.1},{label:'V4 (Optimized)',co2:2.1}],
   builder:{steps:5,energy:'mixed',location:'tamilnadu'},
   cbamCountries:[
-    {code:'DE',name:'Germany',flag:'🇩🇪',price:75},
-    {code:'FR',name:'France',flag:'🇫🇷',price:70},
-    {code:'NL',name:'Netherlands',flag:'🇳🇱',price:78},
-    {code:'IT',name:'Italy',flag:'🇮🇹',price:68},
+    {code:'DE',name:'Germany',flag:'🇩🇪',price:73},
+    {code:'FR',name:'France',flag:'🇫🇷',price:73},
+    {code:'NL',name:'Netherlands',flag:'🇳🇱',price:73},
+    {code:'IT',name:'Italy',flag:'🇮🇹',price:73},
     {code:'BE',name:'Belgium',flag:'🇧🇪',price:73},
   ],
   portfolio:[
