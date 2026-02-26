@@ -259,59 +259,148 @@ body{background:#0f0d2e;font-family:'Inter',sans-serif;color:#e2e8f0}
 
 <!-- Industry Analogies -->
 <section class="max-w-5xl mx-auto px-4 pb-16">
-<h2 class="text-2xl font-bold mb-6 text-center">Standing on Giant Shoulders</h2>
-<div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-  <div class="glass rounded-xl p-5">
-    <div class="text-2xl mb-2">🔬</div>
-    <div class="font-semibold text-sm mb-1">Benchling</div>
-    <div class="text-xs text-gray-500 mb-2">$100M+ ARR • R&D OS for biotech</div>
-    <div class="text-xs text-gray-400 mb-2">ELN + LIMS + workflow templates + compliance + data platform for internal biotech R&D teams.</div>
-    <div class="text-xs text-indigo">
-      <span class="font-medium">What we take:</span> Workflow templates, sample traceability, milestone tracking. <span class="font-medium">Skip:</span> Full ELN/LIMS, molecular design.
+<h2 class="text-2xl font-bold mb-2 text-center">Standing on Giant Shoulders</h2>
+<p class="text-xs text-gray-500 text-center mb-6">We're not inventing from scratch. These companies solved similar problems in other industries. We're copying their best ideas for specialty chemicals.</p>
+
+<!-- Benchling -->
+<div class="glass rounded-xl p-5 mb-4" x-data="{open:false}">
+  <div class="flex items-start gap-4 cursor-pointer" @click="open=!open">
+    <div class="text-2xl shrink-0">🔬</div>
+    <div class="flex-1">
+      <div class="flex items-center gap-2 mb-1">
+        <span class="font-semibold text-sm">Benchling</span>
+        <span class="text-[10px] text-gray-500">$100M+ ARR</span>
+        <span class="text-[10px] px-1.5 py-0.5 rounded-full bg-indigo/20 text-indigo ml-auto">→ IONS Project Hub</span>
+      </div>
+      <p class="text-xs text-gray-400">Project management software for biotech scientists. When Moderna is developing a new mRNA sequence, Benchling tracks every experiment, every sample, every milestone — all in one place.</p>
     </div>
-    <div class="mt-2 text-[10px] text-gray-500">→ IONS Project Hub</div>
+    <span class="text-gray-500 text-xs shrink-0 mt-1" x-text="open?'▲':'▼'"></span>
   </div>
-  <div class="glass rounded-xl p-5">
-    <div class="text-2xl mb-2">🛡️</div>
-    <div class="font-semibold text-sm mb-1">Resilinc</div>
-    <div class="text-xs text-gray-500 mb-2">Gartner Leader • Supply chain risk for Fortune 500</div>
-    <div class="text-xs text-gray-400 mb-2">Multi-tier supplier mapping, disruption monitoring, what-if scenarios, compliance management.</div>
-    <div class="text-xs text-indigo">
-      <span class="font-medium">What we take:</span> Supply risk queries, alternative sourcing, compliance tracking. <span class="font-medium">Skip:</span> Global news monitoring, agentic AI.
+  <div x-show="open" x-collapse class="mt-4 pt-4 border-t border-white/10">
+    <div class="grid md:grid-cols-2 gap-4 mb-3">
+      <div>
+        <div class="text-xs font-medium text-teal mb-2">✓ What we take</div>
+        <div class="space-y-2 text-[11px] text-gray-400">
+          <div><span class="text-white">Workflow templates</span> — Benchling has templates per experiment type. We create templates for "Route Optimization," "Custom Molecule," "China+1 Switch" — so scientists don't start from scratch each time.</div>
+          <div><span class="text-white">Sample traceability</span> — Benchling tracks every sample: who made it, what purity, who approved it. We do the same: "Sample S-003: Purity 98.2%, Shipped Oct 15, Customer: Pending."</div>
+          <div><span class="text-white">Milestone tracking</span> — visual progress through stages: Discovery → Feasibility → Lab Scale → Pilot → Tech Transfer → Production.</div>
+        </div>
+      </div>
+      <div>
+        <div class="text-xs font-medium text-red-400 mb-2">✗ What we skip</div>
+        <div class="space-y-2 text-[11px] text-gray-400">
+          <div><span class="text-white">Electronic Lab Notebook (ELN)</span> — a digital version of a scientist's physical notebook for recording experiment details. We don't need this — Scimplify manages projects across external factories, not internal lab work.</div>
+          <div><span class="text-white">Lab Information Mgmt (LIMS)</span> — software tracking instruments and workflows inside a single lab. Not our domain.</div>
+          <div><span class="text-white">Molecular design tools</span> — software for designing new molecules from scratch.</div>
+        </div>
+      </div>
     </div>
-    <div class="mt-2 text-[10px] text-gray-500">→ ChemGraph + ComplianceOS</div>
-  </div>
-  <div class="glass rounded-xl p-5">
-    <div class="text-2xl mb-2">🌱</div>
-    <div class="font-semibold text-sm mb-1">Sphera</div>
-    <div class="text-xs text-gray-500 mb-2">Carbon mgmt leader • Enterprise sustainability & EHS</div>
-    <div class="text-xs text-gray-400 mb-2">LCA Automation for Chemical Manufacturing, SDS Management, Product Stewardship, Supply Chain Risk. Sells to Dow, BASF at $100K+/yr.</div>
-    <div class="text-xs text-indigo">
-      <span class="font-medium">What we take:</span> Product-level carbon scoring (simplified LCA), SDS automation. <span class="font-medium">Skip:</span> Full enterprise EHS, process safety. <span class="font-medium">Key diff:</span> Sphera is SAP. We're Shopify — same capabilities, embedded in a marketplace for mid-market.
+    <div class="glass rounded-lg p-3 text-[11px] text-gray-400 border-l-2 border-indigo">
+      <span class="text-white font-medium">Key difference:</span> Benchling serves internal teams (Moderna's own scientists). IONS serves outsourced R&D — there's a customer on the other side who needs to see progress, approve samples, and give feedback. Benchling has no customer-facing portal. We do.
     </div>
-    <div class="mt-2 text-[10px] text-gray-500">→ GreenScore + ComplianceOS</div>
-  </div>
-  <div class="glass rounded-xl p-5">
-    <div class="text-2xl mb-2">🏭</div>
-    <div class="font-semibold text-sm mb-1">Cognilix <span class="text-[9px] text-gray-500">(by Moglix)</span></div>
-    <div class="text-xs text-gray-500 mb-2">$40Bn+ network • B2B commerce SaaS spun from marketplace</div>
-    <div class="text-xs text-gray-400 mb-2">Source-to-Pay, Vendor Management, B2B eCommerce (Cognimart), RFQ/Spend Analytics. Born from Moglix's operational backbone — exact same playbook we're proposing.</div>
-    <div class="text-xs text-indigo">
-      <span class="font-medium">What we take:</span> Vendor onboarding (self-serve), B2B eCommerce model, RFQ price benchmarking. <span class="font-medium">Key diff:</span> Cognilix is horizontal (all MRO). We're vertical — chemistry-deep matching no horizontal platform can do.
-    </div>
-    <div class="mt-2 text-[10px] text-gray-500">→ ATOMS Commerce + ComplianceOS</div>
-  </div>
-  <div class="glass rounded-xl p-5">
-    <div class="text-2xl mb-2">📊</div>
-    <div class="font-semibold text-sm mb-1">Veeva Systems</div>
-    <div class="text-xs text-gray-500 mb-2">$2B+ ARR • Industry cloud for life sciences</div>
-    <div class="text-xs text-gray-400 mb-2">Started as CRM for pharma, became the OS — every life sciences company runs on Veeva. Vertical SaaS dominance.</div>
-    <div class="text-xs text-indigo">
-      <span class="font-medium">The playbook:</span> Own the vertical. Start with one workflow, expand to the entire value chain. Specialty chemicals has no Veeva. Yet.
-    </div>
-    <div class="mt-2 text-[10px] text-gray-500">→ The endgame</div>
   </div>
 </div>
+
+<!-- Cognilix -->
+<div class="glass rounded-xl p-5 mb-4" x-data="{open:false}">
+  <div class="flex items-start gap-4 cursor-pointer" @click="open=!open">
+    <div class="text-2xl shrink-0">🏭</div>
+    <div class="flex-1">
+      <div class="flex items-center gap-2 mb-1">
+        <span class="font-semibold text-sm">Cognilix <span class="text-[10px] text-gray-500 font-normal">(by Moglix)</span></span>
+        <span class="text-[10px] text-gray-500">$40B+ network</span>
+        <span class="text-[10px] px-1.5 py-0.5 rounded-full bg-indigo/20 text-indigo ml-auto">→ ATOMS Commerce</span>
+      </div>
+      <p class="text-xs text-gray-400">Moglix built an Amazon-for-industrial-supplies marketplace in India ($40B+ in orders). Then they realized: "The software we built to run our marketplace — vendor management, procurement, analytics — other companies would pay for this." So they spun it out as Cognilix. <span class="text-white">Exact same playbook we're proposing.</span></p>
+    </div>
+    <span class="text-gray-500 text-xs shrink-0 mt-1" x-text="open?'▲':'▼'"></span>
+  </div>
+  <div x-show="open" x-collapse class="mt-4 pt-4 border-t border-white/10">
+    <div class="grid md:grid-cols-2 gap-4 mb-3">
+      <div>
+        <div class="text-xs font-medium text-teal mb-2">✓ What we take</div>
+        <div class="space-y-2 text-[11px] text-gray-400">
+          <div><span class="text-white">Self-serve vendor onboarding</span> — manufacturers register, upload documents, get verified. Our ComplianceOS onboarding wizard follows this pattern.</div>
+          <div><span class="text-white">B2B eCommerce model</span> — Cognilix's "Cognimart" proves Indian B2B buyers will purchase online if it's easy. ATOMS Commerce: catalog, real pricing, cart, checkout.</div>
+          <div><span class="text-white">Price benchmarking</span> — "Is this supplier overcharging?" ChemGraph's price anomaly detection does this for chemicals.</div>
+        </div>
+      </div>
+      <div>
+        <div class="text-xs font-medium text-red-400 mb-2">✗ What we skip</div>
+        <div class="space-y-2 text-[11px] text-gray-400">
+          <div><span class="text-white">Horizontal/generic approach</span> — Cognilix works for any industrial category: nuts, bolts, safety gear, electrical supplies. All generic commodities.</div>
+        </div>
+      </div>
+    </div>
+    <div class="glass rounded-lg p-3 text-[11px] text-gray-400 border-l-2 border-indigo">
+      <span class="text-white font-medium">Key difference:</span> Cognilix can tell you "who sells sulfuric acid." ATOMS can tell you "who has a glass-lined reactor with CGMP certification and Grignard reaction experience at -20°C, with 200 MT spare capacity." That chemistry-deep matching is impossible on a horizontal platform.
+    </div>
+  </div>
+</div>
+
+<!-- Sphera -->
+<div class="glass rounded-xl p-5 mb-4" x-data="{open:false}">
+  <div class="flex items-start gap-4 cursor-pointer" @click="open=!open">
+    <div class="text-2xl shrink-0">🌱</div>
+    <div class="flex-1">
+      <div class="flex items-center gap-2 mb-1">
+        <span class="font-semibold text-sm">Sphera</span>
+        <span class="text-[10px] text-gray-500">$100K+/yr per customer</span>
+        <span class="text-[10px] px-1.5 py-0.5 rounded-full bg-indigo/20 text-indigo ml-auto">→ GreenScore + ComplianceOS</span>
+      </div>
+      <p class="text-xs text-gray-400">Enterprise sustainability software for giant chemical companies (Dow, BASF). They calculate carbon footprints of products (called LCA — Life Cycle Assessment), manage Safety Data Sheets (SDS — the 16-section document legally required for every chemical sold), and handle workplace safety compliance.</p>
+    </div>
+    <span class="text-gray-500 text-xs shrink-0 mt-1" x-text="open?'▲':'▼'"></span>
+  </div>
+  <div x-show="open" x-collapse class="mt-4 pt-4 border-t border-white/10">
+    <div class="grid md:grid-cols-2 gap-4 mb-3">
+      <div>
+        <div class="text-xs font-medium text-teal mb-2">✓ What we take</div>
+        <div class="space-y-2 text-[11px] text-gray-400">
+          <div><span class="text-white">Product-level carbon scoring</span> — "How much CO₂ to make 1 kg of Pymetrozine?" Sphera does this with PhD-level analysis and proprietary databases. We do a simpler version using our own data: synthesis route (steps, energy), factory audits (solar vs coal), and public emission databases.</div>
+          <div><span class="text-white">SDS automation</span> — instead of manufacturers paying consultants $200-500 per Safety Data Sheet, ComplianceOS generates them from formulation data in minutes.</div>
+        </div>
+      </div>
+      <div>
+        <div class="text-xs font-medium text-red-400 mb-2">✗ What we skip</div>
+        <div class="space-y-2 text-[11px] text-gray-400">
+          <div><span class="text-white">Full EHS (Environment, Health & Safety)</span> — managing workplace safety incidents, environmental permits, process safety inside factories. Not our domain.</div>
+          <div><span class="text-white">Process safety analysis</span> — analyzing whether a reactor could explode. Too specialized, too high-liability.</div>
+        </div>
+      </div>
+    </div>
+    <div class="glass rounded-lg p-3 text-[11px] text-gray-400 border-l-2 border-indigo">
+      <span class="text-white font-medium">Key difference:</span> Sphera is SAP — sells to BASF at $100K+/year with 6-month implementations. We're Shopify — same science (carbon scoring, SDS), but embedded directly into a marketplace that mid-market manufacturers already use. Same capabilities, radically different price point and delivery.
+    </div>
+  </div>
+</div>
+
+<!-- Veeva -->
+<div class="glass rounded-xl p-5" x-data="{open:false}">
+  <div class="flex items-start gap-4 cursor-pointer" @click="open=!open">
+    <div class="text-2xl shrink-0">📊</div>
+    <div class="flex-1">
+      <div class="flex items-center gap-2 mb-1">
+        <span class="font-semibold text-sm">Veeva Systems</span>
+        <span class="text-[10px] text-gray-500">$2B+ ARR</span>
+        <span class="text-[10px] px-1.5 py-0.5 rounded-full bg-teal/20 text-teal ml-auto">→ The Endgame</span>
+      </div>
+      <p class="text-xs text-gray-400">Started as a simple CRM (customer database) for pharma sales reps. Then expanded to clinical trials, regulatory docs, quality management, drug safety — until every major pharma company ran on Veeva. They own the entire vertical.</p>
+    </div>
+    <span class="text-gray-500 text-xs shrink-0 mt-1" x-text="open?'▲':'▼'"></span>
+  </div>
+  <div x-show="open" x-collapse class="mt-4 pt-4 border-t border-white/10">
+    <div class="text-[11px] text-gray-400 space-y-2 mb-3">
+      <p><span class="text-white font-medium">The playbook:</span> Start with one workflow that the industry desperately needs. Nail it. Then expand to adjacent workflows. Keep expanding until you're the operating system for the entire value chain.</p>
+      <p><span class="text-white font-medium">The opportunity:</span> Specialty chemicals is a <span class="text-teal font-semibold">$600B+ global market</span> with <span class="text-teal font-semibold">zero dominant vertical software player.</span> Nobody is the "Veeva of specialty chemicals."</p>
+      <p>We're not building Veeva today. We're building the first 2-3 products (IONS, ATOMS, ComplianceOS) that could eventually become a Veeva-like platform — if the data compounds and the network grows.</p>
+    </div>
+    <div class="glass rounded-lg p-3 text-[11px] text-gray-400 border-l-2 border-teal">
+      <span class="text-white font-medium">Veeva's path:</span> CRM → clinical trials → regulatory → quality → content → data. Each product sold to the same customers, shared the same data layer, and made the next product easier to sell. <span class="text-teal font-medium">That's exactly the platform architecture we're designing.</span>
+    </div>
+  </div>
+</div>
+
 </section>
 
 <!-- 6 Product Cards -->
