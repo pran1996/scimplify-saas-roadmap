@@ -776,10 +776,16 @@ body{background:#0f0d2e;font-family:'Inter',sans-serif;color:#e2e8f0}
             <button @click="p.duration=Math.min(12,p.duration+1);recalc()" class="w-5 h-5 rounded bg-white/5 hover:bg-white/10 text-gray-400 text-xs transition">+</button>
           </div>
         </div>
-        <!-- Key Assumption (slider) -->
-        <div class="col-span-2 px-1">
+        <!-- Key Assumption (slider) + tooltip -->
+        <div class="col-span-2 px-1 relative group">
           <input type="range" :min="p.assumptionMin" :max="p.assumptionMax" :step="p.assumptionStep" x-model.number="p.assumption" @input="recalc()" class="w-full h-1 accent-indigo">
           <div class="text-[10px] text-gray-400 text-center mt-0.5" x-text="p.assumptionLabel+': '+p.assumption+p.assumptionUnit"></div>
+          <!-- Hover tooltip with formula -->
+          <div class="hidden group-hover:block absolute z-20 bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 bg-gray-900 border border-white/10 rounded-lg p-2 shadow-xl text-[9px]">
+            <div class="text-gray-400 mb-1" x-text="p.revenueType"></div>
+            <div class="font-mono text-indigo" x-text="p.getFormula(24).eq"></div>
+            <div class="text-[8px] text-gray-500 mt-1">Hover: M24 projection. Click "Formula Explorer" below for full details.</div>
+          </div>
         </div>
         <!-- M12 Revenue -->
         <div class="col-span-2 text-center">
@@ -873,14 +879,161 @@ body{background:#0f0d2e;font-family:'Inter',sans-serif;color:#e2e8f0}
   </div>
 </div>
 
-<!-- Revenue Model Explanation -->
+<!-- Revenue Model — Formula Explorer -->
 <div class="glass rounded-xl p-5">
-  <h3 class="text-sm font-semibold mb-3">Assumption Details</h3>
-  <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
-    <template x-for="p in products" :key="p.id">
-      <div class="glass rounded-lg p-3 text-[11px]" :class="p.enabled?'':'opacity-30'">
-        <div class="font-medium text-xs mb-1" x-text="p.icon+' '+p.shortName"></div>
-        <div class="text-gray-400" x-text="p.revenueLogic"></div>
+  <h3 class="text-sm font-semibold mb-1">Formula Explorer</h3>
+  <p class="text-[10px] text-gray-500 mb-4">Click any product to see the live equation, tweak pricing & ramp variables, and watch revenue update.</p>
+  <div class="space-y-2">
+    <template x-for="p in products" :key="'formula-'+p.id">
+      <div class="glass rounded-lg overflow-hidden transition-all" :class="p.enabled?'':'opacity-30'">
+        <!-- Header row — click to expand -->
+        <div class="flex items-center justify-between p-3 cursor-pointer hover:bg-white/5 transition" @click="showFormulaDetail = showFormulaDetail===p.id ? null : p.id">
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-medium" x-text="p.icon+' '+p.shortName"></span>
+            <span class="text-[9px] px-1.5 py-0.5 rounded-full" :class="{'bg-emerald-500/20 text-emerald-400': p.revenueType.includes('SaaS'), 'bg-amber-500/20 text-amber-400': p.revenueType.includes('Capacity') || p.revenueType.includes('Uplift'), 'bg-blue-500/20 text-blue-400': p.revenueType.includes('Transaction') || p.revenueType.includes('Report'), 'bg-purple-500/20 text-purple-400': p.revenueType.includes('Consulting')}" x-text="p.revenueType"></span>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="text-[10px] text-gray-400" x-text="p.rev24>0?'M24: ₹'+formatLakhs(p.rev24)+'/mo':'—'"></span>
+            <span class="text-gray-500 text-[10px]" x-text="showFormulaDetail===p.id?'▲':'▼'"></span>
+          </div>
+        </div>
+        <!-- Expanded detail -->
+        <div x-show="showFormulaDetail===p.id" x-collapse class="px-3 pb-3 border-t border-white/5">
+          <div class="text-[11px] text-gray-400 mt-2 mb-3" x-text="p.revenueLogic"></div>
+
+          <!-- Live equation at M24 -->
+          <div class="bg-white/5 rounded-lg p-2 mb-3 font-mono text-[10px] text-indigo" x-text="p.getFormula(24).eq"></div>
+          <div class="flex flex-wrap gap-2 mb-3">
+            <template x-for="(val, key) in p.getFormula(24).vals" :key="key">
+              <span class="text-[9px] bg-white/5 rounded px-1.5 py-0.5"><span class="text-gray-500" x-text="key+': '"></span><span class="text-teal font-medium" x-text="val"></span></span>
+            </template>
+          </div>
+
+          <!-- Editable formula variables -->
+          <div class="text-[10px] text-gray-500 font-medium mb-2">⚙️ Tune Formula Variables</div>
+          <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
+            <!-- IONS-specific -->
+            <template x-if="p.id==='ions'">
+              <div class="glass rounded p-2">
+                <label class="text-[9px] text-gray-400 block mb-1">Baseline projects/yr</label>
+                <input type="number" x-model.number="p.baselineProjects" @input="recalc()" min="1" max="20" step="1" class="w-full bg-white/5 rounded px-2 py-1 text-xs text-white border border-white/10 focus:border-indigo outline-none">
+              </div>
+            </template>
+            <template x-if="p.id==='ions'">
+              <div class="glass rounded p-2">
+                <label class="text-[9px] text-gray-400 block mb-1">Avg project value (₹L)</label>
+                <input type="number" x-model.number="p.projectValueL" @input="recalc()" min="5" max="100" step="5" class="w-full bg-white/5 rounded px-2 py-1 text-xs text-white border border-white/10 focus:border-indigo outline-none">
+              </div>
+            </template>
+            <template x-if="p.id==='ions'">
+              <div class="glass rounded p-2">
+                <label class="text-[9px] text-gray-400 block mb-1">Ramp (projects/mo)</label>
+                <input type="number" x-model.number="p.rampRate" @input="recalc()" min="0.1" max="2" step="0.1" class="w-full bg-white/5 rounded px-2 py-1 text-xs text-white border border-white/10 focus:border-indigo outline-none">
+              </div>
+            </template>
+            <!-- ATOMS-specific -->
+            <template x-if="p.id==='atoms'">
+              <div class="glass rounded p-2">
+                <label class="text-[9px] text-gray-400 block mb-1">Avg order value (₹L)</label>
+                <input type="number" x-model.number="p.aovL" @input="recalc()" min="0.5" max="10" step="0.5" class="w-full bg-white/5 rounded px-2 py-1 text-xs text-white border border-white/10 focus:border-indigo outline-none">
+              </div>
+            </template>
+            <template x-if="p.id==='atoms'">
+              <div class="glass rounded p-2">
+                <label class="text-[9px] text-gray-400 block mb-1">Take-rate (%)</label>
+                <input type="number" x-model.number="p.takeRate" @input="recalc()" min="0.5" max="5" step="0.25" class="w-full bg-white/5 rounded px-2 py-1 text-xs text-white border border-white/10 focus:border-indigo outline-none">
+              </div>
+            </template>
+            <template x-if="p.id==='atoms'">
+              <div class="glass rounded p-2">
+                <label class="text-[9px] text-gray-400 block mb-1">Initial orders/mo</label>
+                <input type="number" x-model.number="p.initialOrders" @input="recalc()" min="5" max="50" step="5" class="w-full bg-white/5 rounded px-2 py-1 text-xs text-white border border-white/10 focus:border-indigo outline-none">
+              </div>
+            </template>
+            <template x-if="p.id==='atoms'">
+              <div class="glass rounded p-2">
+                <label class="text-[9px] text-gray-400 block mb-1">Order ramp/mo</label>
+                <input type="number" x-model.number="p.orderRamp" @input="recalc()" min="1" max="20" step="1" class="w-full bg-white/5 rounded px-2 py-1 text-xs text-white border border-white/10 focus:border-indigo outline-none">
+              </div>
+            </template>
+            <!-- ChemGraph-specific -->
+            <template x-if="p.id==='chemgraph'">
+              <div class="glass rounded p-2">
+                <label class="text-[9px] text-gray-400 block mb-1">Avg deal value (₹L)</label>
+                <input type="number" x-model.number="p.dealValueL" @input="recalc()" min="5" max="100" step="5" class="w-full bg-white/5 rounded px-2 py-1 text-xs text-white border border-white/10 focus:border-indigo outline-none">
+              </div>
+            </template>
+            <template x-if="p.id==='chemgraph'">
+              <div class="glass rounded p-2">
+                <label class="text-[9px] text-gray-400 block mb-1">Deal ramp/mo</label>
+                <input type="number" x-model.number="p.dealRamp" @input="recalc()" min="0.1" max="1" step="0.1" class="w-full bg-white/5 rounded px-2 py-1 text-xs text-white border border-white/10 focus:border-indigo outline-none">
+              </div>
+            </template>
+            <template x-if="p.id==='chemgraph'">
+              <div class="glass rounded p-2">
+                <label class="text-[9px] text-gray-400 block mb-1">Initial deals/qtr</label>
+                <input type="number" x-model.number="p.initialDeals" @input="recalc()" min="0" max="5" step="1" class="w-full bg-white/5 rounded px-2 py-1 text-xs text-white border border-white/10 focus:border-indigo outline-none">
+              </div>
+            </template>
+            <!-- ComplianceOS-specific -->
+            <template x-if="p.id==='compliance'">
+              <div class="glass rounded p-2">
+                <label class="text-[9px] text-gray-400 block mb-1">Price/facility (₹K/mo)</label>
+                <input type="number" x-model.number="p.pricePerFacilityK" @input="recalc()" min="2" max="20" step="1" class="w-full bg-white/5 rounded px-2 py-1 text-xs text-white border border-white/10 focus:border-indigo outline-none">
+              </div>
+            </template>
+            <template x-if="p.id==='compliance'">
+              <div class="glass rounded p-2">
+                <label class="text-[9px] text-gray-400 block mb-1">Facility ramp/mo</label>
+                <input type="number" x-model.number="p.facilityRamp" @input="recalc()" min="0.5" max="10" step="0.5" class="w-full bg-white/5 rounded px-2 py-1 text-xs text-white border border-white/10 focus:border-indigo outline-none">
+              </div>
+            </template>
+            <template x-if="p.id==='compliance'">
+              <div class="glass rounded p-2">
+                <label class="text-[9px] text-gray-400 block mb-1">Initial facilities</label>
+                <input type="number" x-model.number="p.initialFacilities" @input="recalc()" min="1" max="20" step="1" class="w-full bg-white/5 rounded px-2 py-1 text-xs text-white border border-white/10 focus:border-indigo outline-none">
+              </div>
+            </template>
+            <!-- GreenScore-specific -->
+            <template x-if="p.id==='green'">
+              <div class="glass rounded p-2">
+                <label class="text-[9px] text-gray-400 block mb-1">Report price (₹L)</label>
+                <input type="number" x-model.number="p.reportPriceL" @input="recalc()" min="0.5" max="5" step="0.25" class="w-full bg-white/5 rounded px-2 py-1 text-xs text-white border border-white/10 focus:border-indigo outline-none">
+              </div>
+            </template>
+            <template x-if="p.id==='green'">
+              <div class="glass rounded p-2">
+                <label class="text-[9px] text-gray-400 block mb-1">Report ramp/mo</label>
+                <input type="number" x-model.number="p.reportRamp" @input="recalc()" min="0.5" max="5" step="0.5" class="w-full bg-white/5 rounded px-2 py-1 text-xs text-white border border-white/10 focus:border-indigo outline-none">
+              </div>
+            </template>
+            <template x-if="p.id==='green'">
+              <div class="glass rounded p-2">
+                <label class="text-[9px] text-gray-400 block mb-1">Initial reports/yr</label>
+                <input type="number" x-model.number="p.initialReports" @input="recalc()" min="1" max="20" step="1" class="w-full bg-white/5 rounded px-2 py-1 text-xs text-white border border-white/10 focus:border-indigo outline-none">
+              </div>
+            </template>
+            <!-- RFQ-specific -->
+            <template x-if="p.id==='rfq'">
+              <div class="glass rounded p-2">
+                <label class="text-[9px] text-gray-400 block mb-1">Report price (₹L)</label>
+                <input type="number" x-model.number="p.reportPriceL" @input="recalc()" min="1" max="10" step="0.5" class="w-full bg-white/5 rounded px-2 py-1 text-xs text-white border border-white/10 focus:border-indigo outline-none">
+              </div>
+            </template>
+            <template x-if="p.id==='rfq'">
+              <div class="glass rounded p-2">
+                <label class="text-[9px] text-gray-400 block mb-1">Report ramp/mo</label>
+                <input type="number" x-model.number="p.reportRamp" @input="recalc()" min="0.1" max="2" step="0.1" class="w-full bg-white/5 rounded px-2 py-1 text-xs text-white border border-white/10 focus:border-indigo outline-none">
+              </div>
+            </template>
+            <template x-if="p.id==='rfq'">
+              <div class="glass rounded p-2">
+                <label class="text-[9px] text-gray-400 block mb-1">Initial reports/yr</label>
+                <input type="number" x-model.number="p.initialReports" @input="recalc()" min="1" max="10" step="1" class="w-full bg-white/5 rounded px-2 py-1 text-xs text-white border border-white/10 focus:border-indigo outline-none">
+              </div>
+            </template>
+          </div>
+        </div>
       </div>
     </template>
   </div>
@@ -2439,6 +2592,7 @@ function app(){return{
 
 function revenueModel(){return{
   showCostConfig:false,
+  showFormulaDetail:null, // which product formula is expanded
   engCostL:1.5,   // ₹L/month per engineer (fully loaded)
   pmCostL:2,      // ₹L/month per PM
   infraCostL:0.5, // ₹L/month infra+cloud
@@ -2446,91 +2600,147 @@ function revenueModel(){return{
     {
       id:'ions', icon:'📋', shortName:'IONS Hub', tier:'Must Build', color:'tier-must',
       enabled:true, startMonth:1, duration:6,
-      assumption:15, assumptionMin:5, assumptionMax:40, assumptionStep:1,
+      assumption:12, assumptionMin:5, assumptionMax:40, assumptionStep:1,
       assumptionLabel:'Projects/scientist/yr', assumptionUnit:'',
+      // Editable formula variables
+      baselineProjects:5, projectValueL:25, rampRate:0.4,
       engineers:2, pmFraction:0.5, investmentL:0,
       rev12:0, rev24:0,
-      revenueLogic:'Revenue = additional projects enabled × avg project value (₹25L). Scientists handle 3-5x more projects. Not direct SaaS — capacity unlock on core business.',
+      revenueType:'🏭 Capacity Unlock (not SaaS)',
+      revenueLogic:'Scientists currently handle ~5 projects/yr. IONS enables more. Each extra project = revenue for core business.',
+      getFormula(month){
+        if(month < this.startMonth+this.duration) return {eq:'Not live yet', vals:{}};
+        const ml = month-(this.startMonth+this.duration);
+        const currentCap = Math.min(this.assumption, this.baselineProjects + ml*this.rampRate);
+        const extra = Math.max(0, currentCap - this.baselineProjects);
+        const rev = extra * this.projectValueL / 12;
+        return {eq:`(min(${this.assumption}, ${this.baselineProjects} + ${ml}×${this.rampRate}) − ${this.baselineProjects}) × ₹${this.projectValueL}L ÷ 12`, vals:{currentCap:currentCap.toFixed(1), extraProjects:extra.toFixed(1), monthlyRev:'₹'+rev.toFixed(1)+'L'}};
+      },
       calcRev(month){
         if(month < this.startMonth+this.duration) return 0;
         const monthsLive = month - (this.startMonth+this.duration);
-        const extraProjects = Math.min(this.assumption, 5 + monthsLive*0.5) - 5; // projects above baseline 5
-        return Math.max(0, extraProjects * 25 / 12); // ₹25L per project, monthly
+        const extraProjects = Math.min(this.assumption, this.baselineProjects + monthsLive*this.rampRate) - this.baselineProjects;
+        return Math.max(0, extraProjects * this.projectValueL / 12);
       }
     },
     {
       id:'atoms', icon:'🛒', shortName:'ATOMS Commerce', tier:'Must Build', color:'tier-must',
       enabled:true, startMonth:2, duration:7,
-      assumption:80, assumptionMin:20, assumptionMax:300, assumptionStep:10,
-      assumptionLabel:'Orders/month', assumptionUnit:'',
+      assumption:60, assumptionMin:10, assumptionMax:300, assumptionStep:5,
+      assumptionLabel:'Orders/month (target)', assumptionUnit:'',
+      aovL:2, takeRate:1.5, initialOrders:15, orderRamp:5,
       engineers:3, pmFraction:1, investmentL:0,
       rev12:0, rev24:0,
-      revenueLogic:'Revenue = monthly orders × avg order value (₹2L) × take-rate (3%). Starts with bulk reorders from existing customers, grows with new buyer acquisition.',
+      revenueType:'💰 Transaction Fee (marketplace)',
+      revenueLogic:'Marketplace take-rate on self-serve orders. Starts with bulk reorders from existing customers.',
+      getFormula(month){
+        if(month < this.startMonth+this.duration) return {eq:'Not live yet', vals:{}};
+        const ml = month-(this.startMonth+this.duration);
+        const orders = Math.min(this.assumption, this.initialOrders + ml*this.orderRamp);
+        const rev = orders * this.aovL * (this.takeRate/100);
+        return {eq:`min(${this.assumption}, ${this.initialOrders} + ${ml}×${this.orderRamp}) × ₹${this.aovL}L × ${this.takeRate}%`, vals:{currentOrders:orders.toFixed(0), monthlyRev:'₹'+rev.toFixed(1)+'L'}};
+      },
       calcRev(month){
         if(month < this.startMonth+this.duration) return 0;
         const monthsLive = month - (this.startMonth+this.duration);
-        const orders = Math.min(this.assumption, 20 + monthsLive*8);
-        return orders * 2 * 0.03; // orders × ₹2L AOV × 3% take-rate = lakhs/mo
+        const orders = Math.min(this.assumption, this.initialOrders + monthsLive*this.orderRamp);
+        return orders * this.aovL * (this.takeRate/100);
       }
     },
     {
       id:'chemgraph', icon:'🕸️', shortName:'ChemGraph', tier:'Build Next', color:'tier-next',
       enabled:true, startMonth:7, duration:6,
-      assumption:5, assumptionMin:0, assumptionMax:20, assumptionStep:1,
+      assumption:4, assumptionMin:0, assumptionMax:20, assumptionStep:1,
       assumptionLabel:'Extra deals/quarter', assumptionUnit:'',
+      dealValueL:30, dealRamp:0.2, initialDeals:1,
       engineers:4, pmFraction:1, investmentL:0,
       rev12:0, rev24:0,
-      revenueLogic:'Phase 1: Internal BD engine. Revenue = additional deals surfaced via cross-sell, supply risk alerts, China+1 detection × avg deal value (₹30L). Not SaaS — core business uplift.',
+      revenueType:'🏭 Core Business Uplift (not SaaS)',
+      revenueLogic:'Internal BD engine surfaces cross-sell & supply-risk deals. Revenue = incremental deal value attributed to the tool.',
+      getFormula(month){
+        if(month < this.startMonth+this.duration) return {eq:'Not live yet', vals:{}};
+        const ml = month-(this.startMonth+this.duration);
+        const dpm = Math.min(this.assumption, this.initialDeals + ml*this.dealRamp) / 3;
+        const rev = dpm * this.dealValueL;
+        return {eq:`min(${this.assumption}, ${this.initialDeals} + ${ml}×${this.dealRamp}) ÷ 3 × ₹${this.dealValueL}L`, vals:{dealsPerMonth:dpm.toFixed(2), monthlyRev:'₹'+rev.toFixed(1)+'L'}};
+      },
       calcRev(month){
         if(month < this.startMonth+this.duration) return 0;
         const monthsLive = month - (this.startMonth+this.duration);
-        const dealsPerMonth = Math.min(this.assumption, 1 + monthsLive*0.3) / 3;
-        return dealsPerMonth * 30; // deals/mo × ₹30L per deal
+        const dealsPerMonth = Math.min(this.assumption, this.initialDeals + monthsLive*this.dealRamp) / 3;
+        return dealsPerMonth * this.dealValueL;
       }
     },
     {
       id:'compliance', icon:'🛡️', shortName:'ComplianceOS', tier:'Build Next', color:'tier-next',
       enabled:true, startMonth:8, duration:5,
-      assumption:50, assumptionMin:10, assumptionMax:150, assumptionStep:5,
-      assumptionLabel:'Paying facilities', assumptionUnit:'',
+      assumption:40, assumptionMin:5, assumptionMax:150, assumptionStep:5,
+      assumptionLabel:'Paying facilities (target)', assumptionUnit:'',
+      pricePerFacilityK:6, facilityRamp:2, initialFacilities:3,
       engineers:3, pmFraction:0.5, investmentL:0,
       rev12:0, rev24:0,
-      revenueLogic:'Revenue = paying facilities × avg ₹6K/mo (cert tracking + SDS). Free gap analysis onboards supply → paid tier upsell. Clearest external SaaS revenue.',
+      revenueType:'✅ External SaaS',
+      revenueLogic:'Manufacturers pay for cert tracking + SDS generation. Free gap analysis → paid upsell. Clearest SaaS revenue.',
+      getFormula(month){
+        if(month < this.startMonth+this.duration) return {eq:'Not live yet', vals:{}};
+        const ml = month-(this.startMonth+this.duration);
+        const fac = Math.min(this.assumption, this.initialFacilities + ml*this.facilityRamp);
+        const rev = fac * this.pricePerFacilityK / 100;
+        return {eq:`min(${this.assumption}, ${this.initialFacilities} + ${ml}×${this.facilityRamp}) × ₹${this.pricePerFacilityK}K/mo`, vals:{currentFacilities:fac.toFixed(0), monthlyRev:'₹'+rev.toFixed(1)+'L'}};
+      },
       calcRev(month){
         if(month < this.startMonth+this.duration) return 0;
         const monthsLive = month - (this.startMonth+this.duration);
-        const facilities = Math.min(this.assumption, 5 + monthsLive*3);
-        return facilities * 0.06; // facilities × ₹6K/mo = lakhs/mo
+        const facilities = Math.min(this.assumption, this.initialFacilities + monthsLive*this.facilityRamp);
+        return facilities * this.pricePerFacilityK / 100;
       }
     },
     {
       id:'green', icon:'🌱', shortName:'GreenScore', tier:'Build on Traction', color:'tier-traction',
       enabled:true, startMonth:10, duration:6,
-      assumption:30, assumptionMin:5, assumptionMax:100, assumptionStep:5,
-      assumptionLabel:'Carbon reports/yr', assumptionUnit:'',
+      assumption:20, assumptionMin:5, assumptionMax:100, assumptionStep:5,
+      assumptionLabel:'Carbon reports/yr (target)', assumptionUnit:'',
+      reportPriceL:1.5, reportRamp:1, initialReports:2,
       engineers:2, pmFraction:0.25, investmentL:0,
       rev12:0, rev24:0,
-      revenueLogic:'Revenue = bundled free with China+1 projects (drives deal value) + standalone carbon reports post-CBAM (₹1.5L each). Regulatory tailwind from 2027.',
+      revenueType:'📋 Report Sales + Regulatory Bet',
+      revenueLogic:'Standalone carbon reports post-CBAM enforcement (₹1.5L each). Pre-2027 demand is low — this is a regulatory bet.',
+      getFormula(month){
+        if(month < this.startMonth+this.duration) return {eq:'Not live yet', vals:{}};
+        const ml = month-(this.startMonth+this.duration);
+        const rpm = Math.min(this.assumption, this.initialReports + ml*this.reportRamp) / 12;
+        const rev = rpm * this.reportPriceL;
+        return {eq:`min(${this.assumption}, ${this.initialReports} + ${ml}×${this.reportRamp}) ÷ 12 × ₹${this.reportPriceL}L`, vals:{reportsPerMonth:rpm.toFixed(2), monthlyRev:'₹'+rev.toFixed(1)+'L'}};
+      },
       calcRev(month){
         if(month < this.startMonth+this.duration) return 0;
         const monthsLive = month - (this.startMonth+this.duration);
-        const reportsPerMonth = Math.min(this.assumption, 2 + monthsLive*1.5) / 12;
-        return reportsPerMonth * 1.5; // reports/mo × ₹1.5L each
+        const reportsPerMonth = Math.min(this.assumption, this.initialReports + monthsLive*this.reportRamp) / 12;
+        return reportsPerMonth * this.reportPriceL;
       }
     },
     {
       id:'rfq', icon:'🔍', shortName:'RFQ Intel', tier:'Build on Traction', color:'tier-traction',
       enabled:false, startMonth:12, duration:6,
-      assumption:10, assumptionMin:2, assumptionMax:30, assumptionStep:1,
-      assumptionLabel:'China+1 reports/yr', assumptionUnit:'',
+      assumption:8, assumptionMin:2, assumptionMax:30, assumptionStep:1,
+      assumptionLabel:'China+1 reports/yr (target)', assumptionUnit:'',
+      reportPriceL:3, reportRamp:0.4, initialReports:1,
       engineers:2, pmFraction:0.25, investmentL:0,
       rev12:0, rev24:0,
-      revenueLogic:'Revenue = China+1 assessment reports × ₹3L each (productized consulting). Internal ops acceleration is bonus but not monetized. Subscription model only at 2000+ manufacturers.',
+      revenueType:'🤝 Productized Consulting',
+      revenueLogic:'China+1 switching assessment reports at ₹3L each. Consulting revenue, not SaaS. Subscription only viable at 2000+ manufacturers.',
+      getFormula(month){
+        if(month < this.startMonth+this.duration) return {eq:'Not live yet', vals:{}};
+        const ml = month-(this.startMonth+this.duration);
+        const rpm = Math.min(this.assumption, this.initialReports + ml*this.reportRamp) / 12;
+        const rev = rpm * this.reportPriceL;
+        return {eq:`min(${this.assumption}, ${this.initialReports} + ${ml}×${this.reportRamp}) ÷ 12 × ₹${this.reportPriceL}L`, vals:{reportsPerMonth:rpm.toFixed(2), monthlyRev:'₹'+rev.toFixed(1)+'L'}};
+      },
       calcRev(month){
         if(month < this.startMonth+this.duration) return 0;
         const monthsLive = month - (this.startMonth+this.duration);
-        const reportsPerMonth = Math.min(this.assumption, 1 + monthsLive*0.5) / 12;
-        return reportsPerMonth * 3; // reports/mo × ₹3L each
+        const reportsPerMonth = Math.min(this.assumption, this.initialReports + monthsLive*this.reportRamp) / 12;
+        return reportsPerMonth * this.reportPriceL;
       }
     },
   ],
