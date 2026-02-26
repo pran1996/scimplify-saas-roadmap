@@ -806,9 +806,13 @@ body{background:#0f0d2e;font-family:'Inter',sans-serif;color:#e2e8f0}
 <div x-show="activeProduct===1" x-cloak class="fade-in max-w-4xl" x-data="rfqApp()">
 <h2 class="text-xl font-bold mb-4">🔍 RFQ Intelligence + China+1</h2>
 
-<div x-show="!showResults">
+<!-- Form -->
+<div x-show="!showResults && !showReport">
 <div class="glass rounded-xl p-6">
-  <h3 class="font-semibold mb-4">Submit RFQ</h3>
+  <div class="flex justify-between items-center mb-4">
+    <h3 class="font-semibold">Submit RFQ</h3>
+    <button @click="fillDemo()" class="px-4 py-1.5 rounded-lg text-xs font-medium bg-teal/20 text-teal border border-teal/30 hover:bg-teal/30 transition">⚡ Try Demo</button>
+  </div>
   <div class="grid md:grid-cols-2 gap-4">
     <div><label class="text-xs text-gray-400 block mb-1">Compound Name</label><input x-model="form.compound" class="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm focus:border-indigo outline-none" placeholder="e.g. Pymetrozine"></div>
     <div><label class="text-xs text-gray-400 block mb-1">CAS Number</label><input x-model="form.cas" class="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm focus:border-indigo outline-none" placeholder="e.g. 123456-78-9"></div>
@@ -848,20 +852,26 @@ body{background:#0f0d2e;font-family:'Inter',sans-serif;color:#e2e8f0}
   <div class="w-16 h-16 rounded-full bg-indigo/20 matching-anim flex items-center justify-center mb-4"><span class="text-2xl">🔍</span></div>
   <div class="text-lg font-semibold">Matching manufacturers...</div>
   <div class="text-sm text-gray-400 mt-1">Analyzing 465 facilities across 11 industries</div>
+  <div class="mt-3 text-xs text-gray-500" x-text="matchingStep"></div>
 </div>
 
 <!-- Results -->
-<div x-show="showResults && !matching" x-cloak class="fade-in space-y-4">
+<div x-show="showResults && !matching && !showReport" x-cloak class="fade-in space-y-4">
   <div class="flex justify-between items-center">
     <h3 class="font-semibold">Feasibility Report</h3>
-    <button @click="showResults=false;matching=false" class="text-xs text-gray-400 hover:text-white">← New RFQ</button>
+    <button @click="showResults=false;matching=false;showReport=false" class="text-xs text-gray-400 hover:text-white">← New RFQ</button>
   </div>
+
+  <!-- Manufacturer Cards (expandable) -->
   <div class="grid gap-3">
     <template x-for="(m,i) in matchResults" :key="i">
-      <div class="glass rounded-xl p-4">
+      <div class="glass rounded-xl p-4 cursor-pointer transition" :class="m.expanded?'border border-indigo/30':''" @click="m.expanded=!m.expanded">
         <div class="flex justify-between items-start mb-3">
           <div>
-            <div class="font-semibold text-sm" x-text="m.name"></div>
+            <div class="font-semibold text-sm flex items-center gap-2">
+              <span x-text="m.name"></span>
+              <span x-show="i===0" class="text-[9px] px-1.5 py-0.5 rounded-full bg-teal/20 text-teal font-medium">Top Match</span>
+            </div>
             <div class="text-xs text-gray-400" x-text="m.location"></div>
           </div>
           <div class="text-right">
@@ -875,31 +885,240 @@ body{background:#0f0d2e;font-family:'Inter',sans-serif;color:#e2e8f0}
           <div><div class="text-[10px] text-gray-500 mb-1">Compliance</div><div class="w-full bg-white/5 rounded-full h-1.5"><div class="score-bar bg-amber rounded-full" :style="'width:'+m.compliance+'%'"></div></div><div class="text-[10px] text-gray-400 mt-0.5" x-text="m.compliance+'%'"></div></div>
         </div>
         <div class="flex flex-wrap gap-1">
-          <template x-for="c in m.certs"><span class="text-[10px] px-1.5 py-0.5 rounded bg-white/5 text-gray-400" x-text="c"></span></template>
+          <template x-for="c in m.certs"><span class="text-[10px] px-1.5 py-0.5 rounded" :class="form.certs.includes(c)?'bg-teal/20 text-teal':'bg-white/5 text-gray-400'" x-text="c"></span></template>
         </div>
+        <!-- Expanded Detail -->
+        <div x-show="m.expanded" x-cloak @click.stop class="mt-4 pt-4 border-t border-white/10 space-y-3 fade-in">
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+            <div class="glass rounded-lg p-2 text-center"><div class="text-gray-500 text-[10px]">Reactor Types</div><div class="font-medium mt-0.5" x-text="m.detail.reactors"></div></div>
+            <div class="glass rounded-lg p-2 text-center"><div class="text-gray-500 text-[10px]">Capacity</div><div class="font-medium mt-0.5" x-text="m.detail.capacityMT+' MT/yr'"></div></div>
+            <div class="glass rounded-lg p-2 text-center"><div class="text-gray-500 text-[10px]">Key Capabilities</div><div class="font-medium mt-0.5" x-text="m.detail.capabilities"></div></div>
+            <div class="glass rounded-lg p-2 text-center"><div class="text-gray-500 text-[10px]">Est. Price</div><div class="font-medium mt-0.5 text-teal" x-text="'$'+m.detail.priceKg+'/kg'"></div></div>
+          </div>
+          <div class="glass rounded-lg p-3 text-xs">
+            <div class="text-[10px] text-gray-500 mb-1">Recent Track Record</div>
+            <div class="text-gray-300" x-text="m.detail.trackRecord"></div>
+          </div>
+          <div class="flex gap-2">
+            <button @click.stop class="px-4 py-2 bg-indigo hover:bg-indigo/80 text-white rounded-lg text-xs font-medium transition">📩 Request Quote</button>
+            <button @click.stop class="px-4 py-2 bg-white/5 hover:bg-white/10 text-gray-300 rounded-lg text-xs font-medium transition border border-white/10">📋 View Full Profile</button>
+          </div>
+        </div>
+        <div x-show="!m.expanded" class="text-[10px] text-gray-500 mt-2 text-center">Click to expand details ↓</div>
       </div>
     </template>
   </div>
+
+  <!-- Cost & Timeline Summary -->
   <div class="glass rounded-xl p-4">
     <div class="text-sm font-medium mb-2">Estimated Cost & Timeline</div>
     <div class="grid grid-cols-3 gap-4 text-center text-sm">
-      <div><div class="text-gray-400 text-xs">Cost Range</div><div class="font-semibold">$38 — $52/kg</div></div>
+      <div><div class="text-gray-400 text-xs">Cost Range</div><div class="font-semibold" x-text="'$'+costRange[0]+' — $'+costRange[1]+'/kg'"></div></div>
       <div><div class="text-gray-400 text-xs">Delivery</div><div class="font-semibold" x-text="form.timeline+' month(s)'"></div></div>
       <div><div class="text-gray-400 text-xs">Risk Level</div><div class="font-semibold text-teal">Low</div></div>
     </div>
   </div>
-  <!-- China+1 comparison -->
+
+  <!-- Timeline Visualization -->
+  <div class="glass rounded-xl p-4">
+    <div class="text-sm font-medium mb-3">📅 Project Timeline</div>
+    <div class="relative">
+      <div class="flex items-center gap-0">
+        <template x-for="(step,si) in timelineSteps" :key="si">
+          <div class="flex-1 flex flex-col items-center relative">
+            <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm z-10" :class="si===0?'bg-indigo/30 text-indigo':si===timelineSteps.length-1?'bg-teal/30 text-teal':'bg-white/10 text-gray-400'" x-text="step.icon"></div>
+            <div class="text-[10px] font-medium mt-1 text-center" x-text="step.name"></div>
+            <div class="text-[9px] text-gray-500" x-text="step.duration"></div>
+            <div class="text-[9px] text-teal" x-text="step.date"></div>
+            <div x-show="si<timelineSteps.length-1" class="absolute top-4 left-[calc(50%+16px)] h-0.5 bg-white/10 right-[-50%]"></div>
+          </div>
+        </template>
+      </div>
+    </div>
+  </div>
+
+  <!-- China+1 comparison with CBAM calculator -->
   <div x-show="form.china1" class="glass rounded-xl p-4">
     <div class="text-sm font-medium mb-3">🇨🇳 → 🇮🇳 China+1 Comparison</div>
     <table class="w-full text-sm">
       <thead><tr class="text-xs text-gray-500"><th class="text-left pb-2">Factor</th><th class="text-center pb-2">China</th><th class="text-center pb-2">India</th><th class="text-center pb-2">Savings</th></tr></thead>
       <tbody>
-        <tr class="border-t border-white/5"><td class="py-2 text-gray-400">Price/kg</td><td class="text-center" x-text="'$'+(form.chinaPrice||45)"></td><td class="text-center text-teal">$38-42</td><td class="text-center text-teal">~12%</td></tr>
+        <tr class="border-t border-white/5"><td class="py-2 text-gray-400">Price/kg</td><td class="text-center" x-text="'$'+(form.chinaPrice||45)"></td><td class="text-center text-teal" x-text="'$'+costRange[0]+'-'+costRange[1]"></td><td class="text-center text-teal" x-text="'~'+Math.round(((form.chinaPrice||45)-costRange[0])/(form.chinaPrice||45)*100)+'%'"></td></tr>
         <tr class="border-t border-white/5"><td class="py-2 text-gray-400">Lead Time</td><td class="text-center" x-text="(form.chinaLead||8)+' weeks'"></td><td class="text-center text-teal">4-5 weeks</td><td class="text-center text-teal">~40%</td></tr>
-        <tr class="border-t border-white/5"><td class="py-2 text-gray-400">CBAM Impact</td><td class="text-center text-red-400">€8.2/ton CO₂</td><td class="text-center text-teal">€3.1/ton CO₂</td><td class="text-center text-teal">€5.1/ton</td></tr>
+        <tr class="border-t border-white/5"><td class="py-2 text-gray-400">CBAM Impact</td><td class="text-center text-red-400">5.8 kg CO₂/kg</td><td class="text-center text-teal">2.1 kg CO₂/kg</td><td class="text-center text-teal">64% lower</td></tr>
         <tr class="border-t border-white/5"><td class="py-2 text-gray-400">Tariff Risk</td><td class="text-center text-amber">High</td><td class="text-center text-teal">Low</td><td class="text-center text-teal">✓</td></tr>
       </tbody>
     </table>
+    <!-- CBAM Calculator -->
+    <div class="mt-4 pt-4 border-t border-white/10">
+      <div class="text-xs font-medium text-gray-400 mb-2">💰 CBAM Cost Impact Calculator</div>
+      <div class="grid grid-cols-2 gap-3 mb-3">
+        <div>
+          <label class="text-[10px] text-gray-500 block mb-1">Import Volume (tons/year)</label>
+          <input x-model.number="cbamTons" type="number" class="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-sm outline-none focus:border-indigo" placeholder="100">
+        </div>
+        <div>
+          <label class="text-[10px] text-gray-500 block mb-1">EU Carbon Price (€/ton CO₂)</label>
+          <input x-model.number="cbamPrice" type="number" class="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-sm outline-none focus:border-indigo" placeholder="75">
+        </div>
+      </div>
+      <div x-show="cbamTons>0" class="grid grid-cols-3 gap-3 text-center">
+        <div class="glass rounded-lg p-3"><div class="text-[10px] text-gray-500">China CBAM Cost</div><div class="text-lg font-bold text-red-400" x-text="'€'+Math.round(cbamTons*5.8*cbamPrice).toLocaleString()"></div></div>
+        <div class="glass rounded-lg p-3"><div class="text-[10px] text-gray-500">India CBAM Cost</div><div class="text-lg font-bold text-teal" x-text="'€'+Math.round(cbamTons*2.1*cbamPrice).toLocaleString()"></div></div>
+        <div class="glass rounded-lg p-3 border border-teal/30"><div class="text-[10px] text-gray-500">You Save</div><div class="text-lg font-bold text-teal" x-text="'€'+Math.round(cbamTons*(5.8-2.1)*cbamPrice).toLocaleString()"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Generate Report Button -->
+  <button @click="showReport=true" class="w-full glass rounded-xl p-4 text-center hover:bg-white/5 transition border border-indigo/20 group">
+    <div class="text-sm font-medium text-indigo group-hover:text-white transition">📊 Generate Full Assessment Report</div>
+    <div class="text-[10px] text-gray-500 mt-1">Executive summary, risk analysis, cost breakdown & recommendations — the kind of report that costs $2-5K from a consulting firm</div>
+  </button>
+</div>
+
+<!-- Assessment Report View -->
+<div x-show="showReport && !matching" x-cloak class="fade-in space-y-4">
+  <div class="flex justify-between items-center">
+    <h3 class="font-semibold">📊 Manufacturer Assessment Report</h3>
+    <div class="flex gap-2">
+      <button @click="showReport=false" class="text-xs text-gray-400 hover:text-white">← Back to Results</button>
+      <button @click="showResults=false;showReport=false;matching=false" class="text-xs text-gray-400 hover:text-white">← New RFQ</button>
+    </div>
+  </div>
+
+  <!-- Report Header -->
+  <div class="glass rounded-xl p-6 border-l-4 border-indigo">
+    <div class="flex justify-between items-start">
+      <div>
+        <div class="text-[10px] text-indigo font-medium uppercase tracking-wider">Confidential Assessment</div>
+        <h2 class="text-lg font-bold mt-1" x-text="'Manufacturer Assessment: '+(form.compound||'Compound')"></h2>
+        <div class="text-xs text-gray-400 mt-1" x-text="'CAS '+form.cas+' • '+form.qty+'kg • '+form.purity+'% purity'"></div>
+      </div>
+      <div class="text-right">
+        <div class="text-xs text-gray-500">Report #SCM-<span x-text="reportId"></span></div>
+        <div class="text-xs text-gray-500" x-text="new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'})"></div>
+        <div class="text-[10px] text-gray-600 mt-1">Prepared by Scimplify Intelligence</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Executive Summary -->
+  <div class="glass rounded-xl p-5">
+    <h3 class="text-sm font-semibold text-indigo mb-3">1. Executive Summary</h3>
+    <p class="text-xs text-gray-300 leading-relaxed" x-text="'Based on analysis of 465 verified manufacturers across our network, we identified '+matchResults.length+' qualified facilities for '+(form.compound||'this compound')+' production at '+form.qty+'kg scale with '+form.purity+'% purity requirements. '+(form.china1?'The China+1 transition analysis indicates a potential cost saving of '+Math.round(((form.chinaPrice||45)-costRange[0])/(form.chinaPrice||45)*100)+'% with significantly reduced CBAM exposure and supply chain risk.':'All recommended manufacturers meet the specified compliance requirements.')"></p>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4">
+      <div class="glass rounded-lg p-3 text-center"><div class="text-lg font-bold text-indigo" x-text="matchResults.length"></div><div class="text-[10px] text-gray-500">Qualified Mfrs</div></div>
+      <div class="glass rounded-lg p-3 text-center"><div class="text-lg font-bold text-teal" x-text="matchResults[0]?.overall+'%'"></div><div class="text-[10px] text-gray-500">Best Match</div></div>
+      <div class="glass rounded-lg p-3 text-center"><div class="text-lg font-bold text-white" x-text="'$'+costRange[0]+'-'+costRange[1]"></div><div class="text-[10px] text-gray-500">Cost/kg Range</div></div>
+      <div class="glass rounded-lg p-3 text-center"><div class="text-lg font-bold text-teal">Low</div><div class="text-[10px] text-gray-500">Risk Rating</div></div>
+    </div>
+  </div>
+
+  <!-- Manufacturer Shortlist -->
+  <div class="glass rounded-xl p-5">
+    <h3 class="text-sm font-semibold text-indigo mb-3">2. Manufacturer Shortlist (Ranked)</h3>
+    <div class="space-y-3">
+      <template x-for="(m,i) in matchResults.slice(0,3)" :key="i">
+        <div class="glass rounded-lg p-4">
+          <div class="flex justify-between items-start mb-2">
+            <div>
+              <span class="text-xs text-indigo font-medium" x-text="'#'+(i+1)+' '"></span>
+              <span class="font-semibold text-sm" x-text="m.name"></span>
+              <span class="text-xs text-gray-500 ml-2" x-text="m.location"></span>
+            </div>
+            <span class="text-sm font-bold" :class="m.overall>85?'text-teal':'text-indigo'" x-text="m.overall+'% match'"></span>
+          </div>
+          <div class="grid grid-cols-3 gap-4 text-xs mb-2">
+            <div><span class="text-gray-500">Capacity:</span> <span x-text="m.detail.capacityMT+' MT/yr'"></span></div>
+            <div><span class="text-gray-500">Est. Price:</span> <span class="text-teal" x-text="'$'+m.detail.priceKg+'/kg'"></span></div>
+            <div><span class="text-gray-500">Reactors:</span> <span x-text="m.detail.reactors"></span></div>
+          </div>
+          <div class="text-[11px] text-gray-400" x-text="m.detail.trackRecord"></div>
+        </div>
+      </template>
+    </div>
+  </div>
+
+  <!-- Risk Assessment -->
+  <div class="glass rounded-xl p-5">
+    <h3 class="text-sm font-semibold text-indigo mb-3">3. Risk Assessment</h3>
+    <div class="space-y-2">
+      <div class="flex items-center justify-between py-2 border-b border-white/5 text-xs">
+        <span class="text-gray-400">Supply Concentration Risk</span>
+        <span class="px-2 py-0.5 rounded bg-teal/20 text-teal">Low — 3+ qualified alternatives</span>
+      </div>
+      <div class="flex items-center justify-between py-2 border-b border-white/5 text-xs">
+        <span class="text-gray-400">Quality Risk</span>
+        <span class="px-2 py-0.5 rounded bg-teal/20 text-teal">Low — All facilities audited</span>
+      </div>
+      <div class="flex items-center justify-between py-2 border-b border-white/5 text-xs">
+        <span class="text-gray-400">Compliance Risk</span>
+        <span class="px-2 py-0.5 rounded" :class="form.certs.length>3?'bg-amber/20 text-amber':'bg-teal/20 text-teal'" x-text="form.certs.length>3?'Medium — Some gaps in cert coverage':'Low — Certs aligned'"></span>
+      </div>
+      <div class="flex items-center justify-between py-2 border-b border-white/5 text-xs">
+        <span class="text-gray-400">Geopolitical Risk</span>
+        <span class="px-2 py-0.5 rounded bg-teal/20 text-teal" x-text="form.china1?'Reduced — India diversification':'Low — India-based supply'"></span>
+      </div>
+      <div class="flex items-center justify-between py-2 text-xs">
+        <span class="text-gray-400">Regulatory/CBAM Risk</span>
+        <span class="px-2 py-0.5 rounded bg-teal/20 text-teal">Low — 64% lower CO₂ vs China</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cost Analysis -->
+  <div class="glass rounded-xl p-5">
+    <h3 class="text-sm font-semibold text-indigo mb-3">4. Cost Analysis</h3>
+    <div class="grid md:grid-cols-2 gap-4 text-xs">
+      <div>
+        <div class="text-gray-400 mb-2">Unit Economics</div>
+        <div class="space-y-1">
+          <div class="flex justify-between py-1 border-b border-white/5"><span>Raw material cost</span><span x-text="'$'+(costRange[0]*0.55).toFixed(0)+'-'+(costRange[1]*0.55).toFixed(0)+'/kg'"></span></div>
+          <div class="flex justify-between py-1 border-b border-white/5"><span>Processing & labor</span><span x-text="'$'+(costRange[0]*0.25).toFixed(0)+'-'+(costRange[1]*0.25).toFixed(0)+'/kg'"></span></div>
+          <div class="flex justify-between py-1 border-b border-white/5"><span>QC & compliance</span><span x-text="'$'+(costRange[0]*0.10).toFixed(0)+'-'+(costRange[1]*0.10).toFixed(0)+'/kg'"></span></div>
+          <div class="flex justify-between py-1 border-b border-white/5"><span>Logistics (CIF)</span><span x-text="'$'+(costRange[0]*0.10).toFixed(0)+'-'+(costRange[1]*0.10).toFixed(0)+'/kg'"></span></div>
+          <div class="flex justify-between py-1 font-medium"><span>Total landed cost</span><span class="text-teal" x-text="'$'+costRange[0]+'-'+costRange[1]+'/kg'"></span></div>
+        </div>
+      </div>
+      <div x-show="form.china1">
+        <div class="text-gray-400 mb-2">China+1 Savings (Annual, <span x-text="form.qty+'kg'"></span>)</div>
+        <div class="space-y-1">
+          <div class="flex justify-between py-1 border-b border-white/5"><span>Price differential</span><span class="text-teal" x-text="'$'+Math.round(((form.chinaPrice||45)-costRange[0])*(form.qty||500)).toLocaleString()"></span></div>
+          <div class="flex justify-between py-1 border-b border-white/5"><span>CBAM avoidance</span><span class="text-teal" x-text="'€'+Math.round((form.qty||500)/1000*(5.8-2.1)*75).toLocaleString()"></span></div>
+          <div class="flex justify-between py-1 border-b border-white/5"><span>Tariff risk reduction</span><span class="text-teal">Significant</span></div>
+          <div class="flex justify-between py-1 font-medium"><span>Total annual savings</span><span class="text-teal" x-text="'~$'+Math.round(((form.chinaPrice||45)-costRange[0])*(form.qty||500)*1.15).toLocaleString()"></span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recommended Next Steps -->
+  <div class="glass rounded-xl p-5">
+    <h3 class="text-sm font-semibold text-indigo mb-3">5. Recommended Next Steps</h3>
+    <div class="space-y-3">
+      <div class="flex gap-3 items-start text-xs">
+        <div class="w-6 h-6 shrink-0 rounded-full bg-indigo/20 flex items-center justify-center text-[10px] font-bold text-indigo">1</div>
+        <div><span class="font-medium text-white">Qualification Samples (Week 1-3):</span> <span class="text-gray-400">Request 1-5kg qualification samples from top 2 manufacturers for purity & impurity profile testing.</span></div>
+      </div>
+      <div class="flex gap-3 items-start text-xs">
+        <div class="w-6 h-6 shrink-0 rounded-full bg-indigo/20 flex items-center justify-center text-[10px] font-bold text-indigo">2</div>
+        <div><span class="font-medium text-white">Pilot Batch (Week 4-8):</span> <span class="text-gray-400">Run 50-100kg pilot batch with selected manufacturer. Validate process reproducibility and scale-up feasibility.</span></div>
+      </div>
+      <div class="flex gap-3 items-start text-xs">
+        <div class="w-6 h-6 shrink-0 rounded-full bg-indigo/20 flex items-center justify-center text-[10px] font-bold text-indigo">3</div>
+        <div><span class="font-medium text-white">Scale-Up & Validation (Week 8-14):</span> <span class="text-gray-400" x-text="'Full-scale '+form.qty+'kg production run. Quality validation against specifications. Stability studies if required.'"></span></div>
+      </div>
+      <div class="flex gap-3 items-start text-xs">
+        <div class="w-6 h-6 shrink-0 rounded-full bg-teal/20 flex items-center justify-center text-[10px] font-bold text-teal">4</div>
+        <div><span class="font-medium text-white">Production & Supply Agreement:</span> <span class="text-gray-400">Negotiate long-term supply terms. Establish quality agreement and delivery schedule.</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="text-center text-[10px] text-gray-600 py-2">
+    This report was generated by Scimplify RFQ Intelligence. For questions, contact your Scimplify account manager.<br>
+    © <span x-text="new Date().getFullYear()"></span> Scimplify • Confidential
   </div>
 </div>
 </div>
@@ -1461,7 +1680,7 @@ body{background:#0f0d2e;font-family:'Inter',sans-serif;color:#e2e8f0}
 
 <!-- Search & Advanced Filters -->
 <div class="flex flex-wrap gap-2 mb-4">
-  <input x-model="search" class="bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-sm outline-none focus:border-indigo flex-1 min-w-[200px]" placeholder="Search products...">
+  <input x-model="search" class="bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-sm outline-none focus:border-indigo flex-1 min-w-0" placeholder="Search products...">
   <select x-model="filterPurity" class="bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-xs outline-none">
     <option value="">All Purity</option><option value="99">≥99%</option><option value="98">≥98%</option>
   </select>
@@ -2216,24 +2435,70 @@ function revenueModel(){return{
 
 function rfqApp(){return{
   form:{compound:'',cas:'',qty:'',purity:'',certs:[],timeline:'3',china1:false,chinaSupplier:'',chinaPrice:'',chinaLead:''},
-  matching:false,showResults:false,matchResults:[],
+  matching:false,matchingStep:'',showResults:false,showReport:false,matchResults:[],
+  costRange:[38,52],cbamTons:100,cbamPrice:75,reportId:Math.floor(Math.random()*9000+1000),
+  timelineSteps:[],
   toggleCert(c){let i=this.form.certs.indexOf(c);i>-1?this.form.certs.splice(i,1):this.form.certs.push(c)},
-  submitRFQ(){
-    this.matching=true;this.showResults=false;
-    const mfrs=[
-      {name:"Gujarat Fluorochemicals",location:"Ahmedabad, Gujarat",certs:["FDA","ISO 9001","ISO 14001","REACH","CGMP"]},
-      {name:"Anand Chemtex",location:"Vadodara, Gujarat",certs:["FDA","GMP","ISO 9001","REACH"]},
-      {name:"Navi Organics",location:"Hyderabad, Telangana",certs:["FDA","GMP","CGMP","ISO 9001","REACH"]},
-      {name:"Deccan Fine Chemicals",location:"Pune, Maharashtra",certs:["GMP","CGMP","ISO 9001","ISO 14001"]},
-      {name:"Sree Krishna Pharma",location:"Hyderabad, Telangana",certs:["ISO 9001","ISO 14001","ISO 45001"]},
+  fillDemo(){
+    this.form={compound:'Pymetrozine',cas:'123312-89-0',qty:500,purity:98,certs:['FDA','REACH'],timeline:'3',china1:true,chinaSupplier:'Zhejiang Heben Pesticide',chinaPrice:45,chinaLead:8};
+  },
+  buildTimeline(){
+    const base=new Date();const tl=parseInt(this.form.timeline)||3;
+    const add=(w)=>{const d=new Date(base);d.setDate(d.getDate()+w*7);return d.toLocaleDateString('en-US',{month:'short',year:'2-digit'})};
+    this.timelineSteps=[
+      {icon:'📍',name:'Current',duration:'Now',date:add(0)},
+      {icon:'🔬',name:'Qualification',duration:'2-4 weeks',date:add(3)},
+      {icon:'⚗️',name:'Pilot Batch',duration:'4-6 weeks',date:add(3+5)},
+      {icon:'🏭',name:'Scale-Up',duration:'6-8 weeks',date:add(3+5+7)},
+      {icon:'✅',name:'Production',duration:'Ongoing',date:add(3+5+7+Math.max(0,(tl*4)-15))},
     ];
+  },
+  submitRFQ(){
+    this.matching=true;this.showResults=false;this.showReport=false;
+    this.reportId=Math.floor(Math.random()*9000+1000);
+    const steps=['Scanning 465 manufacturer profiles...','Evaluating chemistry capabilities...','Checking compliance certifications...','Scoring capacity match...','Generating feasibility report...'];
+    let si=0;this.matchingStep=steps[0];
+    const iv=setInterval(()=>{si++;if(si<steps.length)this.matchingStep=steps[si];else clearInterval(iv)},400);
+
+    const mfrs=[
+      {name:"Gujarat Fluorochemicals",location:"Ahmedabad, Gujarat",certs:["FDA","ISO 9001","ISO 14001","REACH","CGMP"],baseCap:95,baseChem:92,baseComp:90,detail:{reactors:"Glass-lined, SS316",capacityMT:250,capabilities:"Hydrogenation, Fluorination",priceKg:38,trackRecord:"Completed 18 projects in Agrochemicals, avg 98.4% purity. On-time delivery 94%."}},
+      {name:"Anand Chemtex",location:"Vadodara, Gujarat",certs:["FDA","GMP","ISO 9001","REACH"],baseCap:88,baseChem:87,baseComp:82,detail:{reactors:"Glass-lined, Hastelloy",capacityMT:200,capabilities:"Grignard, Hydrogenation",priceKg:42,trackRecord:"Completed 12 projects in Agrochemicals & Pharma, avg 98.1% purity. On-time delivery 91%."}},
+      {name:"Navi Organics",location:"Hyderabad, Telangana",certs:["FDA","GMP","CGMP","ISO 9001","REACH"],baseCap:81,baseChem:82,baseComp:78,detail:{reactors:"SS316, Glass-lined",capacityMT:175,capabilities:"Catalytic hydrogenation, Condensation",priceKg:44,trackRecord:"Completed 9 projects in Pharma intermediates, avg 97.8% purity. On-time delivery 88%."}},
+      {name:"Deccan Fine Chemicals",location:"Pune, Maharashtra",certs:["GMP","CGMP","ISO 9001","ISO 14001"],baseCap:74,baseChem:77,baseComp:70,detail:{reactors:"Glass-lined",capacityMT:120,capabilities:"Oxidation, Esterification",priceKg:48,trackRecord:"Completed 7 projects in Fine Chemicals, avg 97.2% purity. On-time delivery 85%."}},
+      {name:"Sree Krishna Pharma",location:"Hyderabad, Telangana",certs:["ISO 9001","ISO 14001","ISO 45001"],baseCap:67,baseChem:72,baseComp:62,detail:{reactors:"SS316",capacityMT:80,capabilities:"Amination, Chlorination",priceKg:51,trackRecord:"Completed 5 projects in Specialty Chemicals, avg 96.5% purity. On-time delivery 82%."}},
+    ];
+
     setTimeout(()=>{
-      this.matchResults=mfrs.map((m,i)=>{
-        let cap=95-i*7+Math.floor(Math.random()*10),chem=92-i*5+Math.floor(Math.random()*8),comp=90-i*8+Math.floor(Math.random()*12);
-        return{...m,capacity:Math.min(99,cap),chemistry:Math.min(99,chem),compliance:Math.min(99,comp),overall:Math.min(99,Math.round((cap+chem+comp)/3))}
+      const qty=parseFloat(this.form.qty)||100;
+      const reqCerts=this.form.certs;
+      this.matchResults=mfrs.map((m)=>{
+        let cap=m.baseCap, chem=m.baseChem, comp=m.baseComp;
+        // Capacity: penalize small factories for large qty
+        if(qty>500 && m.detail.capacityMT<150) cap=Math.max(40,cap-20);
+        else if(qty>1000 && m.detail.capacityMT<250) cap=Math.max(35,cap-25);
+        if(qty<=100 && m.detail.capacityMT>200) cap=Math.min(99,cap+5);
+        // Compliance: penalize missing required certs
+        if(reqCerts.length>0){
+          const matched=reqCerts.filter(c=>m.certs.some(mc=>mc.toUpperCase().includes(c.toUpperCase()))).length;
+          const ratio=matched/reqCerts.length;
+          comp=Math.round(comp*ratio*0.6 + comp*0.4); // 60% weight on cert match
+          if(ratio<0.5) comp=Math.max(30,comp-15);
+        }
+        // Small random variation
+        cap=Math.min(99,cap+Math.floor(Math.random()*5-2));
+        chem=Math.min(99,chem+Math.floor(Math.random()*5-2));
+        comp=Math.min(99,comp+Math.floor(Math.random()*5-2));
+        const overall=Math.min(99,Math.round((cap+chem+comp)/3));
+        return{...m,capacity:cap,chemistry:chem,compliance:comp,overall,expanded:false};
       });
+      // Sort by overall descending
+      this.matchResults.sort((a,b)=>b.overall-a.overall);
+      // Compute cost range from top results
+      const prices=this.matchResults.slice(0,3).map(m=>m.detail.priceKg);
+      this.costRange=[Math.min(...prices),Math.max(...prices)];
+      this.buildTimeline();
       this.matching=false;this.showResults=true;
-    },2000);
+    },2200);
   }
 }}
 
